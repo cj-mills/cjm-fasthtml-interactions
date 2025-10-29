@@ -8,3 +8,275 @@
 ``` bash
 pip install cjm_fasthtml_interactions
 ```
+
+## Project Structure
+
+    nbs/
+    ├── core/ (2)
+    │   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data
+    │   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components
+    └── patterns/ (1)
+        └── step_flow.ipynb  # Multi-step wizard pattern with state management, navigation, and route generation
+
+Total: 3 notebooks across 2 directories
+
+## Module Dependencies
+
+``` mermaid
+graph LR
+    core_context[core.context<br/>Interaction Context]
+    core_html_ids[core.html_ids<br/>HTML IDs]
+    patterns_step_flow[patterns.step_flow<br/>Step Flow]
+
+    patterns_step_flow --> core_html_ids
+    patterns_step_flow --> core_context
+```
+
+*2 cross-module dependencies detected*
+
+## CLI Reference
+
+No CLI commands found in this project.
+
+## Module Overview
+
+Detailed documentation for each module in the project:
+
+### Interaction Context (`context.ipynb`)
+
+> Context management for interaction patterns providing access to state,
+> request, and custom data
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.core.context import (
+    InteractionContext
+)
+```
+
+#### Classes
+
+``` python
+@dataclass
+class InteractionContext:
+    "Context for interaction patterns providing access to state, request, and custom data."
+    
+    state: Dict[str, Any] = field(...)  # Workflow state
+    request: Optional[Any]  # FastHTML request object
+    session: Optional[Any]  # FastHTML session object
+    data: Dict[str, Any] = field(...)  # Custom data from data loaders
+    metadata: Dict[str, Any] = field(...)  # Additional metadata
+    
+    def get(self,
+                key: str,  # Key to retrieve from state
+                default: Any = None  # Default value if key not found
+               ) -> Any:  # Value from state or default
+        "Get value from workflow state."
+    
+    def get_data(self,
+                     key: str,  # Key to retrieve from data
+                     default: Any = None  # Default value if key not found
+                    ) -> Any:  # Value from data or default
+        "Get value from custom data."
+    
+    def has(self,
+                key: str  # Key to check in state
+               ) -> bool:  # True if key exists in state
+        "Check if key exists in workflow state."
+    
+    def set(self,
+                key: str,  # Key to set in state
+                value: Any  # Value to store
+               ) -> None
+        "Set value in workflow state."
+    
+    def get_all_state(self) -> Dict[str, Any]:  # All workflow state
+            """Get all workflow state as dictionary."""
+            return self.state.copy()
+        
+        def update_state(self, 
+                         updates: Dict[str, Any]  # State updates to apply
+                        ) -> None
+        "Get all workflow state as dictionary."
+    
+    def update_state(self,
+                         updates: Dict[str, Any]  # State updates to apply
+                        ) -> None
+        "Update multiple state values at once."
+```
+
+### HTML IDs (`html_ids.ipynb`)
+
+> Centralized HTML ID constants for interaction pattern components
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.core.html_ids import (
+    InteractionHtmlIds
+)
+```
+
+#### Classes
+
+``` python
+class InteractionHtmlIds(AppHtmlIds):
+    """
+    HTML ID constants for interaction pattern components.
+    
+    Inherits from AppHtmlIds:
+        - MAIN_CONTENT = "main-content"
+        - ALERT_CONTAINER = "alert-container"
+        - as_selector(id_str) - static method
+    """
+    
+    def step_content(step_id: str  # Step identifier
+                        ) -> str:  # HTML ID for step content
+        "Generate HTML ID for a specific step's content."
+    
+    def step_indicator(step_id: str  # Step identifier
+                          ) -> str:  # HTML ID for step indicator
+        "Generate HTML ID for a specific step's progress indicator."
+```
+
+### Step Flow (`step_flow.ipynb`)
+
+> Multi-step wizard pattern with state management, navigation, and route
+> generation
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.patterns.step_flow import (
+    Step,
+    StepFlow
+)
+```
+
+#### Classes
+
+``` python
+@dataclass
+class Step:
+    "Definition of a single step in a multi-step workflow."
+    
+    id: str  # Unique step identifier (used in URLs)
+    title: str  # Display title for the step
+    render: Callable[[InteractionContext], Any]  # Function to render step UI
+    validate: Optional[Callable[[Dict[str, Any]], bool]]  # Validation function
+    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function
+    data_keys: List[str] = field(...)  # State keys managed by this step
+    can_skip: bool = False  # Whether this step can be skipped
+    show_back: bool = True  # Whether to show back button
+    show_cancel: bool = True  # Whether to show cancel button
+    next_button_text: str = 'Continue'  # Text for next/submit button
+    
+    def is_valid(self, state: Dict[str, Any]  # Current workflow state
+                    ) -> bool:  # True if step is complete and valid
+        "Check if step has valid data in state."
+```
+
+``` python
+class StepFlow:
+    def __init__(
+        self,
+        flow_id: str,  # Unique identifier for this workflow
+        steps: List[Step],  # List of step definitions
+        container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
+        on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
+        show_progress: bool = False,  # Whether to show progress indicator
+        wrap_in_form: bool = True  # Whether to wrap content + navigation in a form
+    )
+    "Manage multi-step workflows with automatic route generation and state management."
+    
+    def __init__(
+            self,
+            flow_id: str,  # Unique identifier for this workflow
+            steps: List[Step],  # List of step definitions
+            container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
+            on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
+            show_progress: bool = False,  # Whether to show progress indicator
+            wrap_in_form: bool = True  # Whether to wrap content + navigation in a form
+        )
+        "Initialize step flow manager."
+    
+    def get_step(self, step_id: str  # Step identifier
+                    ) -> Optional[Step]:  # Step object or None
+        "Get step by ID."
+    
+    def get_step_index(self, step_id: str  # Step identifier
+                          ) -> Optional[int]:  # Step index or None
+        "Get step index by ID."
+    
+    def get_current_step_id(self, sess: Any  # FastHTML session object
+                               ) -> str:  # Current step ID
+        "Get current step ID from session."
+    
+    def set_current_step(self, sess: Any,  # FastHTML session object
+                            step_id: str  # Step ID to set as current
+                           ) -> None
+        "Set current step in session."
+    
+    def get_next_step_id(self, current_step_id: str  # Current step ID
+                            ) -> Optional[str]:  # Next step ID or None if last step
+        "Get the ID of the next step."
+    
+    def get_previous_step_id(self, current_step_id: str  # Current step ID
+                                ) -> Optional[str]:  # Previous step ID or None if first step
+        "Get the ID of the previous step."
+    
+    def is_last_step(self, step_id: str  # Step ID to check
+                        ) -> bool:  # True if this is the last step
+        "Check if step is the last step."
+    
+    def is_first_step(self, step_id: str  # Step ID to check
+                         ) -> bool:  # True if this is the first step
+        "Check if step is the first step."
+    
+    def get_workflow_state(self, sess: Any  # FastHTML session object
+                              ) -> Dict[str, Any]:  # All workflow state
+        "Get all workflow state from session."
+    
+    def update_workflow_state(self, sess: Any,  # FastHTML session object
+                                  updates: Dict[str, Any]  # State updates
+                                 ) -> None
+        "Update workflow state with new values."
+    
+    def clear_workflow(self, sess: Any  # FastHTML session object
+                          ) -> None
+        "Clear all workflow state."
+    
+    def create_context(self,
+                           request: Any,  # FastHTML request object
+                           sess: Any,  # FastHTML session object
+                           step: Step  # Current step
+                          ) -> InteractionContext:  # Interaction context for rendering
+        "Create interaction context for a step."
+    
+    def render_progress(self, sess: Any  # FastHTML session object
+                           ) -> FT:  # Progress indicator or empty Div
+        "Render progress indicator showing all steps."
+    
+    def render_step_content(self,
+                               step_obj: Step,  # Step to render
+                               ctx: InteractionContext,  # Interaction context
+                               next_route: str,  # Route for next/submit
+                               back_route: Optional[str] = None,  # Route for back
+                               cancel_route: Optional[str] = None  # Route for cancel
+                              ) -> FT:  # Complete step content with optional progress and navigation
+        "Render step content with optional progress indicator and navigation."
+    
+    def render_navigation(self,
+                             step_id: str,  # Current step ID
+                             next_route: str,  # Route for next/submit action
+                             back_route: Optional[str] = None,  # Route for back action
+                             cancel_route: Optional[str] = None,  # Route for cancel action
+                            ) -> FT:  # Navigation button container
+        "Render navigation buttons for a step."
+    
+    def create_router(self,
+                         prefix: str = ""  # URL prefix for routes (e.g., "/transcription")
+                        ) -> APIRouter:  # APIRouter with generated routes
+        "Create FastHTML router with generated routes for this flow."
+```
