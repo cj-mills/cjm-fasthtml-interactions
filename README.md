@@ -28,8 +28,8 @@ graph LR
     core_html_ids[core.html_ids<br/>HTML IDs]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
 
-    patterns_step_flow --> core_html_ids
     patterns_step_flow --> core_context
+    patterns_step_flow --> core_html_ids
 ```
 
 *2 cross-module dependencies detected*
@@ -289,7 +289,7 @@ def render_navigation(self:StepFlow,
 
 ``` python
 @patch
-def create_router(self:StepFlow, 
+def create_router(self:StepFlow,
                   prefix: str = ""  # URL prefix for routes (e.g., "/transcription")
                  ) -> APIRouter:  # APIRouter with generated routes
     "Create FastHTML router with generated routes for this flow."

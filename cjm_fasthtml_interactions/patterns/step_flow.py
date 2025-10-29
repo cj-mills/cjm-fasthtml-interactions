@@ -341,62 +341,62 @@ def render_navigation(self:StepFlow,
 
 # %% ../../nbs/patterns/step_flow.ipynb 28
 @patch
-def create_router(self:StepFlow, 
+def create_router(self:StepFlow,
                   prefix: str = ""  # URL prefix for routes (e.g., "/transcription")
                  ) -> APIRouter:  # APIRouter with generated routes
     """Create FastHTML router with generated routes for this flow."""
     router = APIRouter(prefix=prefix)
-    
+
     # Store reference to flow in router for access in route handlers
     router.step_flow = self
-    
+
     # Entry point route - start or resume
-    @router.get("/")
+    @router
     def start(request, sess):
         """Entry point - start workflow or resume from last step."""
         current_step_id = self.get_current_step_id(sess)
         step_obj = self.get_step(current_step_id)
-        
+
         if not step_obj:
             # Invalid state, restart from beginning
             step_obj = self.steps[0]
             self.set_current_step(sess, step_obj.id)
-        
+
         ctx = self.create_context(request, sess, step_obj)
-        
+
         step_content = self.render_step_content(
             step_obj=step_obj,
             ctx=ctx,
-            next_route=f"{prefix}/next",
-            back_route=f"{prefix}/back",
-            cancel_route=f"{prefix}/reset"
+            next_route=next_step.to(),
+            back_route=back_step.to(),
+            cancel_route=reset.to()
         )
-        
+
         return Div(step_content, id=self.container_id)
-    
+
     # Next step handler
-    @router.post("/next")
+    @router
     async def next_step(request, sess):
         """Advance to next step."""
         current_step_id = self.get_current_step_id(sess)
         current_step = self.get_step(current_step_id)
-        
+
         if not current_step:
             return start(request, sess)
-        
+
         # Get form data if any (properly handle FormData from Starlette)
         try:
             form_data = await request.form()
             # Convert FormData to dict
             form_dict = {key: form_data.get(key) for key in form_data.keys()}
-            
+
             # Update workflow state with form data
             if form_dict:
                 self.update_workflow_state(sess, form_dict)
         except Exception:
             # No form data or error reading it
             pass
-        
+
         # Check if this is the last step
         if self.is_last_step(current_step_id):
             # Complete the workflow
@@ -406,57 +406,57 @@ def create_router(self:StepFlow,
             else:
                 # No completion handler, just show success
                 return Div("Workflow completed!", id=self.container_id)
-        
+
         # Move to next step
         next_step_id = self.get_next_step_id(current_step_id)
         if next_step_id:
             self.set_current_step(sess, next_step_id)
-            next_step = self.get_step(next_step_id)
-            
-            ctx = self.create_context(request, sess, next_step)
-            
+            step_obj = self.get_step(next_step_id)
+
+            ctx = self.create_context(request, sess, step_obj)
+
             step_content = self.render_step_content(
-                step_obj=next_step,
+                step_obj=step_obj,
                 ctx=ctx,
-                next_route=f"{prefix}/next",
-                back_route=f"{prefix}/back",
-                cancel_route=f"{prefix}/reset"
+                next_route=next_step.to(),
+                back_route=back_step.to(),
+                cancel_route=reset.to()
             )
-            
+
             return Div(step_content, id=self.container_id)
-        
+
         return start(request, sess)
-    
+
     # Back step handler
-    @router.get("/back")
+    @router
     def back_step(request, sess):
         """Go back to previous step."""
         current_step_id = self.get_current_step_id(sess)
         prev_step_id = self.get_previous_step_id(current_step_id)
-        
+
         if prev_step_id:
             self.set_current_step(sess, prev_step_id)
             prev_step = self.get_step(prev_step_id)
-            
+
             ctx = self.create_context(request, sess, prev_step)
-            
+
             step_content = self.render_step_content(
                 step_obj=prev_step,
                 ctx=ctx,
-                next_route=f"{prefix}/next",
-                back_route=f"{prefix}/back",
-                cancel_route=f"{prefix}/reset"
+                next_route=next_step.to(),
+                back_route=back_step.to(),
+                cancel_route=reset.to()
             )
-            
+
             return Div(step_content, id=self.container_id)
-        
+
         return start(request, sess)
-    
+
     # Reset workflow handler
-    @router.get("/reset")
+    @router
     def reset(request, sess):
         """Reset workflow to beginning."""
         self.clear_workflow(sess)
         return start(request, sess)
-    
+
     return router
