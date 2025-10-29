@@ -9,6 +9,7 @@ __all__ = ['Step', 'StepFlow']
 from typing import Dict, Any, Optional, Callable, List, Union
 from dataclasses import dataclass, field
 from fasthtml.common import *
+from fastcore.basics import patch
 
 from cjm_fasthtml_workflows.core.workflow_session import WorkflowSession
 from ..core.context import InteractionContext
@@ -66,261 +67,356 @@ class StepFlow:
         
         # Build step index for quick lookup
         self.step_index = {step.id: idx for idx, step in enumerate(steps)}
+
+# %% ../../nbs/patterns/step_flow.ipynb 9
+@patch
+def get_step(self:StepFlow, 
+             step_id: str  # Step identifier
+            ) -> Optional[Step]:  # Step object or None
+    """Get step by ID."""
+    idx = self.step_index.get(step_id)
+    if idx is not None:
+        return self.steps[idx]
+    return None
+
+# %% ../../nbs/patterns/step_flow.ipynb 10
+@patch
+def get_step_index(self:StepFlow, 
+                   step_id: str  # Step identifier
+                  ) -> Optional[int]:  # Step index or None
+    """Get step index by ID."""
+    return self.step_index.get(step_id)
+
+# %% ../../nbs/patterns/step_flow.ipynb 12
+@patch
+def get_current_step_id(self:StepFlow, 
+                        sess: Any  # FastHTML session object
+                       ) -> str:  # Current step ID
+    """Get current step ID from session."""
+    workflow = WorkflowSession(sess, self.flow_id)
+    return workflow.get("current_step", self.steps[0].id)
+
+# %% ../../nbs/patterns/step_flow.ipynb 13
+@patch
+def set_current_step(self:StepFlow, 
+                     sess: Any,  # FastHTML session object
+                     step_id: str  # Step ID to set as current
+                    ) -> None:
+    """Set current step in session."""
+    workflow = WorkflowSession(sess, self.flow_id)
+    workflow.set("current_step", step_id)
+
+# %% ../../nbs/patterns/step_flow.ipynb 14
+@patch
+def get_next_step_id(self:StepFlow, 
+                     current_step_id: str  # Current step ID
+                    ) -> Optional[str]:  # Next step ID or None if last step
+    """Get the ID of the next step."""
+    idx = self.get_step_index(current_step_id)
+    if idx is not None and idx < len(self.steps) - 1:
+        return self.steps[idx + 1].id
+    return None
+
+# %% ../../nbs/patterns/step_flow.ipynb 15
+@patch
+def get_previous_step_id(self:StepFlow, 
+                         current_step_id: str  # Current step ID
+                        ) -> Optional[str]:  # Previous step ID or None if first step
+    """Get the ID of the previous step."""
+    idx = self.get_step_index(current_step_id)
+    if idx is not None and idx > 0:
+        return self.steps[idx - 1].id
+    return None
+
+# %% ../../nbs/patterns/step_flow.ipynb 16
+@patch
+def is_last_step(self:StepFlow, 
+                 step_id: str  # Step ID to check
+                ) -> bool:  # True if this is the last step
+    """Check if step is the last step."""
+    idx = self.get_step_index(step_id)
+    return idx == len(self.steps) - 1 if idx is not None else False
+
+# %% ../../nbs/patterns/step_flow.ipynb 17
+@patch
+def is_first_step(self:StepFlow, 
+                  step_id: str  # Step ID to check
+                 ) -> bool:  # True if this is the first step
+    """Check if step is the first step."""
+    idx = self.get_step_index(step_id)
+    return idx == 0 if idx is not None else False
+
+# %% ../../nbs/patterns/step_flow.ipynb 19
+@patch
+def get_workflow_state(self:StepFlow, 
+                       sess: Any  # FastHTML session object
+                      ) -> Dict[str, Any]:  # All workflow state
+    """Get all workflow state from session."""
+    workflow = WorkflowSession(sess, self.flow_id)
+    return workflow.get_all()
+
+# %% ../../nbs/patterns/step_flow.ipynb 20
+@patch
+def update_workflow_state(self:StepFlow, 
+                          sess: Any,  # FastHTML session object
+                          updates: Dict[str, Any]  # State updates
+                         ) -> None:
+    """Update workflow state with new values."""
+    workflow = WorkflowSession(sess, self.flow_id)
+    for key, value in updates.items():
+        workflow.set(key, value)
+
+# %% ../../nbs/patterns/step_flow.ipynb 21
+@patch
+def clear_workflow(self:StepFlow, 
+                   sess: Any  # FastHTML session object
+                  ) -> None:
+    """Clear all workflow state."""
+    workflow = WorkflowSession(sess, self.flow_id)
+    workflow.clear()
+
+# %% ../../nbs/patterns/step_flow.ipynb 23
+@patch
+def create_context(self:StepFlow, 
+                   request: Any,  # FastHTML request object
+                   sess: Any,  # FastHTML session object
+                   step: Step  # Current step
+                  ) -> InteractionContext:  # Interaction context for rendering
+    """Create interaction context for a step."""
+    # Get workflow state
+    state = self.get_workflow_state(sess)
     
-    def get_step(self, step_id: str  # Step identifier
-                ) -> Optional[Step]:  # Step object or None
-        """Get step by ID."""
-        idx = self.step_index.get(step_id)
-        if idx is not None:
-            return self.steps[idx]
-        return None
+    # Load data if step has data loader
+    data = {}
+    if step.data_loader:
+        data = step.data_loader(request)
     
-    def get_step_index(self, step_id: str  # Step identifier
-                      ) -> Optional[int]:  # Step index or None
-        """Get step index by ID."""
-        return self.step_index.get(step_id)
+    return InteractionContext(
+        state=state,
+        request=request,
+        session=sess,
+        data=data
+    )
+
+# %% ../../nbs/patterns/step_flow.ipynb 24
+@patch
+def render_progress(self:StepFlow, 
+                    sess: Any  # FastHTML session object
+                   ) -> FT:  # Progress indicator or empty Div
+    """Render progress indicator showing all steps."""
+    if not self.show_progress:
+        return Div()  # Return empty if progress disabled
     
-    def get_current_step_id(self, sess: Any  # FastHTML session object
-                           ) -> str:  # Current step ID
-        """Get current step ID from session."""
-        workflow = WorkflowSession(sess, self.flow_id)
-        return workflow.get("current_step", self.steps[0].id)
+    current_step_id = self.get_current_step_id(sess)
+    current_idx = self.get_step_index(current_step_id)
     
-    def set_current_step(self, sess: Any,  # FastHTML session object
-                        step_id: str  # Step ID to set as current
-                       ) -> None:
-        """Set current step in session."""
-        workflow = WorkflowSession(sess, self.flow_id)
-        workflow.set("current_step", step_id)
-    
-    def get_next_step_id(self, current_step_id: str  # Current step ID
-                        ) -> Optional[str]:  # Next step ID or None if last step
-        """Get the ID of the next step."""
-        idx = self.get_step_index(current_step_id)
-        if idx is not None and idx < len(self.steps) - 1:
-            return self.steps[idx + 1].id
-        return None
-    
-    def get_previous_step_id(self, current_step_id: str  # Current step ID
-                            ) -> Optional[str]:  # Previous step ID or None if first step
-        """Get the ID of the previous step."""
-        idx = self.get_step_index(current_step_id)
-        if idx is not None and idx > 0:
-            return self.steps[idx - 1].id
-        return None
-    
-    def is_last_step(self, step_id: str  # Step ID to check
-                    ) -> bool:  # True if this is the last step
-        """Check if step is the last step."""
-        idx = self.get_step_index(step_id)
-        return idx == len(self.steps) - 1 if idx is not None else False
-    
-    def is_first_step(self, step_id: str  # Step ID to check
-                     ) -> bool:  # True if this is the first step
-        """Check if step is the first step."""
-        idx = self.get_step_index(step_id)
-        return idx == 0 if idx is not None else False
-    
-    def get_workflow_state(self, sess: Any  # FastHTML session object
-                          ) -> Dict[str, Any]:  # All workflow state
-        """Get all workflow state from session."""
-        workflow = WorkflowSession(sess, self.flow_id)
-        return workflow.get_all()
-    
-    def update_workflow_state(self, sess: Any,  # FastHTML session object
-                              updates: Dict[str, Any]  # State updates
-                             ) -> None:
-        """Update workflow state with new values."""
-        workflow = WorkflowSession(sess, self.flow_id)
-        for key, value in updates.items():
-            workflow.set(key, value)
-    
-    def clear_workflow(self, sess: Any  # FastHTML session object
-                      ) -> None:
-        """Clear all workflow state."""
-        workflow = WorkflowSession(sess, self.flow_id)
-        workflow.clear()
-    
-    def create_context(self, 
-                       request: Any,  # FastHTML request object
-                       sess: Any,  # FastHTML session object
-                       step: Step  # Current step
-                      ) -> InteractionContext:  # Interaction context for rendering
-        """Create interaction context for a step."""
-        # Get workflow state
-        state = self.get_workflow_state(sess)
+    step_items = []
+    for idx, step_def in enumerate(self.steps):
+        # Completed steps (and current step) get primary color
+        if idx <= current_idx:
+            cls = combine_classes(step, step_colors.primary)
+        else:
+            cls = str(step)
         
-        # Load data if step has data loader
-        data = {}
-        if step.data_loader:
-            data = step.data_loader(request)
-        
-        return InteractionContext(
-            state=state,
-            request=request,
-            session=sess,
-            data=data
-        )
+        step_items.append(Li(step_def.title, cls=cls))
     
-    def render_progress(self, sess: Any  # FastHTML session object
-                       ) -> FT:  # Progress indicator or empty Div
-        """Render progress indicator showing all steps."""
-        if not self.show_progress:
-            return Div()  # Return empty if progress disabled
-        
-        current_step_id = self.get_current_step_id(sess)
-        current_idx = self.get_step_index(current_step_id)
-        
-        step_items = []
-        for idx, step_def in enumerate(self.steps):
-            # Completed steps (and current step) get primary color
-            if idx <= current_idx:
-                cls = combine_classes(step, step_colors.primary)
-            else:
-                cls = str(step)
-            
-            step_items.append(Li(step_def.title, cls=cls))
-        
-        return Ul(
-            *step_items, 
-            cls=str(steps), 
-            id=InteractionHtmlIds.STEP_FLOW_PROGRESS
-        )
+    return Ul(
+        *step_items, 
+        cls=str(steps), 
+        id=InteractionHtmlIds.STEP_FLOW_PROGRESS
+    )
+
+# %% ../../nbs/patterns/step_flow.ipynb 25
+@patch
+def render_step_content(self:StepFlow,
+                        step_obj: Step,  # Step to render
+                        ctx: InteractionContext,  # Interaction context
+                        next_route: str,  # Route for next/submit
+                        back_route: Optional[str] = None,  # Route for back
+                        cancel_route: Optional[str] = None  # Route for cancel
+                       ) -> FT:  # Complete step content with optional progress and navigation
+    """Render step content with optional progress indicator and navigation."""
+    components = []
     
-    def render_step_content(self,
-                           step_obj: Step,  # Step to render
-                           ctx: InteractionContext,  # Interaction context
-                           next_route: str,  # Route for next/submit
-                           back_route: Optional[str] = None,  # Route for back
-                           cancel_route: Optional[str] = None  # Route for cancel
-                          ) -> FT:  # Complete step content with optional progress and navigation
-        """Render step content with optional progress indicator and navigation."""
-        components = []
-        
-        # Add progress indicator if enabled
-        if self.show_progress:
-            components.append(
-                Div(
-                    self.render_progress(ctx.session),
-                    cls=combine_classes(m.b(6))
-                )
+    # Add progress indicator if enabled
+    if self.show_progress:
+        components.append(
+            Div(
+                self.render_progress(ctx.session),
+                cls=combine_classes(m.b(6))
             )
-        
-        # Add step content
-        content = step_obj.render(ctx)
-        components.append(content)
-        
-        # Add navigation
-        navigation = self.render_navigation(
-            step_id=step_obj.id,
-            next_route=next_route,
-            back_route=back_route,
-            cancel_route=cancel_route
         )
-        components.append(navigation)
-        
-        # Wrap in form if needed (for automatic form data submission)
-        if self.wrap_in_form:
-            return Form(
-                *components,
-                hx_post=next_route,
+    
+    # Add step content
+    content = step_obj.render(ctx)
+    components.append(content)
+    
+    # Add navigation
+    navigation = self.render_navigation(
+        step_id=step_obj.id,
+        next_route=next_route,
+        back_route=back_route,
+        cancel_route=cancel_route
+    )
+    components.append(navigation)
+    
+    # Wrap in form if needed (for automatic form data submission)
+    if self.wrap_in_form:
+        return Form(
+            *components,
+            hx_post=next_route,
+            hx_target=InteractionHtmlIds.as_selector(self.container_id),
+            hx_swap="innerHTML"
+        )
+    else:
+        return Div(*components)
+
+# %% ../../nbs/patterns/step_flow.ipynb 26
+@patch
+def render_navigation(self:StepFlow,
+                      step_id: str,  # Current step ID
+                      next_route: str,  # Route for next/submit action
+                      back_route: Optional[str] = None,  # Route for back action
+                      cancel_route: Optional[str] = None,  # Route for cancel action
+                     ) -> FT:  # Navigation button container
+    """Render navigation buttons for a step."""
+    step_obj = self.get_step(step_id)
+    if not step_obj:
+        return Div()
+    
+    buttons = []
+    
+    # Back button
+    if step_obj.show_back and back_route and not self.is_first_step(step_id):
+        buttons.append(
+            Button(
+                "← Back",
+                hx_get=back_route,
                 hx_target=InteractionHtmlIds.as_selector(self.container_id),
-                hx_swap="innerHTML"
+                hx_swap="innerHTML",
+                type="button",  # Important: prevent form submission
+                id=InteractionHtmlIds.STEP_FLOW_BACK_BTN,
+                cls=combine_classes(btn, btn_styles.ghost)
             )
-        else:
-            return Div(*components)
-    
-    def render_navigation(self,
-                         step_id: str,  # Current step ID
-                         next_route: str,  # Route for next/submit action
-                         back_route: Optional[str] = None,  # Route for back action
-                         cancel_route: Optional[str] = None,  # Route for cancel action
-                        ) -> FT:  # Navigation button container
-        """Render navigation buttons for a step."""
-        step_obj = self.get_step(step_id)
-        if not step_obj:
-            return Div()
-        
-        buttons = []
-        
-        # Back button
-        if step_obj.show_back and back_route and not self.is_first_step(step_id):
-            buttons.append(
-                Button(
-                    "← Back",
-                    hx_get=back_route,
-                    hx_target=InteractionHtmlIds.as_selector(self.container_id),
-                    hx_swap="innerHTML",
-                    type="button",  # Important: prevent form submission
-                    id=InteractionHtmlIds.STEP_FLOW_BACK_BTN,
-                    cls=combine_classes(btn, btn_styles.ghost)
-                )
-            )
-        
-        # Next/Submit button
-        is_last = self.is_last_step(step_id)
-        button_text = step_obj.next_button_text
-        button_id = InteractionHtmlIds.STEP_FLOW_SUBMIT_BTN if is_last else InteractionHtmlIds.STEP_FLOW_NEXT_BTN
-        
-        # If wrapped in form, this will submit the form
-        # If not wrapped, it will trigger HTMX POST
-        button_attrs = {"id": button_id, "cls": combine_classes(btn, btn_colors.primary)}
-        if self.wrap_in_form:
-            button_attrs["type"] = "submit"
-        else:
-            button_attrs.update({
-                "hx_post": next_route,
-                "hx_target": InteractionHtmlIds.as_selector(self.container_id),
-                "hx_swap": "innerHTML"
-            })
-        
-        buttons.append(Button(button_text, **button_attrs))
-        
-        # Cancel button
-        if step_obj.show_cancel and cancel_route:
-            buttons.append(
-                Button(
-                    "Cancel",
-                    hx_get=cancel_route,
-                    hx_target=InteractionHtmlIds.as_selector(self.container_id),
-                    hx_swap="innerHTML",
-                    type="button",  # Important: prevent form submission
-                    id=InteractionHtmlIds.STEP_FLOW_CANCEL_BTN,
-                    cls=combine_classes(btn, btn_styles.ghost)
-                )
-            )
-        
-        return Div(
-            *buttons,
-            id=InteractionHtmlIds.STEP_FLOW_NAVIGATION,
-            cls=combine_classes(flex_display, gap(2), justify.end, m.t(4))
         )
     
-    def create_router(self, 
-                     prefix: str = ""  # URL prefix for routes (e.g., "/transcription")
-                    ) -> APIRouter:  # APIRouter with generated routes
-        """Create FastHTML router with generated routes for this flow."""
-        router = APIRouter(prefix=prefix)
+    # Next/Submit button
+    is_last = self.is_last_step(step_id)
+    button_text = step_obj.next_button_text
+    button_id = InteractionHtmlIds.STEP_FLOW_SUBMIT_BTN if is_last else InteractionHtmlIds.STEP_FLOW_NEXT_BTN
+    
+    # If wrapped in form, this will submit the form
+    # If not wrapped, it will trigger HTMX POST
+    button_attrs = {"id": button_id, "cls": combine_classes(btn, btn_colors.primary)}
+    if self.wrap_in_form:
+        button_attrs["type"] = "submit"
+    else:
+        button_attrs.update({
+            "hx_post": next_route,
+            "hx_target": InteractionHtmlIds.as_selector(self.container_id),
+            "hx_swap": "innerHTML"
+        })
+    
+    buttons.append(Button(button_text, **button_attrs))
+    
+    # Cancel button
+    if step_obj.show_cancel and cancel_route:
+        buttons.append(
+            Button(
+                "Cancel",
+                hx_get=cancel_route,
+                hx_target=InteractionHtmlIds.as_selector(self.container_id),
+                hx_swap="innerHTML",
+                type="button",  # Important: prevent form submission
+                id=InteractionHtmlIds.STEP_FLOW_CANCEL_BTN,
+                cls=combine_classes(btn, btn_styles.ghost)
+            )
+        )
+    
+    return Div(
+        *buttons,
+        id=InteractionHtmlIds.STEP_FLOW_NAVIGATION,
+        cls=combine_classes(flex_display, gap(2), justify.end, m.t(4))
+    )
+
+# %% ../../nbs/patterns/step_flow.ipynb 28
+@patch
+def create_router(self:StepFlow, 
+                  prefix: str = ""  # URL prefix for routes (e.g., "/transcription")
+                 ) -> APIRouter:  # APIRouter with generated routes
+    """Create FastHTML router with generated routes for this flow."""
+    router = APIRouter(prefix=prefix)
+    
+    # Store reference to flow in router for access in route handlers
+    router.step_flow = self
+    
+    # Entry point route - start or resume
+    @router.get("/")
+    def start(request, sess):
+        """Entry point - start workflow or resume from last step."""
+        current_step_id = self.get_current_step_id(sess)
+        step_obj = self.get_step(current_step_id)
         
-        # Store reference to flow in router for access in route handlers
-        router.step_flow = self
+        if not step_obj:
+            # Invalid state, restart from beginning
+            step_obj = self.steps[0]
+            self.set_current_step(sess, step_obj.id)
         
-        # Entry point route - start or resume
-        @router.get("/")
-        def start(request, sess):
-            """Entry point - start workflow or resume from last step."""
-            current_step_id = self.get_current_step_id(sess)
-            step_obj = self.get_step(current_step_id)
+        ctx = self.create_context(request, sess, step_obj)
+        
+        step_content = self.render_step_content(
+            step_obj=step_obj,
+            ctx=ctx,
+            next_route=f"{prefix}/next",
+            back_route=f"{prefix}/back",
+            cancel_route=f"{prefix}/reset"
+        )
+        
+        return Div(step_content, id=self.container_id)
+    
+    # Next step handler
+    @router.post("/next")
+    async def next_step(request, sess):
+        """Advance to next step."""
+        current_step_id = self.get_current_step_id(sess)
+        current_step = self.get_step(current_step_id)
+        
+        if not current_step:
+            return start(request, sess)
+        
+        # Get form data if any (properly handle FormData from Starlette)
+        try:
+            form_data = await request.form()
+            # Convert FormData to dict
+            form_dict = {key: form_data.get(key) for key in form_data.keys()}
             
-            if not step_obj:
-                # Invalid state, restart from beginning
-                step_obj = self.steps[0]
-                self.set_current_step(sess, step_obj.id)
+            # Update workflow state with form data
+            if form_dict:
+                self.update_workflow_state(sess, form_dict)
+        except Exception:
+            # No form data or error reading it
+            pass
+        
+        # Check if this is the last step
+        if self.is_last_step(current_step_id):
+            # Complete the workflow
+            if self.on_complete:
+                state = self.get_workflow_state(sess)
+                return self.on_complete(state, request)
+            else:
+                # No completion handler, just show success
+                return Div("Workflow completed!", id=self.container_id)
+        
+        # Move to next step
+        next_step_id = self.get_next_step_id(current_step_id)
+        if next_step_id:
+            self.set_current_step(sess, next_step_id)
+            next_step = self.get_step(next_step_id)
             
-            ctx = self.create_context(request, sess, step_obj)
+            ctx = self.create_context(request, sess, next_step)
             
             step_content = self.render_step_content(
-                step_obj=step_obj,
+                step_obj=next_step,
                 ctx=ctx,
                 next_route=f"{prefix}/next",
                 back_route=f"{prefix}/back",
@@ -329,89 +425,38 @@ class StepFlow:
             
             return Div(step_content, id=self.container_id)
         
-        # Next step handler
-        @router.post("/next")
-        async def next_step(request, sess):
-            """Advance to next step."""
-            current_step_id = self.get_current_step_id(sess)
-            current_step = self.get_step(current_step_id)
-            
-            if not current_step:
-                return start(request, sess)
-            
-            # Get form data if any (properly handle FormData from Starlette)
-            try:
-                form_data = await request.form()
-                # Convert FormData to dict
-                form_dict = {key: form_data.get(key) for key in form_data.keys()}
-                
-                # Update workflow state with form data
-                if form_dict:
-                    self.update_workflow_state(sess, form_dict)
-            except Exception:
-                # No form data or error reading it
-                pass
-            
-            # Check if this is the last step
-            if self.is_last_step(current_step_id):
-                # Complete the workflow
-                if self.on_complete:
-                    state = self.get_workflow_state(sess)
-                    return self.on_complete(state, request)
-                else:
-                    # No completion handler, just show success
-                    return Div("Workflow completed!", id=self.container_id)
-            
-            # Move to next step
-            next_step_id = self.get_next_step_id(current_step_id)
-            if next_step_id:
-                self.set_current_step(sess, next_step_id)
-                next_step = self.get_step(next_step_id)
-                
-                ctx = self.create_context(request, sess, next_step)
-                
-                step_content = self.render_step_content(
-                    step_obj=next_step,
-                    ctx=ctx,
-                    next_route=f"{prefix}/next",
-                    back_route=f"{prefix}/back",
-                    cancel_route=f"{prefix}/reset"
-                )
-                
-                return Div(step_content, id=self.container_id)
-            
-            return start(request, sess)
+        return start(request, sess)
+    
+    # Back step handler
+    @router.get("/back")
+    def back_step(request, sess):
+        """Go back to previous step."""
+        current_step_id = self.get_current_step_id(sess)
+        prev_step_id = self.get_previous_step_id(current_step_id)
         
-        # Back step handler
-        @router.get("/back")
-        def back_step(request, sess):
-            """Go back to previous step."""
-            current_step_id = self.get_current_step_id(sess)
-            prev_step_id = self.get_previous_step_id(current_step_id)
+        if prev_step_id:
+            self.set_current_step(sess, prev_step_id)
+            prev_step = self.get_step(prev_step_id)
             
-            if prev_step_id:
-                self.set_current_step(sess, prev_step_id)
-                prev_step = self.get_step(prev_step_id)
-                
-                ctx = self.create_context(request, sess, prev_step)
-                
-                step_content = self.render_step_content(
-                    step_obj=prev_step,
-                    ctx=ctx,
-                    next_route=f"{prefix}/next",
-                    back_route=f"{prefix}/back",
-                    cancel_route=f"{prefix}/reset"
-                )
-                
-                return Div(step_content, id=self.container_id)
+            ctx = self.create_context(request, sess, prev_step)
             
-            return start(request, sess)
+            step_content = self.render_step_content(
+                step_obj=prev_step,
+                ctx=ctx,
+                next_route=f"{prefix}/next",
+                back_route=f"{prefix}/back",
+                cancel_route=f"{prefix}/reset"
+            )
+            
+            return Div(step_content, id=self.container_id)
         
-        # Reset workflow handler
-        @router.get("/reset")
-        def reset(request, sess):
-            """Reset workflow to beginning."""
-            self.clear_workflow(sess)
-            return start(request, sess)
-        
-        return router
+        return start(request, sess)
+    
+    # Reset workflow handler
+    @router.get("/reset")
+    def reset(request, sess):
+        """Reset workflow to beginning."""
+        self.clear_workflow(sess)
+        return start(request, sess)
+    
+    return router

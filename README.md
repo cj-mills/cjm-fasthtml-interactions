@@ -154,6 +154,147 @@ from cjm_fasthtml_interactions.patterns.step_flow import (
 )
 ```
 
+#### Functions
+
+``` python
+@patch
+def get_step(self:StepFlow, 
+             step_id: str  # Step identifier
+            ) -> Optional[Step]:  # Step object or None
+    "Get step by ID."
+```
+
+``` python
+@patch
+def get_step_index(self:StepFlow, 
+                   step_id: str  # Step identifier
+                  ) -> Optional[int]:  # Step index or None
+    "Get step index by ID."
+```
+
+``` python
+@patch
+def get_current_step_id(self:StepFlow, 
+                        sess: Any  # FastHTML session object
+                       ) -> str:  # Current step ID
+    "Get current step ID from session."
+```
+
+``` python
+@patch
+def set_current_step(self:StepFlow, 
+                     sess: Any,  # FastHTML session object
+                     step_id: str  # Step ID to set as current
+                    ) -> None
+    "Set current step in session."
+```
+
+``` python
+@patch
+def get_next_step_id(self:StepFlow, 
+                     current_step_id: str  # Current step ID
+                    ) -> Optional[str]:  # Next step ID or None if last step
+    "Get the ID of the next step."
+```
+
+``` python
+@patch
+def get_previous_step_id(self:StepFlow, 
+                         current_step_id: str  # Current step ID
+                        ) -> Optional[str]:  # Previous step ID or None if first step
+    "Get the ID of the previous step."
+```
+
+``` python
+@patch
+def is_last_step(self:StepFlow, 
+                 step_id: str  # Step ID to check
+                ) -> bool:  # True if this is the last step
+    "Check if step is the last step."
+```
+
+``` python
+@patch
+def is_first_step(self:StepFlow, 
+                  step_id: str  # Step ID to check
+                 ) -> bool:  # True if this is the first step
+    "Check if step is the first step."
+```
+
+``` python
+@patch
+def get_workflow_state(self:StepFlow, 
+                       sess: Any  # FastHTML session object
+                      ) -> Dict[str, Any]:  # All workflow state
+    "Get all workflow state from session."
+```
+
+``` python
+@patch
+def update_workflow_state(self:StepFlow, 
+                          sess: Any,  # FastHTML session object
+                          updates: Dict[str, Any]  # State updates
+                         ) -> None
+    "Update workflow state with new values."
+```
+
+``` python
+@patch
+def clear_workflow(self:StepFlow, 
+                   sess: Any  # FastHTML session object
+                  ) -> None
+    "Clear all workflow state."
+```
+
+``` python
+@patch
+def create_context(self:StepFlow, 
+                   request: Any,  # FastHTML request object
+                   sess: Any,  # FastHTML session object
+                   step: Step  # Current step
+                  ) -> InteractionContext:  # Interaction context for rendering
+    "Create interaction context for a step."
+```
+
+``` python
+@patch
+def render_progress(self:StepFlow, 
+                    sess: Any  # FastHTML session object
+                   ) -> FT:  # Progress indicator or empty Div
+    "Render progress indicator showing all steps."
+```
+
+``` python
+@patch
+def render_step_content(self:StepFlow,
+                        step_obj: Step,  # Step to render
+                        ctx: InteractionContext,  # Interaction context
+                        next_route: str,  # Route for next/submit
+                        back_route: Optional[str] = None,  # Route for back
+                        cancel_route: Optional[str] = None  # Route for cancel
+                       ) -> FT:  # Complete step content with optional progress and navigation
+    "Render step content with optional progress indicator and navigation."
+```
+
+``` python
+@patch
+def render_navigation(self:StepFlow,
+                      step_id: str,  # Current step ID
+                      next_route: str,  # Route for next/submit action
+                      back_route: Optional[str] = None,  # Route for back action
+                      cancel_route: Optional[str] = None,  # Route for cancel action
+                     ) -> FT:  # Navigation button container
+    "Render navigation buttons for a step."
+```
+
+``` python
+@patch
+def create_router(self:StepFlow, 
+                  prefix: str = ""  # URL prefix for routes (e.g., "/transcription")
+                 ) -> APIRouter:  # APIRouter with generated routes
+    "Create FastHTML router with generated routes for this flow."
+```
+
 #### Classes
 
 ``` python
@@ -200,83 +341,4 @@ class StepFlow:
             wrap_in_form: bool = True  # Whether to wrap content + navigation in a form
         )
         "Initialize step flow manager."
-    
-    def get_step(self, step_id: str  # Step identifier
-                    ) -> Optional[Step]:  # Step object or None
-        "Get step by ID."
-    
-    def get_step_index(self, step_id: str  # Step identifier
-                          ) -> Optional[int]:  # Step index or None
-        "Get step index by ID."
-    
-    def get_current_step_id(self, sess: Any  # FastHTML session object
-                               ) -> str:  # Current step ID
-        "Get current step ID from session."
-    
-    def set_current_step(self, sess: Any,  # FastHTML session object
-                            step_id: str  # Step ID to set as current
-                           ) -> None
-        "Set current step in session."
-    
-    def get_next_step_id(self, current_step_id: str  # Current step ID
-                            ) -> Optional[str]:  # Next step ID or None if last step
-        "Get the ID of the next step."
-    
-    def get_previous_step_id(self, current_step_id: str  # Current step ID
-                                ) -> Optional[str]:  # Previous step ID or None if first step
-        "Get the ID of the previous step."
-    
-    def is_last_step(self, step_id: str  # Step ID to check
-                        ) -> bool:  # True if this is the last step
-        "Check if step is the last step."
-    
-    def is_first_step(self, step_id: str  # Step ID to check
-                         ) -> bool:  # True if this is the first step
-        "Check if step is the first step."
-    
-    def get_workflow_state(self, sess: Any  # FastHTML session object
-                              ) -> Dict[str, Any]:  # All workflow state
-        "Get all workflow state from session."
-    
-    def update_workflow_state(self, sess: Any,  # FastHTML session object
-                                  updates: Dict[str, Any]  # State updates
-                                 ) -> None
-        "Update workflow state with new values."
-    
-    def clear_workflow(self, sess: Any  # FastHTML session object
-                          ) -> None
-        "Clear all workflow state."
-    
-    def create_context(self,
-                           request: Any,  # FastHTML request object
-                           sess: Any,  # FastHTML session object
-                           step: Step  # Current step
-                          ) -> InteractionContext:  # Interaction context for rendering
-        "Create interaction context for a step."
-    
-    def render_progress(self, sess: Any  # FastHTML session object
-                           ) -> FT:  # Progress indicator or empty Div
-        "Render progress indicator showing all steps."
-    
-    def render_step_content(self,
-                               step_obj: Step,  # Step to render
-                               ctx: InteractionContext,  # Interaction context
-                               next_route: str,  # Route for next/submit
-                               back_route: Optional[str] = None,  # Route for back
-                               cancel_route: Optional[str] = None  # Route for cancel
-                              ) -> FT:  # Complete step content with optional progress and navigation
-        "Render step content with optional progress indicator and navigation."
-    
-    def render_navigation(self,
-                             step_id: str,  # Current step ID
-                             next_route: str,  # Route for next/submit action
-                             back_route: Optional[str] = None,  # Route for back action
-                             cancel_route: Optional[str] = None,  # Route for cancel action
-                            ) -> FT:  # Navigation button container
-        "Render navigation buttons for a step."
-    
-    def create_router(self,
-                         prefix: str = ""  # URL prefix for routes (e.g., "/transcription")
-                        ) -> APIRouter:  # APIRouter with generated routes
-        "Create FastHTML router with generated routes for this flow."
 ```
