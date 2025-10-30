@@ -30,6 +30,11 @@ class InteractionHtmlIds(AppHtmlIds):
     STEP_FLOW_CANCEL_BTN = "step-flow-cancel-btn"
     STEP_FLOW_SUBMIT_BTN = "step-flow-submit-btn"
     
+    # Tabbed interface components
+    TABBED_INTERFACE_CONTAINER = "tabbed-interface-container"
+    TABBED_INTERFACE_TABS = "tabbed-interface-tabs"
+    TABBED_INTERFACE_CONTENT = "tabbed-interface-content"
+    
     @staticmethod
     def step_content(step_id: str  # Step identifier
                     ) -> str:  # HTML ID for step content
@@ -41,3 +46,15 @@ class InteractionHtmlIds(AppHtmlIds):
                       ) -> str:  # HTML ID for step indicator
         """Generate HTML ID for a specific step's progress indicator."""
         return f"step-{step_id}-indicator"
+    
+    @staticmethod
+    def tab_radio(tab_id: str  # Tab identifier
+                 ) -> str:  # HTML ID for tab radio input
+        """Generate HTML ID for a specific tab's radio input."""
+        return f"tab-{tab_id}-radio"
+    
+    @staticmethod
+    def tab_content(tab_id: str  # Tab identifier
+                   ) -> str:  # HTML ID for tab content
+        """Generate HTML ID for a specific tab's content."""
+        return f"tab-{tab_id}-content"

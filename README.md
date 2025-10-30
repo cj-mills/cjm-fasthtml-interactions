@@ -15,10 +15,11 @@ pip install cjm_fasthtml_interactions
     ├── core/ (2)
     │   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data
     │   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components
-    └── patterns/ (1)
-        └── step_flow.ipynb  # Multi-step wizard pattern with state management, navigation, and route generation
+    └── patterns/ (2)
+        ├── step_flow.ipynb         # Multi-step wizard pattern with state management, navigation, and route generation
+        └── tabbed_interface.ipynb  # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
 
-Total: 3 notebooks across 2 directories
+Total: 4 notebooks across 2 directories
 
 ## Module Dependencies
 
@@ -27,12 +28,15 @@ graph LR
     core_context[core.context<br/>Interaction Context]
     core_html_ids[core.html_ids<br/>HTML IDs]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
+    patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
 
-    patterns_step_flow --> core_html_ids
     patterns_step_flow --> core_context
+    patterns_step_flow --> core_html_ids
+    patterns_tabbed_interface --> core_context
+    patterns_tabbed_interface --> core_html_ids
 ```
 
-*2 cross-module dependencies detected*
+*4 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -138,6 +142,14 @@ class InteractionHtmlIds(AppHtmlIds):
     def step_indicator(step_id: str  # Step identifier
                           ) -> str:  # HTML ID for step indicator
         "Generate HTML ID for a specific step's progress indicator."
+    
+    def tab_radio(tab_id: str  # Tab identifier
+                     ) -> str:  # HTML ID for tab radio input
+        "Generate HTML ID for a specific tab's radio input."
+    
+    def tab_content(tab_id: str  # Tab identifier
+                       ) -> str:  # HTML ID for tab content
+        "Generate HTML ID for a specific tab's content."
 ```
 
 ### Step Flow (`step_flow.ipynb`)
@@ -341,4 +353,127 @@ class StepFlow:
             wrap_in_form: bool = True  # Whether to wrap content + navigation in a form
         )
         "Initialize step flow manager."
+```
+
+### Tabbed Interface (`tabbed_interface.ipynb`)
+
+> Multi-tab interface pattern with automatic routing, state management,
+> and DaisyUI styling
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.patterns.tabbed_interface import (
+    Tab,
+    TabbedInterface
+)
+```
+
+#### Functions
+
+``` python
+@patch
+def get_tab(self:TabbedInterface, 
+            tab_id: str  # Tab identifier
+           ) -> Optional[Tab]:  # Tab object or None
+    "Get tab by ID."
+```
+
+``` python
+@patch
+def get_tab_index(self:TabbedInterface, 
+                  tab_id: str  # Tab identifier
+                 ) -> Optional[int]:  # Tab index or None
+    "Get tab index by ID."
+```
+
+``` python
+@patch
+def create_context(self:TabbedInterface, 
+                   request: Any,  # FastHTML request object
+                   sess: Any,  # FastHTML session object
+                   tab: Tab  # Current tab
+                  ) -> InteractionContext:  # Interaction context for rendering
+    "Create interaction context for a tab."
+```
+
+``` python
+@patch
+def render_tabs(self:TabbedInterface,
+                current_tab_id: str,  # Currently active tab ID
+                tab_route_func: Callable[[str], str]  # Function to generate tab route
+               ) -> FT:  # Tab navigation element
+    "Render tab navigation using DaisyUI radio-based tabs."
+```
+
+``` python
+@patch
+def render_tab_content(self:TabbedInterface,
+                       tab_obj: Tab,  # Tab to render
+                       ctx: InteractionContext  # Interaction context
+                      ) -> FT:  # Tab content
+    "Render tab content."
+```
+
+``` python
+@patch
+def render_full_interface(self:TabbedInterface,
+                         current_tab_id: str,  # Currently active tab ID
+                         tab_route_func: Callable[[str], str],  # Function to generate tab route
+                         request: Any,  # FastHTML request object
+                         sess: Any  # FastHTML session object
+                        ) -> FT:  # Complete tabbed interface
+    "Render complete tabbed interface with tabs and content area."
+```
+
+``` python
+@patch
+def create_router(self:TabbedInterface,
+                  prefix: str = ""  # URL prefix for routes (e.g., "/dashboard")
+                 ) -> APIRouter:  # APIRouter with generated routes
+    "Create FastHTML router with generated routes for this tabbed interface."
+```
+
+#### Classes
+
+``` python
+@dataclass
+class Tab:
+    "Definition of a single tab in a tabbed interface."
+    
+    id: str  # Unique tab identifier (used in URLs)
+    label: str  # Display label for the tab
+    render: Callable[[InteractionContext], Any]  # Function to render tab content
+    title: Optional[str]  # Optional title/tooltip for the tab
+    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function
+    load_on_demand: bool = True  # Whether to load content only when tab is selected
+```
+
+``` python
+class TabbedInterface:
+    def __init__(
+        self,
+        interface_id: str,  # Unique identifier for this interface
+        tabs_list: List[Tab],  # List of tab definitions
+        default_tab: Optional[str] = None,  # Default tab ID (defaults to first tab)
+        container_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTAINER,  # HTML ID for container
+        tabs_id: str = InteractionHtmlIds.TABBED_INTERFACE_TABS,  # HTML ID for tabs element
+        content_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTENT,  # HTML ID for content area
+        tab_style: Optional[str] = None,  # DaisyUI tab style (lift, bordered, boxed)
+        show_on_htmx_only: bool = False  # Whether to show full page layout for non-HTMX requests
+    )
+    "Manage multi-tab interfaces with automatic route generation and HTMX content loading."
+    
+    def __init__(
+            self,
+            interface_id: str,  # Unique identifier for this interface
+            tabs_list: List[Tab],  # List of tab definitions
+            default_tab: Optional[str] = None,  # Default tab ID (defaults to first tab)
+            container_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTAINER,  # HTML ID for container
+            tabs_id: str = InteractionHtmlIds.TABBED_INTERFACE_TABS,  # HTML ID for tabs element
+            content_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTENT,  # HTML ID for content area
+            tab_style: Optional[str] = None,  # DaisyUI tab style (lift, bordered, boxed)
+            show_on_htmx_only: bool = False  # Whether to show full page layout for non-HTMX requests
+        )
+        "Initialize tabbed interface manager."
 ```

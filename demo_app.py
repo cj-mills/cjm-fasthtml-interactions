@@ -1,12 +1,21 @@
 """Demo application for cjm-fasthtml-interactions library.
 
-This demo showcases the StepFlow pattern:
-- Multi-step wizard workflow
-- State management across steps
-- Progress indicator with daisyUI steps component
-- Form data collection and submission
-- Back/forward/cancel navigation
-- Workflow resumability
+This demo showcases:
+
+1. StepFlow Pattern:
+   - Multi-step wizard workflow
+   - State management across steps
+   - Progress indicator with daisyUI steps component
+   - Form data collection and submission
+   - Back/forward/cancel navigation
+   - Workflow resumability
+
+2. TabbedInterface Pattern:
+   - Tab-based navigation with DaisyUI styling
+   - Automatic route generation
+   - On-demand content loading
+   - Direct URL navigation support
+   - Multiple tab styles (lift, bordered, boxed)
 """
 
 from pathlib import Path
@@ -20,6 +29,7 @@ print("="*70)
 
 # Import library components
 from cjm_fasthtml_interactions.patterns.step_flow import Step, StepFlow
+from cjm_fasthtml_interactions.patterns.tabbed_interface import Tab, TabbedInterface
 from cjm_fasthtml_interactions.core.context import InteractionContext
 from cjm_fasthtml_interactions.core.html_ids import InteractionHtmlIds
 from cjm_fasthtml_app_core.core.html_ids import AppHtmlIds
@@ -186,6 +196,153 @@ registration_flow = StepFlow(
 registration_router = registration_flow.create_router(prefix="/register")
 registration_router.to_app(app)
 
+# ========================================
+# Tabbed Interface Demo
+# ========================================
+
+# Define tab render functions for dashboard
+def render_overview_tab(ctx: InteractionContext):
+    """Render overview tab."""
+    stats = ctx.get_data("stats", {})
+    return Div(
+        H2("Dashboard Overview", cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+        P("This tab shows a dashboard overview with statistics.",
+          cls=combine_classes(m.b(6))),
+        Div(
+            Div(
+                H3("Total Items", cls=combine_classes(font_weight.semibold, m.b(2))),
+                P(str(stats.get("total", 0)), cls=combine_classes(font_size._3xl, font_weight.bold)),
+                cls=combine_classes(card_body)
+            ),
+            Div(
+                H3("Active Items", cls=combine_classes(font_weight.semibold, m.b(2))),
+                P(str(stats.get("active", 0)), cls=combine_classes(font_size._3xl, font_weight.bold)),
+                cls=combine_classes(card_body)
+            ),
+            cls="grid grid-cols-1 md:grid-cols-2 gap-4"
+        ),
+        cls=combine_classes(card_body)
+    )
+
+def render_settings_tab(ctx: InteractionContext):
+    """Render settings tab."""
+    return Div(
+        H2("Settings", cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+        P("Configure your application preferences here.",
+          cls=combine_classes(m.b(4))),
+        Div(
+            Label("Theme:", cls=combine_classes(font_weight.semibold, m.b(2))),
+            Select(
+                Option("Light", value="light"),
+                Option("Dark", value="dark"),
+                Option("Cupcake", value="cupcake"),
+                cls="select select-bordered w-full max-w-xs"
+            ),
+            cls=str(m.b(4))
+        ),
+        Div(
+            Label("Language:", cls=combine_classes(font_weight.semibold, m.b(2))),
+            Select(
+                Option("English", value="en"),
+                Option("Spanish", value="es"),
+                Option("French", value="fr"),
+                cls="select select-bordered w-full max-w-xs"
+            ),
+            cls=str(m.b(4))
+        ),
+        cls=combine_classes(card_body)
+    )
+
+def render_help_tab(ctx: InteractionContext):
+    """Render help tab."""
+    return Div(
+        H2("Help & Documentation", cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+        P("Find helpful resources and documentation here.",
+          cls=combine_classes(m.b(4))),
+        Div(
+            H3("Quick Links", cls=combine_classes(font_weight.semibold, m.b(3))),
+            Ul(
+                Li(A("Getting Started Guide", href="#", cls="link link-primary")),
+                Li(A("API Reference", href="#", cls="link link-primary")),
+                Li(A("Common Issues", href="#", cls="link link-primary")),
+                Li(A("Contact Support", href="#", cls="link link-primary")),
+                cls=combine_classes(m.l(6))
+            )
+        ),
+        cls=combine_classes(card_body)
+    )
+
+def render_about_tab(ctx: InteractionContext):
+    """Render about tab."""
+    return Div(
+        H2("About", cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+        P("This demo showcases the TabbedInterface pattern from cjm-fasthtml-interactions.",
+          cls=combine_classes(m.b(4))),
+        Div(
+            H3("Features", cls=combine_classes(font_weight.semibold, m.b(3))),
+            Ul(
+                Li("DaisyUI radio-based tab navigation"),
+                Li("Automatic route generation"),
+                Li("On-demand content loading"),
+                Li("Direct URL navigation support"),
+                Li("Multiple tab styles (lift, bordered, boxed)"),
+                cls=combine_classes(m.l(6), m.b(4))
+            )
+        ),
+        Div(
+            H3("Version", cls=combine_classes(font_weight.semibold, m.b(2))),
+            P("cjm-fasthtml-interactions v0.1.0", cls=str(m.b(4)))
+        ),
+        cls=combine_classes(card_body)
+    )
+
+# Optional data loader for overview tab
+def load_dashboard_stats(request):
+    """Load statistics for overview tab."""
+    return {
+        "stats": {
+            "total": 156,
+            "active": 42
+        }
+    }
+
+# Create tabbed interface with lift style
+dashboard_tabs = TabbedInterface(
+    interface_id="dashboard",
+    tabs_list=[
+        Tab(
+            id="overview",
+            label="Overview",
+            title="Dashboard Overview",
+            render=render_overview_tab,
+            data_loader=load_dashboard_stats
+        ),
+        Tab(
+            id="settings",
+            label="Settings",
+            title="Configuration Settings",
+            render=render_settings_tab
+        ),
+        Tab(
+            id="help",
+            label="Help",
+            title="Help & Documentation",
+            render=render_help_tab
+        ),
+        Tab(
+            id="about",
+            label="About",
+            title="About This Demo",
+            render=render_about_tab
+        )
+    ],
+    tab_style="lift"  # Use DaisyUI lift style
+)
+
+# Generate router and register it
+dashboard_router = dashboard_tabs.create_router(prefix="/dashboard")
+dashboard_router.to_app(app)
+
 # Define main routes at module level
 @rt
 def index(request):
@@ -202,39 +359,39 @@ def index(request):
             # Feature list
             Div(
                 Div(
-                    Span("✓", cls=combine_classes(font_size._2xl, m.r(3))),
-                    Span("Multi-step wizard workflows with state management"),
-                    cls=combine_classes(m.b(3))
+                    H3("StepFlow Pattern", cls=combine_classes(font_weight.bold, m.b(2))),
+                    Ul(
+                        Li("Multi-step wizard workflows"),
+                        Li("Visual progress indicators"),
+                        Li("Form data collection"),
+                        Li("State management and resumability"),
+                        cls=combine_classes(m.l(6), m.b(4))
+                    )
                 ),
                 Div(
-                    Span("✓", cls=combine_classes(font_size._2xl, m.r(3))),
-                    Span("Visual progress indicators using daisyUI steps"),
-                    cls=combine_classes(m.b(3))
-                ),
-                Div(
-                    Span("✓", cls=combine_classes(font_size._2xl, m.r(3))),
-                    Span("Form data collection across multiple steps"),
-                    cls=combine_classes(m.b(3))
-                ),
-                Div(
-                    Span("✓", cls=combine_classes(font_size._2xl, m.r(3))),
-                    Span("Back/forward/cancel navigation controls"),
-                    cls=combine_classes(m.b(3))
-                ),
-                Div(
-                    Span("✓", cls=combine_classes(font_size._2xl, m.r(3))),
-                    Span("Automatic route generation and resumability"),
-                    cls=combine_classes(m.b(8))
+                    H3("TabbedInterface Pattern", cls=combine_classes(font_weight.bold, m.b(2))),
+                    Ul(
+                        Li("DaisyUI radio-based tabs"),
+                        Li("Automatic route generation"),
+                        Li("On-demand content loading"),
+                        Li("Multiple tab styles"),
+                        cls=combine_classes(m.l(6), m.b(8))
+                    )
                 ),
                 cls=combine_classes(text_align.left, m.b(8))
             ),
 
-            # Navigation (Note: /register routes are handled by registration_router)
+            # Navigation
             Div(
                 A(
-                    "Try Registration Demo",
+                    "StepFlow Demo",
                     href=registration_router.start.to(),
-                    cls=combine_classes(btn, btn_colors.primary, btn_sizes.lg, m.r(2))
+                    cls=combine_classes(btn, btn_colors.primary, btn_sizes.lg, m.r(2), m.b(2))
+                ),
+                A(
+                    "Tabbed Interface Demo",
+                    href=dashboard_router.index.to(),
+                    cls=combine_classes(btn, btn_colors.secondary, btn_sizes.lg, m.r(2), m.b(2))
                 ),
                 A(
                     "View Features",
@@ -242,7 +399,7 @@ def index(request):
                     hx_get=features.to(),
                     hx_target=f"#{AppHtmlIds.MAIN_CONTENT}",
                     hx_push_url="true",
-                    cls=combine_classes(btn, btn_colors.secondary, btn_sizes.lg)
+                    cls=combine_classes(btn, btn_colors.accent, btn_sizes.lg, m.b(2))
                 ),
             ),
 
@@ -347,6 +504,8 @@ navbar = create_navbar(
     title="Interactions Demo",
     nav_items=[
         ("Home", index),
+        ("StepFlow", registration_router.start),
+        ("Tabbed UI", dashboard_router.index),
         ("Features", features)
     ],
     home_route=index,
@@ -366,9 +525,11 @@ print("Demo App Ready!")
 print("="*70)
 print("\n📦 Library Components:")
 print("  • StepFlow - Multi-step wizard pattern")
+print("  • TabbedInterface - Tab-based navigation pattern")
 print("  • InteractionContext - Unified context management")
 print("  • InteractionHtmlIds - Centralized ID constants")
 print("  • Step - Declarative step definition")
+print("  • Tab - Declarative tab definition")
 print("="*70 + "\n")
 
 
@@ -388,7 +549,8 @@ if __name__ == "__main__":
     print(f"🚀 Server: http://{display_host}:{port}")
     print("\n📍 Available routes:")
     print(f"  http://{display_host}:{port}/                  - Homepage")
-    print(f"  http://{display_host}:{port}/register/start    - Registration workflow")
+    print(f"  http://{display_host}:{port}/register/start    - StepFlow demo (Registration)")
+    print(f"  http://{display_host}:{port}/dashboard/        - TabbedInterface demo (Dashboard)")
     print(f"  http://{display_host}:{port}/features          - Feature list")
     print("\n" + "="*70 + "\n")
 
