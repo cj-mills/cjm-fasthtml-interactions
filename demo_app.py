@@ -74,7 +74,7 @@ def render_name_step(ctx: InteractionContext):
             value=current_name,
             placeholder="John Doe",
             required=True,
-            cls=combine_classes(text_input, 'input-bordered', w.full)
+            cls=combine_classes(text_input, w.full)
         ),
         cls=combine_classes(card_body)
     )
@@ -93,7 +93,7 @@ def render_email_step(ctx: InteractionContext):
             value=current_email,
             placeholder="john@example.com",
             required=True,
-            cls=combine_classes(text_input, 'input-bordered', w.full)
+            cls=combine_classes(text_input, w.full)
         ),
         cls=combine_classes(card_body)
     )
@@ -110,7 +110,7 @@ def render_preferences_step(ctx: InteractionContext):
             Option("Weekly digest", value="weekly", selected=(current_notifications == "weekly")),
             Option("Monthly summary", value="monthly", selected=(current_notifications == "monthly")),
             name="notifications",
-            cls=combine_classes(select, 'select-bordered', w.full)
+            cls=combine_classes(select, w.full)
         ),
         cls=combine_classes(card_body)
     )
@@ -240,7 +240,7 @@ def render_settings_tab(ctx: InteractionContext):
                 Option("Light", value="light"),
                 Option("Dark", value="dark"),
                 Option("Cupcake", value="cupcake"),
-                cls=combine_classes(select, 'select-bordered', w.full, max_w.xs)
+                cls=combine_classes(select, w.full, max_w.xs)
             ),
             cls=str(m.b(4))
         ),
@@ -250,7 +250,7 @@ def render_settings_tab(ctx: InteractionContext):
                 Option("English", value="en"),
                 Option("Spanish", value="es"),
                 Option("French", value="fr"),
-                cls=combine_classes(select, 'select-bordered', w.full, max_w.xs)
+                cls=combine_classes(select, w.full, max_w.xs)
             ),
             cls=str(m.b(4))
         ),
