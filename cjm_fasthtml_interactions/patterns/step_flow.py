@@ -397,6 +397,21 @@ def create_router(self:StepFlow,
             # No form data or error reading it
             pass
 
+        # Validate current step before advancing
+        state = self.get_workflow_state(sess)
+        if not current_step.is_valid(state):
+            # Validation failed, re-render current step
+            # TODO: In future, could add error messaging here
+            ctx = self.create_context(request, sess, current_step)
+            step_content = self.render_step_content(
+                step_obj=current_step,
+                ctx=ctx,
+                next_route=next_step.to(),
+                back_route=back_step.to(),
+                cancel_route=reset.to()
+            )
+            return Div(step_content, id=self.container_id)
+
         # Check if this is the last step
         if self.is_last_step(current_step_id):
             # Complete the workflow
