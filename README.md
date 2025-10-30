@@ -28,8 +28,8 @@ graph LR
     core_html_ids[core.html_ids<br/>HTML IDs]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
 
-    patterns_step_flow --> core_context
     patterns_step_flow --> core_html_ids
+    patterns_step_flow --> core_context
 ```
 
 *2 cross-module dependencies detected*

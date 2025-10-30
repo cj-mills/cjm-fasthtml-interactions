@@ -94,7 +94,8 @@ def get_current_step_id(self:StepFlow,
                        ) -> str:  # Current step ID
     """Get current step ID from session."""
     workflow = WorkflowSession(sess, self.flow_id)
-    return workflow.get("current_step", self.steps[0].id)
+    # Use private key to avoid conflicts with user data
+    return workflow.get("__step_flow_current", self.steps[0].id)
 
 # %% ../../nbs/patterns/step_flow.ipynb 13
 @patch
@@ -105,9 +106,10 @@ def set_current_step(self:StepFlow,
     """Set current step in session."""
     print(f"DEBUG StepFlow.set_current_step: setting current_step to '{step_id}'")
     workflow = WorkflowSession(sess, self.flow_id)
-    workflow.set("current_step", step_id)
+    # Use private key to avoid conflicts with user data
+    workflow.set("__step_flow_current", step_id)
     # Immediately verify it was set
-    check = workflow.get("current_step")
+    check = workflow.get("__step_flow_current")
     print(f"DEBUG StepFlow.set_current_step: verified current_step is now '{check}'")
 
 # %% ../../nbs/patterns/step_flow.ipynb 14
