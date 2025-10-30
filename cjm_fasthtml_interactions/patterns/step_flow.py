@@ -169,8 +169,17 @@ def update_workflow_state(self:StepFlow,
                          ) -> None:
     """Update workflow state with new values."""
     workflow = WorkflowSession(sess, self.flow_id)
+    # Button IDs to exclude from state (these are just UI artifacts)
+    button_keys = {
+        InteractionHtmlIds.STEP_FLOW_NEXT_BTN,
+        InteractionHtmlIds.STEP_FLOW_SUBMIT_BTN,
+        InteractionHtmlIds.STEP_FLOW_BACK_BTN,
+        InteractionHtmlIds.STEP_FLOW_CANCEL_BTN
+    }
     for key, value in updates.items():
-        workflow.set(key, value)
+        # Skip private keys (those starting with __) and button IDs
+        if not key.startswith("__") and key not in button_keys:
+            workflow.set(key, value)
 
 # %% ../../nbs/patterns/step_flow.ipynb 21
 @patch
