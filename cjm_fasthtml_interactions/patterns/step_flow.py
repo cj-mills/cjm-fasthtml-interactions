@@ -380,6 +380,8 @@ def create_router(self:StepFlow,
         """Advance to next step."""
         current_step_id = self.get_current_step_id(sess)
         current_step = self.get_step(current_step_id)
+        
+        print(f"DEBUG StepFlow: current_step_id={current_step_id}, is_last={self.is_last_step(current_step_id)}")
 
         if not current_step:
             return start(request, sess)
@@ -392,16 +394,23 @@ def create_router(self:StepFlow,
 
             # Update workflow state with form data
             if form_dict:
+                print(f"DEBUG StepFlow: form_dict={form_dict}")
                 self.update_workflow_state(sess, form_dict)
-        except Exception:
+        except Exception as e:
+            print(f"DEBUG StepFlow: Exception getting form data: {e}")
             # No form data or error reading it
             pass
 
         # Validate current step before advancing
         state = self.get_workflow_state(sess)
-        if not current_step.is_valid(state):
+        print(f"DEBUG StepFlow: state={state}")
+        is_valid = current_step.is_valid(state)
+        print(f"DEBUG StepFlow: is_valid={is_valid}")
+        
+        if not is_valid:
             # Validation failed, re-render current step
             # TODO: In future, could add error messaging here
+            print(f"DEBUG StepFlow: Validation failed, re-rendering current step")
             ctx = self.create_context(request, sess, current_step)
             step_content = self.render_step_content(
                 step_obj=current_step,
@@ -414,20 +423,26 @@ def create_router(self:StepFlow,
 
         # Check if this is the last step
         if self.is_last_step(current_step_id):
+            print(f"DEBUG StepFlow: This is the last step, calling on_complete")
             # Complete the workflow
             if self.on_complete:
                 state = self.get_workflow_state(sess)
                 # Check if completion handler is async
                 import inspect
                 if inspect.iscoroutinefunction(self.on_complete):
-                    return await self.on_complete(state, request)
+                    result = await self.on_complete(state, request)
+                    print(f"DEBUG StepFlow: on_complete returned (async)")
+                    return result
                 else:
-                    return self.on_complete(state, request)
+                    result = self.on_complete(state, request)
+                    print(f"DEBUG StepFlow: on_complete returned (sync)")
+                    return result
             else:
                 # No completion handler, just show success
                 return Div("Workflow completed!", id=self.container_id)
 
         # Move to next step
+        print(f"DEBUG StepFlow: Moving to next step")
         next_step_id = self.get_next_step_id(current_step_id)
         if next_step_id:
             self.set_current_step(sess, next_step_id)
