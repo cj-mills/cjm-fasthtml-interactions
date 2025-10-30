@@ -15,11 +15,12 @@ pip install cjm_fasthtml_interactions
     ├── core/ (2)
     │   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data
     │   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components
-    └── patterns/ (2)
+    └── patterns/ (3)
+        ├── master_detail.ipynb     # Sidebar navigation pattern with master list and detail content area
         ├── step_flow.ipynb         # Multi-step wizard pattern with state management, navigation, and route generation
         └── tabbed_interface.ipynb  # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
 
-Total: 4 notebooks across 2 directories
+Total: 5 notebooks across 2 directories
 
 ## Module Dependencies
 
@@ -27,16 +28,19 @@ Total: 4 notebooks across 2 directories
 graph LR
     core_context[core.context<br/>Interaction Context]
     core_html_ids[core.html_ids<br/>HTML IDs]
+    patterns_master_detail[patterns.master_detail<br/>Master-Detail]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
     patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
 
+    patterns_master_detail --> core_context
+    patterns_master_detail --> core_html_ids
     patterns_step_flow --> core_context
     patterns_step_flow --> core_html_ids
     patterns_tabbed_interface --> core_context
     patterns_tabbed_interface --> core_html_ids
 ```
 
-*4 cross-module dependencies detected*
+*6 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -150,6 +154,161 @@ class InteractionHtmlIds(AppHtmlIds):
     def tab_content(tab_id: str  # Tab identifier
                        ) -> str:  # HTML ID for tab content
         "Generate HTML ID for a specific tab's content."
+    
+    def master_item(item_id: str  # Item identifier
+                       ) -> str:  # HTML ID for master list item
+        "Generate HTML ID for a master list item."
+    
+    def master_group(group_id: str  # Group identifier
+                        ) -> str:  # HTML ID for master list group
+        "Generate HTML ID for a master list group."
+    
+    def detail_content(item_id: str  # Item identifier
+                          ) -> str:  # HTML ID for detail content
+        "Generate HTML ID for detail content area."
+```
+
+### Master-Detail (`master_detail.ipynb`)
+
+> Sidebar navigation pattern with master list and detail content area
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.patterns.master_detail import (
+    DetailItem,
+    DetailItemGroup,
+    MasterDetail
+)
+```
+
+#### Functions
+
+``` python
+@patch
+def get_item(self:MasterDetail, 
+             item_id: str  # Item identifier
+            ) -> Optional[DetailItem]:  # DetailItem or None
+    "Get item by ID."
+```
+
+``` python
+@patch
+def create_context(self:MasterDetail, 
+                   request: Any,  # FastHTML request object
+                   sess: Any,  # FastHTML session object
+                   item: DetailItem  # Current item
+                  ) -> InteractionContext:  # Interaction context for rendering
+    "Create interaction context for an item."
+```
+
+``` python
+@patch
+def render_master(self:MasterDetail,
+                  active_item_id: str,  # Currently active item ID
+                  item_route_func: Callable[[str], str],  # Function to generate item route
+                  include_wrapper: bool = True  # Whether to include outer wrapper div
+                 ) -> FT:  # Master list element
+    "Render master list (sidebar) with items and groups."
+```
+
+``` python
+@patch
+def render_master_oob(self:MasterDetail,
+                      active_item_id: str,  # Currently active item ID
+                      item_route_func: Callable[[str], str]  # Function to generate item route
+                     ) -> FT:  # Master list with OOB swap attribute
+    "Render master list with OOB swap attribute for coordinated updates."
+```
+
+``` python
+@patch
+def render_detail(self:MasterDetail,
+                  item: DetailItem,  # Item to render
+                  ctx: InteractionContext  # Interaction context
+                 ) -> FT:  # Detail content
+    "Render detail content for an item."
+```
+
+``` python
+@patch
+def render_full_interface(self:MasterDetail,
+                         active_item_id: str,  # Currently active item ID
+                         item_route_func: Callable[[str], str],  # Function to generate item route
+                         request: Any,  # FastHTML request object
+                         sess: Any  # FastHTML session object
+                        ) -> FT:  # Complete master-detail interface
+    "Render complete master-detail interface with master list and detail area."
+```
+
+``` python
+@patch
+def create_router(self:MasterDetail,
+                  prefix: str = ""  # URL prefix for routes (e.g., "/media")
+                 ) -> APIRouter:  # APIRouter with generated routes
+    "Create FastHTML router with generated routes for this master-detail interface."
+```
+
+#### Classes
+
+``` python
+@dataclass
+class DetailItem:
+    "Definition of a single item in the master-detail pattern."
+    
+    id: str  # Unique identifier
+    label: str  # Display text in master list
+    render: Callable[[InteractionContext], Any]  # Function to render detail view
+    badge_text: Optional[str]  # Optional badge text (e.g., "configured", "3 items")
+    badge_color: Optional[str]  # Badge color class (e.g., badge_colors.success)
+    icon: Optional[Any]  # Optional icon element
+    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function
+    load_on_demand: bool = True  # Whether to load content only when item is selected
+```
+
+``` python
+@dataclass
+class DetailItemGroup:
+    "Group of related detail items in a collapsible section."
+    
+    id: str  # Group identifier
+    title: str  # Group display title
+    items: List[DetailItem]  # Items in this group
+    default_open: bool = True  # Whether group is expanded by default
+    icon: Optional[Any]  # Optional group icon
+    badge_text: Optional[str]  # Optional badge for the group
+    badge_color: Optional[str]  # Badge color for the group
+```
+
+``` python
+class MasterDetail:
+    def __init__(
+        self,
+        interface_id: str,  # Unique identifier for this interface
+        items: List[Union[DetailItem, DetailItemGroup]],  # List of items/groups
+        default_item: Optional[str] = None,  # Default item ID (defaults to first item)
+        container_id: str = InteractionHtmlIds.MASTER_DETAIL_CONTAINER,  # HTML ID for container
+        master_id: str = InteractionHtmlIds.MASTER_DETAIL_MASTER,  # HTML ID for master list
+        detail_id: str = InteractionHtmlIds.MASTER_DETAIL_DETAIL,  # HTML ID for detail area
+        master_width: str = "w-64",  # Tailwind width class for master list
+        master_title: Optional[str] = None,  # Optional title for master list
+        show_on_htmx_only: bool = False  # Whether to show full interface for non-HTMX requests
+    )
+    "Manage master-detail interfaces with sidebar navigation and detail content area."
+    
+    def __init__(
+            self,
+            interface_id: str,  # Unique identifier for this interface
+            items: List[Union[DetailItem, DetailItemGroup]],  # List of items/groups
+            default_item: Optional[str] = None,  # Default item ID (defaults to first item)
+            container_id: str = InteractionHtmlIds.MASTER_DETAIL_CONTAINER,  # HTML ID for container
+            master_id: str = InteractionHtmlIds.MASTER_DETAIL_MASTER,  # HTML ID for master list
+            detail_id: str = InteractionHtmlIds.MASTER_DETAIL_DETAIL,  # HTML ID for detail area
+            master_width: str = "w-64",  # Tailwind width class for master list
+            master_title: Optional[str] = None,  # Optional title for master list
+            show_on_htmx_only: bool = False  # Whether to show full interface for non-HTMX requests
+        )
+        "Initialize master-detail manager."
 ```
 
 ### Step Flow (`step_flow.ipynb`)

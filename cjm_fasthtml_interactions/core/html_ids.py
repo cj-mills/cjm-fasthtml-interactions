@@ -35,6 +35,11 @@ class InteractionHtmlIds(AppHtmlIds):
     TABBED_INTERFACE_TABS = "tabbed-interface-tabs"
     TABBED_INTERFACE_CONTENT = "tabbed-interface-content"
     
+    # Master-detail components
+    MASTER_DETAIL_CONTAINER = "master-detail-container"
+    MASTER_DETAIL_MASTER = "master-detail-master"
+    MASTER_DETAIL_DETAIL = "master-detail-detail"
+    
     @staticmethod
     def step_content(step_id: str  # Step identifier
                     ) -> str:  # HTML ID for step content
@@ -58,3 +63,21 @@ class InteractionHtmlIds(AppHtmlIds):
                    ) -> str:  # HTML ID for tab content
         """Generate HTML ID for a specific tab's content."""
         return f"tab-{tab_id}-content"
+    
+    @staticmethod
+    def master_item(item_id: str  # Item identifier
+                   ) -> str:  # HTML ID for master list item
+        """Generate HTML ID for a master list item."""
+        return f"master-item-{item_id}"
+    
+    @staticmethod
+    def master_group(group_id: str  # Group identifier
+                    ) -> str:  # HTML ID for master list group
+        """Generate HTML ID for a master list group."""
+        return f"master-group-{group_id}"
+    
+    @staticmethod
+    def detail_content(item_id: str  # Item identifier
+                      ) -> str:  # HTML ID for detail content
+        """Generate HTML ID for detail content area."""
+        return f"detail-{item_id}-content"

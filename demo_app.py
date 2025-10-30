@@ -16,6 +16,14 @@ This demo showcases:
    - On-demand content loading
    - Direct URL navigation support
    - Multiple tab styles (lift, bordered, boxed)
+
+3. MasterDetail Pattern:
+   - Sidebar navigation with master list
+   - Detail content area
+   - Hierarchical grouping with collapsible sections
+   - Badge indicators for status/counts
+   - Active state management with URL synchronization
+   - On-demand content loading
 """
 
 from pathlib import Path
@@ -30,6 +38,7 @@ print("="*70)
 # Import library components
 from cjm_fasthtml_interactions.patterns.step_flow import Step, StepFlow
 from cjm_fasthtml_interactions.patterns.tabbed_interface import Tab, TabbedInterface
+from cjm_fasthtml_interactions.patterns.master_detail import MasterDetail, DetailItem, DetailItemGroup
 from cjm_fasthtml_interactions.core.context import InteractionContext
 from cjm_fasthtml_interactions.core.html_ids import InteractionHtmlIds
 from cjm_fasthtml_app_core.core.html_ids import AppHtmlIds
@@ -45,6 +54,7 @@ from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import grid_display, grid_
 from cjm_fasthtml_tailwind.core.base import combine_classes
 from cjm_fasthtml_daisyui.components.actions.button import btn, btn_colors, btn_sizes
 from cjm_fasthtml_daisyui.components.data_display.card import card, card_body, card_title
+from cjm_fasthtml_daisyui.components.data_display.badge import badge_colors
 from cjm_fasthtml_daisyui.components.data_input.text_input import text_input
 from cjm_fasthtml_daisyui.components.data_input.select import select
 from cjm_fasthtml_daisyui.components.navigation.link import link, link_colors
@@ -347,6 +357,267 @@ dashboard_tabs = TabbedInterface(
 dashboard_router = dashboard_tabs.create_router(prefix="/dashboard")
 dashboard_router.to_app(app)
 
+# ========================================
+# Master-Detail Demo
+# ========================================
+
+# Define detail render functions for file browser
+def render_file_detail(ctx: InteractionContext):
+    """Render file detail view."""
+    file_data = ctx.get_data("file", {})
+    return Div(
+        H2(f"📄 {file_data.get('name', 'Unknown File')}",
+           cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+        P("File details and metadata:",
+          cls=combine_classes(m.b(4))),
+        Div(
+            Div(
+                H3("File Information", cls=combine_classes(font_weight.semibold, m.b(2))),
+                P(Strong("Size: "), f"{file_data.get('size', 0)} bytes", cls=str(m.b(2))),
+                P(Strong("Type: "), file_data.get('type', 'N/A'), cls=str(m.b(2))),
+                P(Strong("Modified: "), file_data.get('modified', 'N/A'), cls=str(m.b(2))),
+                P(Strong("Path: "), file_data.get('path', 'N/A'), cls=str(m.b(4))),
+                cls=combine_classes(card_body, m.b(4))
+            ),
+            Div(
+                H3("Actions", cls=combine_classes(font_weight.semibold, m.b(2))),
+                Div(
+                    Button("Download", cls=combine_classes(btn, btn_colors.primary, btn_sizes.sm, m.r(2))),
+                    Button("Share", cls=combine_classes(btn, btn_colors.secondary, btn_sizes.sm, m.r(2))),
+                    Button("Delete", cls=combine_classes(btn, btn_colors.error, btn_sizes.sm)),
+                ),
+                cls=combine_classes(card_body)
+            ),
+            cls=str(m.t(4))
+        ),
+        cls=combine_classes(card_body)
+    )
+
+def render_folder_detail(ctx: InteractionContext):
+    """Render folder detail view."""
+    folder_data = ctx.get_data("folder", {})
+    return Div(
+        H2(f"📁 {folder_data.get('name', 'Unknown Folder')}",
+           cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+        P("Folder contents and statistics:",
+          cls=combine_classes(m.b(4))),
+        Div(
+            Div(
+                H3("Folder Statistics", cls=combine_classes(font_weight.semibold, m.b(2))),
+                P(Strong("Total Items: "), str(folder_data.get('item_count', 0)), cls=str(m.b(2))),
+                P(Strong("Files: "), str(folder_data.get('file_count', 0)), cls=str(m.b(2))),
+                P(Strong("Folders: "), str(folder_data.get('folder_count', 0)), cls=str(m.b(4))),
+                cls=combine_classes(card_body, m.b(4))
+            ),
+            Div(
+                H3("Contents", cls=combine_classes(font_weight.semibold, m.b(2))),
+                Ul(
+                    *[Li(item, cls=str(m.b(1))) for item in folder_data.get('items', [])],
+                    cls=combine_classes(m.l(6))
+                ),
+                cls=combine_classes(card_body)
+            ),
+            cls=str(m.t(4))
+        ),
+        cls=combine_classes(card_body)
+    )
+
+def render_overview_detail(ctx: InteractionContext):
+    """Render storage overview."""
+    overview_data = ctx.get_data("overview", {})
+    return Div(
+        H2("💾 Storage Overview",
+           cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+        P("Your file storage at a glance:",
+          cls=combine_classes(m.b(4))),
+        Div(
+            Div(
+                H3("Storage Summary", cls=combine_classes(font_weight.semibold, m.b(2))),
+                P(Strong("Total Files: "), str(overview_data.get('total_files', 0)), cls=str(m.b(2))),
+                P(Strong("Total Size: "), overview_data.get('total_size', 'N/A'), cls=str(m.b(2))),
+                P(Strong("Available Space: "), overview_data.get('available_space', 'N/A'), cls=str(m.b(4))),
+                cls=combine_classes(card_body, m.b(4))
+            ),
+            Div(
+                H3("Quick Stats", cls=combine_classes(font_weight.semibold, m.b(3))),
+                Div(
+                    Div(
+                        P("Documents", cls=combine_classes(font_weight.semibold)),
+                        P(str(overview_data.get('documents_count', 0)),
+                          cls=combine_classes(font_size._2xl, font_weight.bold)),
+                        cls=combine_classes(card_body)
+                    ),
+                    Div(
+                        P("Images", cls=combine_classes(font_weight.semibold)),
+                        P(str(overview_data.get('images_count', 0)),
+                          cls=combine_classes(font_size._2xl, font_weight.bold)),
+                        cls=combine_classes(card_body)
+                    ),
+                    Div(
+                        P("Videos", cls=combine_classes(font_weight.semibold)),
+                        P(str(overview_data.get('videos_count', 0)),
+                          cls=combine_classes(font_size._2xl, font_weight.bold)),
+                        cls=combine_classes(card_body)
+                    ),
+                    cls=combine_classes(grid_display, grid_cols._1, grid_cols._3.md, gap._4)
+                ),
+                cls=combine_classes(card_body)
+            ),
+            cls=str(m.t(4))
+        ),
+        cls=combine_classes(card_body)
+    )
+
+# Data loaders for master-detail items
+def load_report_data(request):
+    """Load annual report file metadata."""
+    return {
+        "file": {
+            "name": "annual-report.pdf",
+            "size": 3145728,  # 3 MB
+            "type": "PDF Document",
+            "modified": "2025-01-15 09:30",
+            "path": "/documents/annual-report.pdf"
+        }
+    }
+
+def load_presentation_data(request):
+    """Load presentation file metadata."""
+    return {
+        "file": {
+            "name": "presentation.pdf",
+            "size": 2097152,  # 2 MB
+            "type": "PDF Document",
+            "modified": "2025-01-20 14:30",
+            "path": "/documents/presentation.pdf"
+        }
+    }
+
+def load_vacation_photo_data(request):
+    """Load vacation photo metadata."""
+    return {
+        "file": {
+            "name": "vacation-photo.jpg",
+            "size": 524288,  # 512 KB
+            "type": "JPEG Image",
+            "modified": "2024-12-25 16:45",
+            "path": "/media/vacation-photo.jpg"
+        }
+    }
+
+def load_demo_video_data(request):
+    """Load demo video metadata."""
+    return {
+        "file": {
+            "name": "demo-video.mp4",
+            "size": 8388608,  # 8 MB
+            "type": "MP4 Video",
+            "modified": "2025-01-18 11:20",
+            "path": "/media/demo-video.mp4"
+        }
+    }
+
+def load_folder_data(request):
+    """Load folder metadata."""
+    return {
+        "folder": {
+            "name": "Work Projects",
+            "item_count": 12,
+            "file_count": 8,
+            "folder_count": 4,
+            "items": ["project-plan.docx", "budget.xlsx", "team-photo.jpg", "meeting-notes.txt"]
+        }
+    }
+
+def load_overview_data(request):
+    """Load storage overview data."""
+    return {
+        "overview": {
+            "total_files": 1247,
+            "total_size": "8.4 GB",
+            "available_space": "41.6 GB",
+            "documents_count": 342,
+            "images_count": 856,
+            "videos_count": 49
+        }
+    }
+
+# Create master-detail file browser interface
+file_browser = MasterDetail(
+    interface_id="file_browser",
+    master_title="File Browser",
+    items=[
+        DetailItem(
+            id="overview",
+            label="Storage Overview",
+            render=render_overview_detail,
+            data_loader=load_overview_data,
+            badge_text="1.2K files",
+            badge_color=badge_colors.info
+        ),
+        DetailItemGroup(
+            id="documents",
+            title="Documents",
+            items=[
+                DetailItem(
+                    id="doc-report",
+                    label="annual-report.pdf",
+                    render=render_file_detail,
+                    data_loader=load_report_data,
+                    badge_text="3 MB",
+                    badge_color=badge_colors.info
+                ),
+                DetailItem(
+                    id="doc-presentation",
+                    label="presentation.pdf",
+                    render=render_file_detail,
+                    data_loader=load_presentation_data,
+                    badge_text="2 MB",
+                    badge_color=badge_colors.info
+                ),
+                DetailItem(
+                    id="folder-work",
+                    label="Work Projects",
+                    render=render_folder_detail,
+                    data_loader=load_folder_data,
+                    badge_text="12 items",
+                    badge_color=badge_colors.success
+                )
+            ],
+            badge_text="3 items",
+            default_open=True
+        ),
+        DetailItemGroup(
+            id="media",
+            title="Media Files",
+            items=[
+                DetailItem(
+                    id="img-vacation",
+                    label="vacation-photo.jpg",
+                    render=render_file_detail,
+                    data_loader=load_vacation_photo_data,
+                    badge_text="512 KB",
+                    badge_color=badge_colors.warning
+                ),
+                DetailItem(
+                    id="video-demo",
+                    label="demo-video.mp4",
+                    render=render_file_detail,
+                    data_loader=load_demo_video_data,
+                    badge_text="8 MB",
+                    badge_color=badge_colors.error
+                )
+            ],
+            badge_text="2 items",
+            default_open=False
+        )
+    ]
+)
+
+# Generate router and register it
+browser_router = file_browser.create_router(prefix="/files")
+browser_router.to_app(app)
+
 # Define main routes at module level
 @rt
 def index(request):
@@ -379,6 +650,16 @@ def index(request):
                         Li("Automatic route generation"),
                         Li("On-demand content loading"),
                         Li("Multiple tab styles"),
+                        cls=combine_classes(m.l(6), m.b(4))
+                    )
+                ),
+                Div(
+                    H3("MasterDetail Pattern", cls=combine_classes(font_weight.bold, m.b(2))),
+                    Ul(
+                        Li("Sidebar navigation with master list"),
+                        Li("Hierarchical grouping with collapsible sections"),
+                        Li("Badge indicators for status"),
+                        Li("Active state management"),
                         cls=combine_classes(m.l(6), m.b(8))
                     )
                 ),
@@ -396,6 +677,11 @@ def index(request):
                     "Tabbed Interface Demo",
                     href=dashboard_router.index.to(),
                     cls=combine_classes(btn, btn_colors.secondary, btn_sizes.lg, m.r(2), m.b(2))
+                ),
+                A(
+                    "Master-Detail Demo",
+                    href=browser_router.index.to(),
+                    cls=combine_classes(btn, btn_colors.success, btn_sizes.lg, m.r(2), m.b(2))
                 ),
                 A(
                     "View Features",
@@ -510,6 +796,7 @@ navbar = create_navbar(
         ("Home", index),
         ("StepFlow", registration_router.start),
         ("Tabbed UI", dashboard_router.index),
+        ("Master-Detail", browser_router.index),
         ("Features", features)
     ],
     home_route=index,
@@ -530,10 +817,13 @@ print("="*70)
 print("\n📦 Library Components:")
 print("  • StepFlow - Multi-step wizard pattern")
 print("  • TabbedInterface - Tab-based navigation pattern")
+print("  • MasterDetail - Sidebar navigation pattern")
 print("  • InteractionContext - Unified context management")
 print("  • InteractionHtmlIds - Centralized ID constants")
 print("  • Step - Declarative step definition")
 print("  • Tab - Declarative tab definition")
+print("  • DetailItem - Declarative detail item definition")
+print("  • DetailItemGroup - Declarative detail group definition")
 print("="*70 + "\n")
 
 
@@ -555,6 +845,7 @@ if __name__ == "__main__":
     print(f"  http://{display_host}:{port}/                  - Homepage")
     print(f"  http://{display_host}:{port}/register/start    - StepFlow demo (Registration)")
     print(f"  http://{display_host}:{port}/dashboard/        - TabbedInterface demo (Dashboard)")
+    print(f"  http://{display_host}:{port}/files/            - MasterDetail demo (File Browser)")
     print(f"  http://{display_host}:{port}/features          - Feature list")
     print("\n" + "="*70 + "\n")
 
