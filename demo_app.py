@@ -39,11 +39,15 @@ from cjm_fasthtml_app_core.components.navbar import create_navbar
 
 # Import utilities for styling
 from cjm_fasthtml_tailwind.utilities.spacing import p, m
-from cjm_fasthtml_tailwind.utilities.sizing import container, max_w
+from cjm_fasthtml_tailwind.utilities.sizing import container, max_w, w
 from cjm_fasthtml_tailwind.utilities.typography import font_size, font_weight, text_align
+from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import grid_display, grid_cols, gap
 from cjm_fasthtml_tailwind.core.base import combine_classes
 from cjm_fasthtml_daisyui.components.actions.button import btn, btn_colors, btn_sizes
 from cjm_fasthtml_daisyui.components.data_display.card import card, card_body, card_title
+from cjm_fasthtml_daisyui.components.data_input.text_input import text_input
+from cjm_fasthtml_daisyui.components.data_input.select import select
+from cjm_fasthtml_daisyui.components.navigation.link import link, link_colors
 
 print("✓ All library components imported successfully")
 
@@ -70,7 +74,7 @@ def render_name_step(ctx: InteractionContext):
             value=current_name,
             placeholder="John Doe",
             required=True,
-            cls="input input-bordered w-full"
+            cls=combine_classes(text_input, 'input-bordered', w.full)
         ),
         cls=combine_classes(card_body)
     )
@@ -89,7 +93,7 @@ def render_email_step(ctx: InteractionContext):
             value=current_email,
             placeholder="john@example.com",
             required=True,
-            cls="input input-bordered w-full"
+            cls=combine_classes(text_input, 'input-bordered', w.full)
         ),
         cls=combine_classes(card_body)
     )
@@ -106,7 +110,7 @@ def render_preferences_step(ctx: InteractionContext):
             Option("Weekly digest", value="weekly", selected=(current_notifications == "weekly")),
             Option("Monthly summary", value="monthly", selected=(current_notifications == "monthly")),
             name="notifications",
-            cls="select select-bordered w-full"
+            cls=combine_classes(select, 'select-bordered', w.full)
         ),
         cls=combine_classes(card_body)
     )
@@ -219,7 +223,7 @@ def render_overview_tab(ctx: InteractionContext):
                 P(str(stats.get("active", 0)), cls=combine_classes(font_size._3xl, font_weight.bold)),
                 cls=combine_classes(card_body)
             ),
-            cls="grid grid-cols-1 md:grid-cols-2 gap-4"
+            cls=combine_classes(grid_display, grid_cols._1, grid_cols._2.md, gap._4)
         ),
         cls=combine_classes(card_body)
     )
@@ -236,7 +240,7 @@ def render_settings_tab(ctx: InteractionContext):
                 Option("Light", value="light"),
                 Option("Dark", value="dark"),
                 Option("Cupcake", value="cupcake"),
-                cls="select select-bordered w-full max-w-xs"
+                cls=combine_classes(select, 'select-bordered', w.full, max_w.xs)
             ),
             cls=str(m.b(4))
         ),
@@ -246,7 +250,7 @@ def render_settings_tab(ctx: InteractionContext):
                 Option("English", value="en"),
                 Option("Spanish", value="es"),
                 Option("French", value="fr"),
-                cls="select select-bordered w-full max-w-xs"
+                cls=combine_classes(select, 'select-bordered', w.full, max_w.xs)
             ),
             cls=str(m.b(4))
         ),
@@ -262,10 +266,10 @@ def render_help_tab(ctx: InteractionContext):
         Div(
             H3("Quick Links", cls=combine_classes(font_weight.semibold, m.b(3))),
             Ul(
-                Li(A("Getting Started Guide", href="#", cls="link link-primary")),
-                Li(A("API Reference", href="#", cls="link link-primary")),
-                Li(A("Common Issues", href="#", cls="link link-primary")),
-                Li(A("Contact Support", href="#", cls="link link-primary")),
+                Li(A("Getting Started Guide", href="#", cls=combine_classes(link, link_colors.primary))),
+                Li(A("API Reference", href="#", cls=combine_classes(link, link_colors.primary))),
+                Li(A("Common Issues", href="#", cls=combine_classes(link, link_colors.primary))),
+                Li(A("Contact Support", href="#", cls=combine_classes(link, link_colors.primary))),
                 cls=combine_classes(m.l(6))
             )
         ),
