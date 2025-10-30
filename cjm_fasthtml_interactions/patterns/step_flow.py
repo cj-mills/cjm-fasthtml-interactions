@@ -103,8 +103,12 @@ def set_current_step(self:StepFlow,
                      step_id: str  # Step ID to set as current
                     ) -> None:
     """Set current step in session."""
+    print(f"DEBUG StepFlow.set_current_step: setting current_step to '{step_id}'")
     workflow = WorkflowSession(sess, self.flow_id)
     workflow.set("current_step", step_id)
+    # Immediately verify it was set
+    check = workflow.get("current_step")
+    print(f"DEBUG StepFlow.set_current_step: verified current_step is now '{check}'")
 
 # %% ../../nbs/patterns/step_flow.ipynb 14
 @patch
