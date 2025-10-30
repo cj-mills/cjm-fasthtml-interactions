@@ -402,7 +402,12 @@ def create_router(self:StepFlow,
             # Complete the workflow
             if self.on_complete:
                 state = self.get_workflow_state(sess)
-                return self.on_complete(state, request)
+                # Check if completion handler is async
+                import inspect
+                if inspect.iscoroutinefunction(self.on_complete):
+                    return await self.on_complete(state, request)
+                else:
+                    return self.on_complete(state, request)
             else:
                 # No completion handler, just show success
                 return Div("Workflow completed!", id=self.container_id)
