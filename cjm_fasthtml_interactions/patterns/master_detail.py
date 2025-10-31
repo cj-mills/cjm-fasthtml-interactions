@@ -19,7 +19,7 @@ from cjm_fasthtml_daisyui.components.data_display.badge import badge, badge_colo
 from cjm_fasthtml_daisyui.utilities.semantic_colors import bg_dui
 from cjm_fasthtml_daisyui.utilities.border_radius import border_radius
 from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import (
-    flex_display, flex_direction, shrink, items, justify, gap
+    flex_display, flex_direction, flex, shrink, items, justify, gap
 )
 from cjm_fasthtml_tailwind.utilities.spacing import p, m
 from cjm_fasthtml_tailwind.utilities.sizing import w, h, min_h
@@ -297,7 +297,7 @@ def render_master(self:MasterDetail,
             bg_dui.base_200,
             self.master_width,
             p(4),
-            min_h.full,
+            h.auto,
             border_radius.box
         )
     )
@@ -308,7 +308,8 @@ def render_master(self:MasterDetail,
             cls=combine_classes(
                 shrink(0),
                 position.sticky,
-                overflow.y.auto
+                overflow.y.auto,
+                h.full
             )
         )
     else:
@@ -367,26 +368,33 @@ def render_full_interface(self:MasterDetail,
             hx_swap="innerHTML" if active_item.load_on_demand else None,
             id=self.detail_id,
             cls=combine_classes(
+                flex(1),
+                min_h(0),
                 flex_display,
                 flex_direction.col,
                 overflow.y.auto,
-                p(6),
-                w.full
+                p(6)
             )
         ) if active_item.load_on_demand else Div(
             self.render_detail(active_item, self.create_context(request, sess, active_item)),
             id=self.detail_id,
             cls=combine_classes(
+                flex(1),
+                min_h(0),
                 flex_display,
                 flex_direction.col,
                 overflow.y.auto,
-                p(6),
-                w.full
+                p(6)
             )
         ),
         
         id=self.container_id,
-        cls=combine_classes(flex_display, gap(4), h.screen, overflow.hidden)
+        cls=combine_classes(
+            flex_display, 
+            gap(4), 
+            h.full, 
+            overflow.hidden
+        )
     )
 
 # %% ../../nbs/patterns/master_detail.ipynb 19
