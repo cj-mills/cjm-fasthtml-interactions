@@ -16,7 +16,7 @@ pip install cjm_fasthtml_interactions
     │   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data
     │   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components
     └── patterns/ (3)
-        ├── master_detail.ipynb     # Sidebar navigation pattern with master list and detail content area
+        ├── master_detail.ipynb     # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.
         ├── step_flow.ipynb         # Multi-step wizard pattern with state management, navigation, and route generation
         └── tabbed_interface.ipynb  # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
 
@@ -170,7 +170,10 @@ class InteractionHtmlIds(AppHtmlIds):
 
 ### Master-Detail (`master_detail.ipynb`)
 
-> Sidebar navigation pattern with master list and detail content area
+> Responsive sidebar navigation pattern with master list and detail
+> content area. On mobile devices, the sidebar is hidden in a drawer
+> that can be toggled. On desktop (lg+ screens), the sidebar is always
+> visible.
 
 #### Import
 
@@ -214,6 +217,15 @@ def render_master(self:MasterDetail,
 
 ``` python
 @patch
+def _render_menu_items(self:MasterDetail,
+                       active_item_id: str,  # Currently active item ID
+                       item_route_func: Callable[[str], str]  # Function to generate item route
+                      ) -> List[FT]:  # List of menu item elements
+    "Render menu items and groups (internal helper)."
+```
+
+``` python
+@patch
 def render_master_oob(self:MasterDetail,
                       active_item_id: str,  # Currently active item ID
                       item_route_func: Callable[[str], str]  # Function to generate item route
@@ -238,7 +250,7 @@ def render_full_interface(self:MasterDetail,
                          request: Any,  # FastHTML request object
                          sess: Any  # FastHTML session object
                         ) -> FT:  # Complete master-detail interface
-    "Render complete master-detail interface with master list and detail area."
+    "Render complete responsive master-detail interface with drawer for mobile."
 ```
 
 ``` python
