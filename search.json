@@ -1,0 +1,403 @@
+[
+  {
+    "objectID": "core/html_ids.html",
+    "href": "core/html_ids.html",
+    "title": "HTML IDs",
+    "section": "",
+    "text": "This class provides centralized HTML ID constants for interaction pattern components. It extends AppHtmlIds from cjm-fasthtml-app-core to inherit base application IDs.\n\nsource\n\n\n\n InteractionHtmlIds ()\n\n*HTML ID constants for interaction pattern components.\nInherits from AppHtmlIds: - MAIN_CONTENT = “main-content” - ALERT_CONTAINER = “alert-container” - as_selector(id_str) - static method*",
+    "crumbs": [
+      "core",
+      "HTML IDs"
+    ]
+  },
+  {
+    "objectID": "core/html_ids.html#interactionhtmlids-class",
+    "href": "core/html_ids.html#interactionhtmlids-class",
+    "title": "HTML IDs",
+    "section": "",
+    "text": "This class provides centralized HTML ID constants for interaction pattern components. It extends AppHtmlIds from cjm-fasthtml-app-core to inherit base application IDs.\n\nsource\n\n\n\n InteractionHtmlIds ()\n\n*HTML ID constants for interaction pattern components.\nInherits from AppHtmlIds: - MAIN_CONTENT = “main-content” - ALERT_CONTAINER = “alert-container” - as_selector(id_str) - static method*",
+    "crumbs": [
+      "core",
+      "HTML IDs"
+    ]
+  },
+  {
+    "objectID": "core/html_ids.html#usage-examples",
+    "href": "core/html_ids.html#usage-examples",
+    "title": "HTML IDs",
+    "section": "Usage Examples",
+    "text": "Usage Examples\n\n# Access base IDs\ncontainer_id = InteractionHtmlIds.STEP_FLOW_CONTAINER\nprint(f\"Container ID: {container_id}\")\nprint(f\"Container selector: {InteractionHtmlIds.as_selector(container_id)}\")\n\nContainer ID: step-flow-container\nContainer selector: #step-flow-container\n\n\n\n# Generate step-specific IDs\nstep_id = \"select-plugin\"\ncontent_id = InteractionHtmlIds.step_content(step_id)\nindicator_id = InteractionHtmlIds.step_indicator(step_id)\n\nprint(f\"Step content ID: {content_id}\")\nprint(f\"Step indicator ID: {indicator_id}\")\n\n# Generate tab-specific IDs\ntab_id = \"settings\"\ntab_radio_id = InteractionHtmlIds.tab_radio(tab_id)\ntab_content_id = InteractionHtmlIds.tab_content(tab_id)\n\nprint(f\"Tab radio ID: {tab_radio_id}\")\nprint(f\"Tab content ID: {tab_content_id}\")\n\n# Generate master-detail IDs\nitem_id = \"file-123\"\ngroup_id = \"media-files\"\nmaster_item_id = InteractionHtmlIds.master_item(item_id)\nmaster_group_id = InteractionHtmlIds.master_group(group_id)\ndetail_id = InteractionHtmlIds.detail_content(item_id)\n\nprint(f\"Master item ID: {master_item_id}\")\nprint(f\"Master group ID: {master_group_id}\")\nprint(f\"Detail content ID: {detail_id}\")\n\nStep content ID: step-select-plugin-content\nStep indicator ID: step-select-plugin-indicator\nTab radio ID: tab-settings-radio\nTab content ID: tab-settings-content\nMaster item ID: master-item-file-123\nMaster group ID: master-group-media-files\nDetail content ID: detail-file-123-content",
+    "crumbs": [
+      "core",
+      "HTML IDs"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "cjm-fasthtml-interactions",
+    "section": "",
+    "text": "pip install cjm_fasthtml_interactions",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "cjm-fasthtml-interactions",
+    "section": "",
+    "text": "pip install cjm_fasthtml_interactions",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#project-structure",
+    "href": "index.html#project-structure",
+    "title": "cjm-fasthtml-interactions",
+    "section": "Project Structure",
+    "text": "Project Structure\nnbs/\n├── core/ (2)\n│   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data\n│   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components\n└── patterns/ (3)\n    ├── master_detail.ipynb     # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.\n    ├── step_flow.ipynb         # Multi-step wizard pattern with state management, navigation, and route generation\n    └── tabbed_interface.ipynb  # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling\nTotal: 5 notebooks across 2 directories",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#module-dependencies",
+    "href": "index.html#module-dependencies",
+    "title": "cjm-fasthtml-interactions",
+    "section": "Module Dependencies",
+    "text": "Module Dependencies\ngraph LR\n    core_context[core.context&lt;br/&gt;Interaction Context]\n    core_html_ids[core.html_ids&lt;br/&gt;HTML IDs]\n    patterns_master_detail[patterns.master_detail&lt;br/&gt;Master-Detail]\n    patterns_step_flow[patterns.step_flow&lt;br/&gt;Step Flow]\n    patterns_tabbed_interface[patterns.tabbed_interface&lt;br/&gt;Tabbed Interface]\n\n    patterns_master_detail --&gt; core_context\n    patterns_master_detail --&gt; core_html_ids\n    patterns_step_flow --&gt; core_context\n    patterns_step_flow --&gt; core_html_ids\n    patterns_tabbed_interface --&gt; core_context\n    patterns_tabbed_interface --&gt; core_html_ids\n6 cross-module dependencies detected",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#cli-reference",
+    "href": "index.html#cli-reference",
+    "title": "cjm-fasthtml-interactions",
+    "section": "CLI Reference",
+    "text": "CLI Reference\nNo CLI commands found in this project.",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#module-overview",
+    "href": "index.html#module-overview",
+    "title": "cjm-fasthtml-interactions",
+    "section": "Module Overview",
+    "text": "Module Overview\nDetailed documentation for each module in the project:\n\nInteraction Context (context.ipynb)\n\nContext management for interaction patterns providing access to state, request, and custom data\n\n\nImport\nfrom cjm_fasthtml_interactions.core.context import (\n    InteractionContext\n)\n\n\nClasses\n@dataclass\nclass InteractionContext:\n    \"Context for interaction patterns providing access to state, request, and custom data.\"\n    \n    state: Dict[str, Any] = field(...)  # Workflow state\n    request: Optional[Any]  # FastHTML request object\n    session: Optional[Any]  # FastHTML session object\n    data: Dict[str, Any] = field(...)  # Custom data from data loaders\n    metadata: Dict[str, Any] = field(...)  # Additional metadata\n    \n    def get(self,\n                key: str,  # Key to retrieve from state\n                default: Any = None  # Default value if key not found\n               ) -&gt; Any:  # Value from state or default\n        \"Get value from workflow state.\"\n    \n    def get_data(self,\n                     key: str,  # Key to retrieve from data\n                     default: Any = None  # Default value if key not found\n                    ) -&gt; Any:  # Value from data or default\n        \"Get value from custom data.\"\n    \n    def has(self,\n                key: str  # Key to check in state\n               ) -&gt; bool:  # True if key exists in state\n        \"Check if key exists in workflow state.\"\n    \n    def set(self,\n                key: str,  # Key to set in state\n                value: Any  # Value to store\n               ) -&gt; None\n        \"Set value in workflow state.\"\n    \n    def get_all_state(self) -&gt; Dict[str, Any]:  # All workflow state\n            \"\"\"Get all workflow state as dictionary.\"\"\"\n            return self.state.copy()\n        \n        def update_state(self, \n                         updates: Dict[str, Any]  # State updates to apply\n                        ) -&gt; None\n        \"Get all workflow state as dictionary.\"\n    \n    def update_state(self,\n                         updates: Dict[str, Any]  # State updates to apply\n                        ) -&gt; None\n        \"Update multiple state values at once.\"\n\n\n\nHTML IDs (html_ids.ipynb)\n\nCentralized HTML ID constants for interaction pattern components\n\n\nImport\nfrom cjm_fasthtml_interactions.core.html_ids import (\n    InteractionHtmlIds\n)\n\n\nClasses\nclass InteractionHtmlIds(AppHtmlIds):\n    \"\"\"\n    HTML ID constants for interaction pattern components.\n    \n    Inherits from AppHtmlIds:\n        - MAIN_CONTENT = \"main-content\"\n        - ALERT_CONTAINER = \"alert-container\"\n        - as_selector(id_str) - static method\n    \"\"\"\n    \n    def step_content(step_id: str  # Step identifier\n                        ) -&gt; str:  # HTML ID for step content\n        \"Generate HTML ID for a specific step's content.\"\n    \n    def step_indicator(step_id: str  # Step identifier\n                          ) -&gt; str:  # HTML ID for step indicator\n        \"Generate HTML ID for a specific step's progress indicator.\"\n    \n    def tab_radio(tab_id: str  # Tab identifier\n                     ) -&gt; str:  # HTML ID for tab radio input\n        \"Generate HTML ID for a specific tab's radio input.\"\n    \n    def tab_content(tab_id: str  # Tab identifier\n                       ) -&gt; str:  # HTML ID for tab content\n        \"Generate HTML ID for a specific tab's content.\"\n    \n    def master_item(item_id: str  # Item identifier\n                       ) -&gt; str:  # HTML ID for master list item\n        \"Generate HTML ID for a master list item.\"\n    \n    def master_group(group_id: str  # Group identifier\n                        ) -&gt; str:  # HTML ID for master list group\n        \"Generate HTML ID for a master list group.\"\n    \n    def detail_content(item_id: str  # Item identifier\n                          ) -&gt; str:  # HTML ID for detail content\n        \"Generate HTML ID for detail content area.\"\n\n\n\nMaster-Detail (master_detail.ipynb)\n\nResponsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.master_detail import (\n    DetailItem,\n    DetailItemGroup,\n    MasterDetail\n)\n\n\nFunctions\n@patch\ndef get_item(self:MasterDetail, \n             item_id: str  # Item identifier\n            ) -&gt; Optional[DetailItem]:  # DetailItem or None\n    \"Get item by ID.\"\n@patch\ndef create_context(self:MasterDetail, \n                   request: Any,  # FastHTML request object\n                   sess: Any,  # FastHTML session object\n                   item: DetailItem  # Current item\n                  ) -&gt; InteractionContext:  # Interaction context for rendering\n    \"Create interaction context for an item.\"\n@patch\ndef render_master(self:MasterDetail,\n                  active_item_id: str,  # Currently active item ID\n                  item_route_func: Callable[[str], str],  # Function to generate item route\n                  include_wrapper: bool = True  # Whether to include outer wrapper div\n                 ) -&gt; FT:  # Master list element\n    \"Render master list (sidebar) with items and groups.\"\n@patch\ndef _render_menu_items(self:MasterDetail,\n                       active_item_id: str,  # Currently active item ID\n                       item_route_func: Callable[[str], str]  # Function to generate item route\n                      ) -&gt; List[FT]:  # List of menu item elements\n    \"Render menu items and groups (internal helper).\"\n@patch\ndef render_master_oob(self:MasterDetail,\n                      active_item_id: str,  # Currently active item ID\n                      item_route_func: Callable[[str], str]  # Function to generate item route\n                     ) -&gt; FT:  # Master list with OOB swap attribute\n    \"Render master list with OOB swap attribute for coordinated updates.\"\n@patch\ndef render_detail(self:MasterDetail,\n                  item: DetailItem,  # Item to render\n                  ctx: InteractionContext  # Interaction context\n                 ) -&gt; FT:  # Detail content\n    \"Render detail content for an item.\"\n@patch\ndef render_full_interface(self:MasterDetail,\n                         active_item_id: str,  # Currently active item ID\n                         item_route_func: Callable[[str], str],  # Function to generate item route\n                         request: Any,  # FastHTML request object\n                         sess: Any  # FastHTML session object\n                        ) -&gt; FT:  # Complete master-detail interface\n    \"Render complete responsive master-detail interface with drawer for mobile.\"\n@patch\ndef create_router(self:MasterDetail,\n                  prefix: str = \"\"  # URL prefix for routes (e.g., \"/media\")\n                 ) -&gt; APIRouter:  # APIRouter with generated routes\n    \"Create FastHTML router with generated routes for this master-detail interface.\"\n\n\nClasses\n@dataclass\nclass DetailItem:\n    \"Definition of a single item in the master-detail pattern.\"\n    \n    id: str  # Unique identifier\n    label: str  # Display text in master list\n    render: Callable[[InteractionContext], Any]  # Function to render detail view\n    badge_text: Optional[str]  # Optional badge text (e.g., \"configured\", \"3 items\")\n    badge_color: Optional[str]  # Badge color class (e.g., badge_colors.success)\n    icon: Optional[Any]  # Optional icon element\n    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function\n    load_on_demand: bool = True  # Whether to load content only when item is selected\n@dataclass\nclass DetailItemGroup:\n    \"Group of related detail items in a collapsible section.\"\n    \n    id: str  # Group identifier\n    title: str  # Group display title\n    items: List[DetailItem]  # Items in this group\n    default_open: bool = True  # Whether group is expanded by default\n    icon: Optional[Any]  # Optional group icon\n    badge_text: Optional[str]  # Optional badge for the group\n    badge_color: Optional[str]  # Badge color for the group\nclass MasterDetail:\n    def __init__(\n        self,\n        interface_id: str,  # Unique identifier for this interface\n        items: List[Union[DetailItem, DetailItemGroup]],  # List of items/groups\n        default_item: Optional[str] = None,  # Default item ID (defaults to first item)\n        container_id: str = InteractionHtmlIds.MASTER_DETAIL_CONTAINER,  # HTML ID for container\n        master_id: str = InteractionHtmlIds.MASTER_DETAIL_MASTER,  # HTML ID for master list\n        detail_id: str = InteractionHtmlIds.MASTER_DETAIL_DETAIL,  # HTML ID for detail area\n        master_width: str = \"w-64\",  # Tailwind width class for master list\n        master_title: Optional[str] = None,  # Optional title for master list\n        show_on_htmx_only: bool = False  # Whether to show full interface for non-HTMX requests\n    )\n    \"Manage master-detail interfaces with sidebar navigation and detail content area.\"\n    \n    def __init__(\n            self,\n            interface_id: str,  # Unique identifier for this interface\n            items: List[Union[DetailItem, DetailItemGroup]],  # List of items/groups\n            default_item: Optional[str] = None,  # Default item ID (defaults to first item)\n            container_id: str = InteractionHtmlIds.MASTER_DETAIL_CONTAINER,  # HTML ID for container\n            master_id: str = InteractionHtmlIds.MASTER_DETAIL_MASTER,  # HTML ID for master list\n            detail_id: str = InteractionHtmlIds.MASTER_DETAIL_DETAIL,  # HTML ID for detail area\n            master_width: str = \"w-64\",  # Tailwind width class for master list\n            master_title: Optional[str] = None,  # Optional title for master list\n            show_on_htmx_only: bool = False  # Whether to show full interface for non-HTMX requests\n        )\n        \"Initialize master-detail manager.\"\n\n\n\nStep Flow (step_flow.ipynb)\n\nMulti-step wizard pattern with state management, navigation, and route generation\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.step_flow import (\n    Step,\n    StepFlow\n)\n\n\nFunctions\n@patch\ndef get_step(self:StepFlow, \n             step_id: str  # Step identifier\n            ) -&gt; Optional[Step]:  # Step object or None\n    \"Get step by ID.\"\n@patch\ndef get_step_index(self:StepFlow, \n                   step_id: str  # Step identifier\n                  ) -&gt; Optional[int]:  # Step index or None\n    \"Get step index by ID.\"\n@patch\ndef get_current_step_id(self:StepFlow, \n                        sess: Any  # FastHTML session object\n                       ) -&gt; str:  # Current step ID\n    \"Get current step ID from session.\"\n@patch\ndef set_current_step(self:StepFlow, \n                     sess: Any,  # FastHTML session object\n                     step_id: str  # Step ID to set as current\n                    ) -&gt; None\n    \"Set current step in session.\"\n@patch\ndef get_next_step_id(self:StepFlow, \n                     current_step_id: str  # Current step ID\n                    ) -&gt; Optional[str]:  # Next step ID or None if last step\n    \"Get the ID of the next step.\"\n@patch\ndef get_previous_step_id(self:StepFlow, \n                         current_step_id: str  # Current step ID\n                        ) -&gt; Optional[str]:  # Previous step ID or None if first step\n    \"Get the ID of the previous step.\"\n@patch\ndef is_last_step(self:StepFlow, \n                 step_id: str  # Step ID to check\n                ) -&gt; bool:  # True if this is the last step\n    \"Check if step is the last step.\"\n@patch\ndef is_first_step(self:StepFlow, \n                  step_id: str  # Step ID to check\n                 ) -&gt; bool:  # True if this is the first step\n    \"Check if step is the first step.\"\n@patch\ndef get_workflow_state(self:StepFlow, \n                       sess: Any  # FastHTML session object\n                      ) -&gt; Dict[str, Any]:  # All workflow state\n    \"Get all workflow state from session.\"\n@patch\ndef update_workflow_state(self:StepFlow, \n                          sess: Any,  # FastHTML session object\n                          updates: Dict[str, Any]  # State updates\n                         ) -&gt; None\n    \"Update workflow state with new values.\"\n@patch\ndef clear_workflow(self:StepFlow, \n                   sess: Any  # FastHTML session object\n                  ) -&gt; None\n    \"Clear all workflow state.\"\n@patch\ndef create_context(self:StepFlow, \n                   request: Any,  # FastHTML request object\n                   sess: Any,  # FastHTML session object\n                   step: Step  # Current step\n                  ) -&gt; InteractionContext:  # Interaction context for rendering\n    \"Create interaction context for a step.\"\n@patch\ndef render_progress(self:StepFlow, \n                    sess: Any  # FastHTML session object\n                   ) -&gt; FT:  # Progress indicator or empty Div\n    \"Render progress indicator showing all steps.\"\n@patch\ndef render_step_content(self:StepFlow,\n                        step_obj: Step,  # Step to render\n                        ctx: InteractionContext,  # Interaction context\n                        next_route: str,  # Route for next/submit\n                        back_route: Optional[str] = None,  # Route for back\n                        cancel_route: Optional[str] = None  # Route for cancel\n                       ) -&gt; FT:  # Complete step content with optional progress and navigation\n    \"Render step content with optional progress indicator and navigation.\"\n@patch\ndef render_navigation(self:StepFlow,\n                      step_id: str,  # Current step ID\n                      next_route: str,  # Route for next/submit action\n                      back_route: Optional[str] = None,  # Route for back action\n                      cancel_route: Optional[str] = None,  # Route for cancel action\n                     ) -&gt; FT:  # Navigation button container\n    \"Render navigation buttons for a step.\"\n@patch\ndef create_router(self:StepFlow,\n                  prefix: str = \"\"  # URL prefix for routes (e.g., \"/transcription\")\n                 ) -&gt; APIRouter:  # APIRouter with generated routes\n    \"Create FastHTML router with generated routes for this flow.\"\n\n\nClasses\n@dataclass\nclass Step:\n    \"Definition of a single step in a multi-step workflow.\"\n    \n    id: str  # Unique step identifier (used in URLs)\n    title: str  # Display title for the step\n    render: Callable[[InteractionContext], Any]  # Function to render step UI\n    validate: Optional[Callable[[Dict[str, Any]], bool]]  # Validation function\n    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function\n    data_keys: List[str] = field(...)  # State keys managed by this step\n    can_skip: bool = False  # Whether this step can be skipped\n    show_back: bool = True  # Whether to show back button\n    show_cancel: bool = True  # Whether to show cancel button\n    next_button_text: str = 'Continue'  # Text for next/submit button\n    \n    def is_valid(self, state: Dict[str, Any]  # Current workflow state\n                    ) -&gt; bool:  # True if step is complete and valid\n        \"Check if step has valid data in state.\"\nclass StepFlow:\n    def __init__(\n        self,\n        flow_id: str,  # Unique identifier for this workflow\n        steps: List[Step],  # List of step definitions\n        container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container\n        on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler\n        show_progress: bool = False,  # Whether to show progress indicator\n        wrap_in_form: bool = True  # Whether to wrap content + navigation in a form\n    )\n    \"Manage multi-step workflows with automatic route generation and state management.\"\n    \n    def __init__(\n            self,\n            flow_id: str,  # Unique identifier for this workflow\n            steps: List[Step],  # List of step definitions\n            container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container\n            on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler\n            show_progress: bool = False,  # Whether to show progress indicator\n            wrap_in_form: bool = True  # Whether to wrap content + navigation in a form\n        )\n        \"Initialize step flow manager.\"\n\n\n\nTabbed Interface (tabbed_interface.ipynb)\n\nMulti-tab interface pattern with automatic routing, state management, and DaisyUI styling\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.tabbed_interface import (\n    Tab,\n    TabbedInterface\n)\n\n\nFunctions\n@patch\ndef get_tab(self:TabbedInterface, \n            tab_id: str  # Tab identifier\n           ) -&gt; Optional[Tab]:  # Tab object or None\n    \"Get tab by ID.\"\n@patch\ndef get_tab_index(self:TabbedInterface, \n                  tab_id: str  # Tab identifier\n                 ) -&gt; Optional[int]:  # Tab index or None\n    \"Get tab index by ID.\"\n@patch\ndef create_context(self:TabbedInterface, \n                   request: Any,  # FastHTML request object\n                   sess: Any,  # FastHTML session object\n                   tab: Tab  # Current tab\n                  ) -&gt; InteractionContext:  # Interaction context for rendering\n    \"Create interaction context for a tab.\"\n@patch\ndef render_tabs(self:TabbedInterface,\n                current_tab_id: str,  # Currently active tab ID\n                tab_route_func: Callable[[str], str]  # Function to generate tab route\n               ) -&gt; FT:  # Tab navigation element\n    \"Render tab navigation using DaisyUI radio-based tabs.\"\n@patch\ndef render_tab_content(self:TabbedInterface,\n                       tab_obj: Tab,  # Tab to render\n                       ctx: InteractionContext  # Interaction context\n                      ) -&gt; FT:  # Tab content\n    \"Render tab content.\"\n@patch\ndef render_full_interface(self:TabbedInterface,\n                         current_tab_id: str,  # Currently active tab ID\n                         tab_route_func: Callable[[str], str],  # Function to generate tab route\n                         request: Any,  # FastHTML request object\n                         sess: Any  # FastHTML session object\n                        ) -&gt; FT:  # Complete tabbed interface\n    \"Render complete tabbed interface with tabs and content area.\"\n@patch\ndef create_router(self:TabbedInterface,\n                  prefix: str = \"\"  # URL prefix for routes (e.g., \"/dashboard\")\n                 ) -&gt; APIRouter:  # APIRouter with generated routes\n    \"Create FastHTML router with generated routes for this tabbed interface.\"\n\n\nClasses\n@dataclass\nclass Tab:\n    \"Definition of a single tab in a tabbed interface.\"\n    \n    id: str  # Unique tab identifier (used in URLs)\n    label: str  # Display label for the tab\n    render: Callable[[InteractionContext], Any]  # Function to render tab content\n    title: Optional[str]  # Optional title/tooltip for the tab\n    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function\n    load_on_demand: bool = True  # Whether to load content only when tab is selected\nclass TabbedInterface:\n    def __init__(\n        self,\n        interface_id: str,  # Unique identifier for this interface\n        tabs_list: List[Tab],  # List of tab definitions\n        default_tab: Optional[str] = None,  # Default tab ID (defaults to first tab)\n        container_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTAINER,  # HTML ID for container\n        tabs_id: str = InteractionHtmlIds.TABBED_INTERFACE_TABS,  # HTML ID for tabs element\n        content_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTENT,  # HTML ID for content area\n        tab_style: Optional[str] = None,  # DaisyUI tab style (lift, bordered, boxed)\n        show_on_htmx_only: bool = False  # Whether to show full page layout for non-HTMX requests\n    )\n    \"Manage multi-tab interfaces with automatic route generation and HTMX content loading.\"\n    \n    def __init__(\n            self,\n            interface_id: str,  # Unique identifier for this interface\n            tabs_list: List[Tab],  # List of tab definitions\n            default_tab: Optional[str] = None,  # Default tab ID (defaults to first tab)\n            container_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTAINER,  # HTML ID for container\n            tabs_id: str = InteractionHtmlIds.TABBED_INTERFACE_TABS,  # HTML ID for tabs element\n            content_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTENT,  # HTML ID for content area\n            tab_style: Optional[str] = None,  # DaisyUI tab style (lift, bordered, boxed)\n            show_on_htmx_only: bool = False  # Whether to show full page layout for non-HTMX requests\n        )\n        \"Initialize tabbed interface manager.\"",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html",
+    "href": "patterns/master_detail.html",
+    "title": "Master-Detail",
+    "section": "",
+    "text": "The DetailItem class defines a single item in the master list. Each item has: - Unique identifier - Display label for the master list - Render function that generates the detail view UI - Optional badge text and color - Optional icon - Optional data loader for fetching required data\n\nsource\n\n\n\n DetailItem (id:str, label:str, render:Callable[[cjm_fasthtml_interactions\n             .core.context.InteractionContext],Any],\n             badge_text:Optional[str]=None,\n             badge_color:Optional[str]=None, icon:Optional[Any]=None,\n             data_loader:Optional[Callable[[Any],Dict[str,Any]]]=None,\n             load_on_demand:bool=True)\n\nDefinition of a single item in the master-detail pattern.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#detail-item-definition",
+    "href": "patterns/master_detail.html#detail-item-definition",
+    "title": "Master-Detail",
+    "section": "",
+    "text": "The DetailItem class defines a single item in the master list. Each item has: - Unique identifier - Display label for the master list - Render function that generates the detail view UI - Optional badge text and color - Optional icon - Optional data loader for fetching required data\n\nsource\n\n\n\n DetailItem (id:str, label:str, render:Callable[[cjm_fasthtml_interactions\n             .core.context.InteractionContext],Any],\n             badge_text:Optional[str]=None,\n             badge_color:Optional[str]=None, icon:Optional[Any]=None,\n             data_loader:Optional[Callable[[Any],Dict[str,Any]]]=None,\n             load_on_demand:bool=True)\n\nDefinition of a single item in the master-detail pattern.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#detail-item-group-definition",
+    "href": "patterns/master_detail.html#detail-item-group-definition",
+    "title": "Master-Detail",
+    "section": "Detail Item Group Definition",
+    "text": "Detail Item Group Definition\nThe DetailItemGroup class groups related items in a collapsible section. Each group has: - Unique identifier - Display title - List of items in the group - Collapsible state control - Optional icon\n\nsource\n\nDetailItemGroup\n\n DetailItemGroup (id:str, title:str, items:List[__main__.DetailItem],\n                  default_open:bool=True, icon:Optional[Any]=None,\n                  badge_text:Optional[str]=None,\n                  badge_color:Optional[str]=None)\n\nGroup of related detail items in a collapsible section.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#masterdetail-class",
+    "href": "patterns/master_detail.html#masterdetail-class",
+    "title": "Master-Detail",
+    "section": "MasterDetail Class",
+    "text": "MasterDetail Class\nThe MasterDetail class manages a responsive master-detail interface. It: - Renders master list (sidebar) with items and optional groups - Manages active item selection - Renders detail content for selected item - Supports badges and status indicators - Supports hierarchical grouping with collapsible sections - Responsive design: Drawer toggleable on mobile, always visible on desktop (lg+) - Mobile-friendly: Includes hamburger menu button for navigation - Generates routes automatically - Provides OOB updates for coordinated UI changes\n\nsource\n\nMasterDetail\n\n MasterDetail (interface_id:str,\n               items:List[Union[__main__.DetailItem,__main__.DetailItemGro\n               up]], default_item:Optional[str]=None,\n               container_id:str='master-detail-container',\n               master_id:str='master-detail-master',\n               detail_id:str='master-detail-detail',\n               master_width:str='w-64', master_title:Optional[str]=None,\n               show_on_htmx_only:bool=False)\n\nManage master-detail interfaces with sidebar navigation and detail content area.\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\ninterface_id\nstr\n\nUnique identifier for this interface\n\n\nitems\nList\n\nList of items/groups\n\n\ndefault_item\nOptional\nNone\nDefault item ID (defaults to first item)\n\n\ncontainer_id\nstr\nmaster-detail-container\nHTML ID for container\n\n\nmaster_id\nstr\nmaster-detail-master\nHTML ID for master list\n\n\ndetail_id\nstr\nmaster-detail-detail\nHTML ID for detail area\n\n\nmaster_width\nstr\nw-64\nTailwind width class for master list\n\n\nmaster_title\nOptional\nNone\nOptional title for master list\n\n\nshow_on_htmx_only\nbool\nFalse\nWhether to show full interface for non-HTMX requests",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#item-management-methods",
+    "href": "patterns/master_detail.html#item-management-methods",
+    "title": "Master-Detail",
+    "section": "Item Management Methods",
+    "text": "Item Management Methods\n\nsource\n\nMasterDetail.get_item\n\n MasterDetail.get_item (item_id:str)\n\nGet item by ID.\n\n\n\n\nType\nDetails\n\n\n\n\nitem_id\nstr\nItem identifier\n\n\nReturns\nOptional\nDetailItem or None",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#context-and-rendering-methods",
+    "href": "patterns/master_detail.html#context-and-rendering-methods",
+    "title": "Master-Detail",
+    "section": "Context and Rendering Methods",
+    "text": "Context and Rendering Methods\n\nsource\n\nMasterDetail.create_context\n\n MasterDetail.create_context (request:Any, sess:Any,\n                              item:__main__.DetailItem)\n\nCreate interaction context for an item.\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\nrequest\nAny\nFastHTML request object\n\n\nsess\nAny\nFastHTML session object\n\n\nitem\nDetailItem\nCurrent item\n\n\nReturns\nInteractionContext\nInteraction context for rendering\n\n\n\n\nsource\n\n\nMasterDetail.render_master\n\n MasterDetail.render_master (active_item_id:str,\n                             item_route_func:Callable[[str],str],\n                             include_wrapper:bool=True)\n\nRender master list (sidebar) with items and groups.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nactive_item_id\nstr\n\nCurrently active item ID\n\n\nitem_route_func\nCallable\n\nFunction to generate item route\n\n\ninclude_wrapper\nbool\nTrue\nWhether to include outer wrapper div\n\n\nReturns\nFT\n\nMaster list element\n\n\n\n\nsource\n\n\nMasterDetail.render_master_oob\n\n MasterDetail.render_master_oob (active_item_id:str,\n                                 item_route_func:Callable[[str],str])\n\nRender master list with OOB swap attribute for coordinated updates.\n\n\n\n\nType\nDetails\n\n\n\n\nactive_item_id\nstr\nCurrently active item ID\n\n\nitem_route_func\nCallable\nFunction to generate item route\n\n\nReturns\nFT\nMaster list with OOB swap attribute\n\n\n\n\nsource\n\n\nMasterDetail.render_detail\n\n MasterDetail.render_detail (item:__main__.DetailItem,\n                             ctx:cjm_fasthtml_interactions.core.context.In\n                             teractionContext)\n\nRender detail content for an item.\n\n\n\n\nType\nDetails\n\n\n\n\nitem\nDetailItem\nItem to render\n\n\nctx\nInteractionContext\nInteraction context\n\n\nReturns\nFT\nDetail content\n\n\n\n\nsource\n\n\nMasterDetail.render_full_interface\n\n MasterDetail.render_full_interface (active_item_id:str,\n                                     item_route_func:Callable[[str],str],\n                                     request:Any, sess:Any)\n\nRender complete responsive master-detail interface with drawer for mobile.\n\n\n\n\nType\nDetails\n\n\n\n\nactive_item_id\nstr\nCurrently active item ID\n\n\nitem_route_func\nCallable\nFunction to generate item route\n\n\nrequest\nAny\nFastHTML request object\n\n\nsess\nAny\nFastHTML session object\n\n\nReturns\nFT\nComplete master-detail interface",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#route-generation",
+    "href": "patterns/master_detail.html#route-generation",
+    "title": "Master-Detail",
+    "section": "Route Generation",
+    "text": "Route Generation\n\nsource\n\nMasterDetail.create_router\n\n MasterDetail.create_router (prefix:str='')\n\nCreate FastHTML router with generated routes for this master-detail interface.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nprefix\nstr\n\nURL prefix for routes (e.g., “/media”)\n\n\nReturns\nAPIRouter\n\nAPIRouter with generated routes",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#usage-example",
+    "href": "patterns/master_detail.html#usage-example",
+    "title": "Master-Detail",
+    "section": "Usage Example",
+    "text": "Usage Example\nHere’s a complete example showing how to create a master-detail interface:\nNote: The interface is automatically responsive: - Mobile (&lt; lg): Master list hidden in a drawer with hamburger menu toggle - Desktop (≥ lg): Master list always visible as a sidebar\n\n# Example: Simple file browser with groups\nfrom fasthtml.common import Div, H2, P, H3, Ul, Li\n\n# Define render functions for each item\ndef render_file_overview(ctx: InteractionContext):\n    \"\"\"Render file details.\"\"\"\n    file_data = ctx.get_data(\"file\", {})\n    return Div(\n        H2(f\"File: {file_data.get('name', 'Unknown')}\"),\n        P(f\"Size: {file_data.get('size', 0)} bytes\"),\n        P(f\"Modified: {file_data.get('modified', 'N/A')}\")\n    )\n\ndef render_folder_overview(ctx: InteractionContext):\n    \"\"\"Render folder contents.\"\"\"\n    folder_data = ctx.get_data(\"folder\", {})\n    return Div(\n        H2(f\"Folder: {folder_data.get('name', 'Unknown')}\"),\n        P(f\"Items: {folder_data.get('item_count', 0)}\"),\n        H3(\"Contents:\"),\n        Ul(*[Li(item) for item in folder_data.get('items', [])])\n    )\n\n# Optional data loaders\ndef load_file_data(request):\n    \"\"\"Load file metadata.\"\"\"\n    return {\n        \"file\": {\n            \"name\": \"document.txt\",\n            \"size\": 1024,\n            \"modified\": \"2025-01-15\"\n        }\n    }\n\ndef load_folder_data(request):\n    \"\"\"Load folder contents.\"\"\"\n    return {\n        \"folder\": {\n            \"name\": \"Documents\",\n            \"item_count\": 3,\n            \"items\": [\"file1.txt\", \"file2.pdf\", \"file3.doc\"]\n        }\n    }\n\n# Create the master-detail interface with groups\nfile_browser = MasterDetail(\n    interface_id=\"file_browser\",\n    master_title=\"File Browser\",\n    items=[\n        DetailItemGroup(\n            id=\"documents\",\n            title=\"Documents\",\n            items=[\n                DetailItem(\n                    id=\"doc1\",\n                    label=\"document.txt\",\n                    render=render_file_overview,\n                    data_loader=load_file_data,\n                    badge_text=\"1KB\",\n                    badge_color=badge_colors.info\n                ),\n                DetailItem(\n                    id=\"doc2\",\n                    label=\"report.pdf\",\n                    render=render_file_overview,\n                    badge_text=\"2KB\",\n                    badge_color=badge_colors.info\n                )\n            ],\n            badge_text=\"2 files\"\n        ),\n        DetailItemGroup(\n            id=\"media\",\n            title=\"Media\",\n            items=[\n                DetailItem(\n                    id=\"img1\",\n                    label=\"photo.jpg\",\n                    render=render_file_overview,\n                    badge_text=\"512KB\",\n                    badge_color=badge_colors.warning\n                )\n            ],\n            badge_text=\"1 file\"\n        ),\n        DetailItem(\n            id=\"root_folder\",\n            label=\"All Files\",\n            render=render_folder_overview,\n            data_loader=load_folder_data,\n            badge_text=\"3 items\",\n            badge_color=badge_colors.success\n        )\n    ]\n)\n\n# Generate router\nbrowser_router = file_browser.create_router(prefix=\"/files\")\n\n# In your FastHTML app, register the router:\n# from cjm_fasthtml_app_core.core.routing import register_routes\n# register_routes(app, browser_router)\n#\n# Or directly:\n# browser_router.to_app(app)\n\n\n# Test master-detail structure\nprint(f\"Interface has {len(file_browser.item_index)} items\")\nprint(f\"Default item: {file_browser.default_item}\")\nprint(f\"Item IDs: {list(file_browser.item_index.keys())}\")\nprint(f\"Master width: {file_browser.master_width}\")\n\nInterface has 4 items\nDefault item: doc1\nItem IDs: ['doc1', 'doc2', 'img1', 'root_folder']\nMaster width: w-64",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html",
+    "href": "patterns/tabbed_interface.html",
+    "title": "Tabbed Interface",
+    "section": "",
+    "text": "The Tab class defines a single tab in a tabbed interface. Each tab has: - Unique identifier - Display label - Optional title (tooltip on hover) - Render function that generates the UI - Optional data loader for fetching required data\n\nsource\n\n\n\n Tab (id:str, label:str, render:Callable[[cjm_fasthtml_interactions.core.c\n      ontext.InteractionContext],Any], title:Optional[str]=None,\n      data_loader:Optional[Callable[[Any],Dict[str,Any]]]=None,\n      load_on_demand:bool=True)\n\nDefinition of a single tab in a tabbed interface.",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#tab-definition",
+    "href": "patterns/tabbed_interface.html#tab-definition",
+    "title": "Tabbed Interface",
+    "section": "",
+    "text": "The Tab class defines a single tab in a tabbed interface. Each tab has: - Unique identifier - Display label - Optional title (tooltip on hover) - Render function that generates the UI - Optional data loader for fetching required data\n\nsource\n\n\n\n Tab (id:str, label:str, render:Callable[[cjm_fasthtml_interactions.core.c\n      ontext.InteractionContext],Any], title:Optional[str]=None,\n      data_loader:Optional[Callable[[Any],Dict[str,Any]]]=None,\n      load_on_demand:bool=True)\n\nDefinition of a single tab in a tabbed interface.",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#tabbedinterface-class",
+    "href": "patterns/tabbed_interface.html#tabbedinterface-class",
+    "title": "Tabbed Interface",
+    "section": "TabbedInterface Class",
+    "text": "TabbedInterface Class\nThe TabbedInterface class manages a multi-tab interface. It: - Renders tab navigation using DaisyUI radio-based tabs - Manages tab content loading via HTMX - Supports direct navigation to specific tabs via URL - Generates routes automatically - Supports different tab styles (lift, bordered, boxed)\n\nsource\n\nTabbedInterface\n\n TabbedInterface (interface_id:str, tabs_list:List[__main__.Tab],\n                  default_tab:Optional[str]=None,\n                  container_id:str='tabbed-interface-container',\n                  tabs_id:str='tabbed-interface-tabs',\n                  content_id:str='tabbed-interface-content',\n                  tab_style:Optional[str]=None,\n                  show_on_htmx_only:bool=False)\n\nManage multi-tab interfaces with automatic route generation and HTMX content loading.\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\ninterface_id\nstr\n\nUnique identifier for this interface\n\n\ntabs_list\nList\n\nList of tab definitions\n\n\ndefault_tab\nOptional\nNone\nDefault tab ID (defaults to first tab)\n\n\ncontainer_id\nstr\ntabbed-interface-container\nHTML ID for container\n\n\ntabs_id\nstr\ntabbed-interface-tabs\nHTML ID for tabs element\n\n\ncontent_id\nstr\ntabbed-interface-content\nHTML ID for content area\n\n\ntab_style\nOptional\nNone\nDaisyUI tab style (lift, bordered, boxed)\n\n\nshow_on_htmx_only\nbool\nFalse\nWhether to show full page layout for non-HTMX requests",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#tab-management-methods",
+    "href": "patterns/tabbed_interface.html#tab-management-methods",
+    "title": "Tabbed Interface",
+    "section": "Tab Management Methods",
+    "text": "Tab Management Methods\n\nsource\n\nTabbedInterface.get_tab\n\n TabbedInterface.get_tab (tab_id:str)\n\nGet tab by ID.\n\n\n\n\nType\nDetails\n\n\n\n\ntab_id\nstr\nTab identifier\n\n\nReturns\nOptional\nTab object or None\n\n\n\n\nsource\n\n\nTabbedInterface.get_tab_index\n\n TabbedInterface.get_tab_index (tab_id:str)\n\nGet tab index by ID.\n\n\n\n\nType\nDetails\n\n\n\n\ntab_id\nstr\nTab identifier\n\n\nReturns\nOptional\nTab index or None",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#context-and-rendering-methods",
+    "href": "patterns/tabbed_interface.html#context-and-rendering-methods",
+    "title": "Tabbed Interface",
+    "section": "Context and Rendering Methods",
+    "text": "Context and Rendering Methods\n\nsource\n\nTabbedInterface.create_context\n\n TabbedInterface.create_context (request:Any, sess:Any, tab:__main__.Tab)\n\nCreate interaction context for a tab.\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\nrequest\nAny\nFastHTML request object\n\n\nsess\nAny\nFastHTML session object\n\n\ntab\nTab\nCurrent tab\n\n\nReturns\nInteractionContext\nInteraction context for rendering\n\n\n\n\nsource\n\n\nTabbedInterface.render_tabs\n\n TabbedInterface.render_tabs (current_tab_id:str,\n                              tab_route_func:Callable[[str],str])\n\nRender tab navigation using DaisyUI radio-based tabs.\n\n\n\n\nType\nDetails\n\n\n\n\ncurrent_tab_id\nstr\nCurrently active tab ID\n\n\ntab_route_func\nCallable\nFunction to generate tab route\n\n\nReturns\nFT\nTab navigation element\n\n\n\n\nsource\n\n\nTabbedInterface.render_tab_content\n\n TabbedInterface.render_tab_content (tab_obj:__main__.Tab,\n                                     ctx:cjm_fasthtml_interactions.core.co\n                                     ntext.InteractionContext)\n\nRender tab content.\n\n\n\n\nType\nDetails\n\n\n\n\ntab_obj\nTab\nTab to render\n\n\nctx\nInteractionContext\nInteraction context\n\n\nReturns\nFT\nTab content\n\n\n\n\nsource\n\n\nTabbedInterface.render_full_interface\n\n TabbedInterface.render_full_interface (current_tab_id:str,\n                                        tab_route_func:Callable[[str],str]\n                                        , request:Any, sess:Any)\n\nRender complete tabbed interface with tabs and content area.\n\n\n\n\nType\nDetails\n\n\n\n\ncurrent_tab_id\nstr\nCurrently active tab ID\n\n\ntab_route_func\nCallable\nFunction to generate tab route\n\n\nrequest\nAny\nFastHTML request object\n\n\nsess\nAny\nFastHTML session object\n\n\nReturns\nFT\nComplete tabbed interface",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#route-generation",
+    "href": "patterns/tabbed_interface.html#route-generation",
+    "title": "Tabbed Interface",
+    "section": "Route Generation",
+    "text": "Route Generation\n\nsource\n\nTabbedInterface.create_router\n\n TabbedInterface.create_router (prefix:str='')\n\nCreate FastHTML router with generated routes for this tabbed interface.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nprefix\nstr\n\nURL prefix for routes (e.g., “/dashboard”)\n\n\nReturns\nAPIRouter\n\nAPIRouter with generated routes",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#usage-example",
+    "href": "patterns/tabbed_interface.html#usage-example",
+    "title": "Tabbed Interface",
+    "section": "Usage Example",
+    "text": "Usage Example\nHere’s a complete example showing how to create a tabbed interface:\n\n# Example: Simple 3-tab dashboard\nfrom fasthtml.common import Div, H2, P, H3, Ul, Li\n\n# Define render functions for each tab\ndef render_overview(ctx: InteractionContext):\n    \"\"\"Render overview tab.\"\"\"\n    stats = ctx.get_data(\"stats\", {})\n    return Div(\n        H2(\"Overview\"),\n        P(f\"Total items: {stats.get('total', 0)}\"),\n        P(f\"Active items: {stats.get('active', 0)}\")\n    )\n\ndef render_settings(ctx: InteractionContext):\n    \"\"\"Render settings tab.\"\"\"\n    return Div(\n        H2(\"Settings\"),\n        H3(\"Configuration Options\"),\n        Ul(\n            Li(\"Theme: Dark\"),\n            Li(\"Language: English\"),\n            Li(\"Notifications: Enabled\")\n        )\n    )\n\ndef render_help(ctx: InteractionContext):\n    \"\"\"Render help tab.\"\"\"\n    return Div(\n        H2(\"Help\"),\n        P(\"Welcome to the help section.\"),\n        P(\"Find documentation and guides here.\")\n    )\n\n# Optional data loader for overview tab\ndef load_overview_data(request):\n    \"\"\"Load statistics for overview tab.\"\"\"\n    return {\n        \"stats\": {\n            \"total\": 42,\n            \"active\": 15\n        }\n    }\n\n# Create the tabbed interface with lift style\ndashboard_tabs = TabbedInterface(\n    interface_id=\"dashboard\",\n    tabs_list=[\n        Tab(\n            id=\"overview\",\n            label=\"Overview\",\n            title=\"Dashboard Overview\",\n            render=render_overview,\n            data_loader=load_overview_data\n        ),\n        Tab(\n            id=\"settings\",\n            label=\"Settings\",\n            title=\"Configuration Settings\",\n            render=render_settings\n        ),\n        Tab(\n            id=\"help\",\n            label=\"Help\",\n            title=\"Help & Documentation\",\n            render=render_help\n        )\n    ],\n    tab_style=\"lift\"  # Use DaisyUI lift style\n)\n\n# Generate router\ndashboard_router = dashboard_tabs.create_router(prefix=\"/dashboard\")\n\n# In your FastHTML app, register the router:\n# from cjm_fasthtml_app_core.core.routing import register_routes\n# register_routes(app, dashboard_router)\n#\n# Or directly:\n# dashboard_router.to_app(app)\n\n\n# Test tabbed interface structure\nprint(f\"Interface has {len(dashboard_tabs.tabs_list)} tabs\")\nprint(f\"Default tab: {dashboard_tabs.default_tab}\")\nprint(f\"Tab IDs: {list(dashboard_tabs.tab_index.keys())}\")\nprint(f\"Tab style: {dashboard_tabs.tab_style}\")\n\nInterface has 3 tabs\nDefault tab: overview\nTab IDs: ['overview', 'settings', 'help']\nTab style: lift",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html",
+    "href": "patterns/step_flow.html",
+    "title": "Step Flow",
+    "section": "",
+    "text": "The Step class defines a single step in a multi-step workflow. Each step has: - Unique identifier - Title for display - Render function that generates the UI - Optional validation function - Optional data loader for fetching required data - State keys that this step manages\n\nsource\n\n\n\n Step (id:str, title:str, render:Callable[[cjm_fasthtml_interactions.core.\n       context.InteractionContext],Any],\n       validate:Optional[Callable[[Dict[str,Any]],bool]]=None,\n       data_loader:Optional[Callable[[Any],Dict[str,Any]]]=None,\n       data_keys:List[str]=&lt;factory&gt;, can_skip:bool=False,\n       show_back:bool=True, show_cancel:bool=True,\n       next_button_text:str='Continue')\n\nDefinition of a single step in a multi-step workflow.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#step-definition",
+    "href": "patterns/step_flow.html#step-definition",
+    "title": "Step Flow",
+    "section": "",
+    "text": "The Step class defines a single step in a multi-step workflow. Each step has: - Unique identifier - Title for display - Render function that generates the UI - Optional validation function - Optional data loader for fetching required data - State keys that this step manages\n\nsource\n\n\n\n Step (id:str, title:str, render:Callable[[cjm_fasthtml_interactions.core.\n       context.InteractionContext],Any],\n       validate:Optional[Callable[[Dict[str,Any]],bool]]=None,\n       data_loader:Optional[Callable[[Any],Dict[str,Any]]]=None,\n       data_keys:List[str]=&lt;factory&gt;, can_skip:bool=False,\n       show_back:bool=True, show_cancel:bool=True,\n       next_button_text:str='Continue')\n\nDefinition of a single step in a multi-step workflow.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#stepflow-class",
+    "href": "patterns/step_flow.html#stepflow-class",
+    "title": "Step Flow",
+    "section": "StepFlow Class",
+    "text": "StepFlow Class\nThe StepFlow class manages a multi-step workflow. It: - Tracks current step - Manages navigation between steps - Integrates with WorkflowSession for state persistence - Generates routes automatically - Provides resumability (returns to last valid step on page load)\n\nsource\n\nStepFlow\n\n StepFlow (flow_id:str, steps:List[__main__.Step], container_id:str='step-\n           flow-container',\n           on_complete:Optional[Callable[[Dict[str,Any],Any],Any]]=None,\n           show_progress:bool=False, wrap_in_form:bool=True)\n\nManage multi-step workflows with automatic route generation and state management.\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nflow_id\nstr\n\nUnique identifier for this workflow\n\n\nsteps\nList\n\nList of step definitions\n\n\ncontainer_id\nstr\nstep-flow-container\nHTML ID for content container\n\n\non_complete\nOptional\nNone\nCompletion handler\n\n\nshow_progress\nbool\nFalse\nWhether to show progress indicator\n\n\nwrap_in_form\nbool\nTrue\nWhether to wrap content + navigation in a form",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#step-management-methods",
+    "href": "patterns/step_flow.html#step-management-methods",
+    "title": "Step Flow",
+    "section": "Step Management Methods",
+    "text": "Step Management Methods\n\nsource\n\nStepFlow.get_step\n\n StepFlow.get_step (step_id:str)\n\nGet step by ID.\n\n\n\n\nType\nDetails\n\n\n\n\nstep_id\nstr\nStep identifier\n\n\nReturns\nOptional\nStep object or None\n\n\n\n\nsource\n\n\nStepFlow.get_step_index\n\n StepFlow.get_step_index (step_id:str)\n\nGet step index by ID.\n\n\n\n\nType\nDetails\n\n\n\n\nstep_id\nstr\nStep identifier\n\n\nReturns\nOptional\nStep index or None",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#navigation-methods",
+    "href": "patterns/step_flow.html#navigation-methods",
+    "title": "Step Flow",
+    "section": "Navigation Methods",
+    "text": "Navigation Methods\n\nsource\n\nStepFlow.get_current_step_id\n\n StepFlow.get_current_step_id (sess:Any)\n\nGet current step ID from session.\n\n\n\n\nType\nDetails\n\n\n\n\nsess\nAny\nFastHTML session object\n\n\nReturns\nstr\nCurrent step ID\n\n\n\n\nsource\n\n\nStepFlow.set_current_step\n\n StepFlow.set_current_step (sess:Any, step_id:str)\n\nSet current step in session.\n\n\n\n\nType\nDetails\n\n\n\n\nsess\nAny\nFastHTML session object\n\n\nstep_id\nstr\nStep ID to set as current\n\n\nReturns\nNone\n\n\n\n\n\nsource\n\n\nStepFlow.get_next_step_id\n\n StepFlow.get_next_step_id (current_step_id:str)\n\nGet the ID of the next step.\n\n\n\n\nType\nDetails\n\n\n\n\ncurrent_step_id\nstr\nCurrent step ID\n\n\nReturns\nOptional\nNext step ID or None if last step\n\n\n\n\nsource\n\n\nStepFlow.get_previous_step_id\n\n StepFlow.get_previous_step_id (current_step_id:str)\n\nGet the ID of the previous step.\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\ncurrent_step_id\nstr\nCurrent step ID\n\n\nReturns\nOptional\nPrevious step ID or None if first step\n\n\n\n\nsource\n\n\nStepFlow.is_last_step\n\n StepFlow.is_last_step (step_id:str)\n\nCheck if step is the last step.\n\n\n\n\nType\nDetails\n\n\n\n\nstep_id\nstr\nStep ID to check\n\n\nReturns\nbool\nTrue if this is the last step\n\n\n\n\nsource\n\n\nStepFlow.is_first_step\n\n StepFlow.is_first_step (step_id:str)\n\nCheck if step is the first step.\n\n\n\n\nType\nDetails\n\n\n\n\nstep_id\nstr\nStep ID to check\n\n\nReturns\nbool\nTrue if this is the first step",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#state-management-methods",
+    "href": "patterns/step_flow.html#state-management-methods",
+    "title": "Step Flow",
+    "section": "State Management Methods",
+    "text": "State Management Methods\n\nsource\n\nStepFlow.get_workflow_state\n\n StepFlow.get_workflow_state (sess:Any)\n\nGet all workflow state from session.\n\n\n\n\nType\nDetails\n\n\n\n\nsess\nAny\nFastHTML session object\n\n\nReturns\nDict\nAll workflow state\n\n\n\n\nsource\n\n\nStepFlow.update_workflow_state\n\n StepFlow.update_workflow_state (sess:Any, updates:Dict[str,Any])\n\nUpdate workflow state with new values.\n\n\n\n\nType\nDetails\n\n\n\n\nsess\nAny\nFastHTML session object\n\n\nupdates\nDict\nState updates\n\n\nReturns\nNone\n\n\n\n\n\nsource\n\n\nStepFlow.clear_workflow\n\n StepFlow.clear_workflow (sess:Any)\n\nClear all workflow state.\n\n\n\n\nType\nDetails\n\n\n\n\nsess\nAny\nFastHTML session object\n\n\nReturns\nNone",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#context-and-rendering-methods",
+    "href": "patterns/step_flow.html#context-and-rendering-methods",
+    "title": "Step Flow",
+    "section": "Context and Rendering Methods",
+    "text": "Context and Rendering Methods\n\nsource\n\nStepFlow.create_context\n\n StepFlow.create_context (request:Any, sess:Any, step:__main__.Step)\n\nCreate interaction context for a step.\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\nrequest\nAny\nFastHTML request object\n\n\nsess\nAny\nFastHTML session object\n\n\nstep\nStep\nCurrent step\n\n\nReturns\nInteractionContext\nInteraction context for rendering\n\n\n\n\nsource\n\n\nStepFlow.render_progress\n\n StepFlow.render_progress (sess:Any)\n\nRender progress indicator showing all steps.\n\n\n\n\nType\nDetails\n\n\n\n\nsess\nAny\nFastHTML session object\n\n\nReturns\nFT\nProgress indicator or empty Div\n\n\n\n\nsource\n\n\nStepFlow.render_step_content\n\n StepFlow.render_step_content (step_obj:__main__.Step,\n                               ctx:cjm_fasthtml_interactions.core.context.\n                               InteractionContext, next_route:str,\n                               back_route:Optional[str]=None,\n                               cancel_route:Optional[str]=None)\n\nRender step content with optional progress indicator and navigation.\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nstep_obj\nStep\n\nStep to render\n\n\nctx\nInteractionContext\n\nInteraction context\n\n\nnext_route\nstr\n\nRoute for next/submit\n\n\nback_route\nOptional\nNone\nRoute for back\n\n\ncancel_route\nOptional\nNone\nRoute for cancel\n\n\nReturns\nFT\n\nComplete step content with optional progress and navigation\n\n\n\n\nsource\n\n\nStepFlow.render_navigation\n\n StepFlow.render_navigation (step_id:str, next_route:str,\n                             back_route:Optional[str]=None,\n                             cancel_route:Optional[str]=None)\n\nRender navigation buttons for a step.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nstep_id\nstr\n\nCurrent step ID\n\n\nnext_route\nstr\n\nRoute for next/submit action\n\n\nback_route\nOptional\nNone\nRoute for back action\n\n\ncancel_route\nOptional\nNone\nRoute for cancel action\n\n\nReturns\nFT\n\nNavigation button container",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#route-generation",
+    "href": "patterns/step_flow.html#route-generation",
+    "title": "Step Flow",
+    "section": "Route Generation",
+    "text": "Route Generation\n\nsource\n\nStepFlow.create_router\n\n StepFlow.create_router (prefix:str='')\n\nCreate FastHTML router with generated routes for this flow.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nprefix\nstr\n\nURL prefix for routes (e.g., “/transcription”)\n\n\nReturns\nAPIRouter\n\nAPIRouter with generated routes",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#usage-example",
+    "href": "patterns/step_flow.html#usage-example",
+    "title": "Step Flow",
+    "section": "Usage Example",
+    "text": "Usage Example\nHere’s a complete example showing how to create a multi-step workflow:\n\n# Example: Simple 3-step workflow\nfrom fasthtml.common import Div, H2, P, Form, Input, Label\n\n# Define render functions for each step\ndef render_step1(ctx: InteractionContext):\n    \"\"\"Render first step - collect name.\"\"\"\n    current_name = ctx.get(\"name\", \"\")\n    return Div(\n        H2(\"Step 1: Enter Your Name\"),\n        Label(\"Name:\"),\n        Input(name=\"name\", value=current_name, required=True)\n    )\n\ndef render_step2(ctx: InteractionContext):\n    \"\"\"Render second step - collect email.\"\"\"\n    name = ctx.get(\"name\", \"User\")\n    current_email = ctx.get(\"email\", \"\")\n    return Div(\n        H2(f\"Step 2: Hi {name}, enter your email\"),\n        Label(\"Email:\"),\n        Input(name=\"email\", type=\"email\", value=current_email, required=True)\n    )\n\ndef render_step3(ctx: InteractionContext):\n    \"\"\"Render third step - confirm.\"\"\"\n    name = ctx.get(\"name\", \"\")\n    email = ctx.get(\"email\", \"\")\n    return Div(\n        H2(\"Step 3: Confirm\"),\n        P(f\"Name: {name}\"),\n        P(f\"Email: {email}\")\n    )\n\n# Define completion handler\ndef on_complete(state: Dict[str, Any], request):\n    \"\"\"Handle workflow completion.\"\"\"\n    return Div(\n        H2(\"Success!\"),\n        P(f\"Welcome {state.get('name')}!\"),\n        P(f\"We'll email you at {state.get('email')}\")\n    )\n\n# Create the step flow with progress indicator\nregistration_flow = StepFlow(\n    flow_id=\"registration\",\n    steps=[\n        Step(\n            id=\"name\",\n            title=\"Enter Name\",\n            render=render_step1,\n            data_keys=[\"name\"]\n        ),\n        Step(\n            id=\"email\",\n            title=\"Enter Email\",\n            render=render_step2,\n            data_keys=[\"email\"]\n        ),\n        Step(\n            id=\"confirm\",\n            title=\"Confirm\",\n            render=render_step3,\n            next_button_text=\"Complete Registration\"\n        )\n    ],\n    on_complete=on_complete,\n    show_progress=True  # Enable progress indicator\n)\n\n# Generate router\nregistration_router = registration_flow.create_router(prefix=\"/register\")\n\n# In your FastHTML app, register the router:\n# from cjm_fasthtml_app_core.core.routing import register_routes\n# register_routes(app, registration_router)\n#\n# Or directly:\n# registration_router.to_app(app)\n\n\n# Test step flow navigation\nprint(f\"Flow has {len(registration_flow.steps)} steps\")\nprint(f\"First step: {registration_flow.steps[0].id}\")\nprint(f\"Last step: {registration_flow.steps[-1].id}\")\nprint(f\"Next after 'name': {registration_flow.get_next_step_id('name')}\")\nprint(f\"Previous before 'email': {registration_flow.get_previous_step_id('email')}\")\n\nFlow has 3 steps\nFirst step: name\nLast step: confirm\nNext after 'name': email\nPrevious before 'email': name",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "core/context.html",
+    "href": "core/context.html",
+    "title": "Interaction Context",
+    "section": "",
+    "text": "The InteractionContext class provides a unified interface for accessing state, request data, and custom data within interaction patterns. This allows render functions and handlers to access everything they need without passing many individual parameters.\n\nsource\n\n\n\n InteractionContext (state:Dict[str,Any]=&lt;factory&gt;,\n                     request:Optional[Any]=None,\n                     session:Optional[Any]=None,\n                     data:Dict[str,Any]=&lt;factory&gt;,\n                     metadata:Dict[str,Any]=&lt;factory&gt;)\n\nContext for interaction patterns providing access to state, request, and custom data.",
+    "crumbs": [
+      "core",
+      "Interaction Context"
+    ]
+  },
+  {
+    "objectID": "core/context.html#interactioncontext-class",
+    "href": "core/context.html#interactioncontext-class",
+    "title": "Interaction Context",
+    "section": "",
+    "text": "The InteractionContext class provides a unified interface for accessing state, request data, and custom data within interaction patterns. This allows render functions and handlers to access everything they need without passing many individual parameters.\n\nsource\n\n\n\n InteractionContext (state:Dict[str,Any]=&lt;factory&gt;,\n                     request:Optional[Any]=None,\n                     session:Optional[Any]=None,\n                     data:Dict[str,Any]=&lt;factory&gt;,\n                     metadata:Dict[str,Any]=&lt;factory&gt;)\n\nContext for interaction patterns providing access to state, request, and custom data.",
+    "crumbs": [
+      "core",
+      "Interaction Context"
+    ]
+  },
+  {
+    "objectID": "core/context.html#usage-examples",
+    "href": "core/context.html#usage-examples",
+    "title": "Interaction Context",
+    "section": "Usage Examples",
+    "text": "Usage Examples\nThe InteractionContext is typically created and managed by interaction pattern classes (like StepFlow), but here are examples showing how it’s used:\n\n# Create a context\nctx = InteractionContext()\nctx\n\nInteractionContext(state={}, request=None, session=None, data={}, metadata={})\n\n\n\n# Store and retrieve state\nctx.set(\"plugin_id\", \"transcription_voxtral\")\nctx.set(\"step\", 1)\n\nprint(f\"Plugin ID: {ctx.get('plugin_id')}\")\nprint(f\"Has file_path: {ctx.has('file_path')}\")\n\nPlugin ID: transcription_voxtral\nHas file_path: False\n\n\n\n# Context with custom data (typically from data loaders)\nctx_with_data = InteractionContext(\n    state={\"user_id\": \"123\"},\n    data={\n        \"plugins\": [\n            {\"name\": \"voxtral\", \"title\": \"Voxtral HF\"},\n            {\"name\": \"whisper\", \"title\": \"Whisper\"}\n        ],\n        \"plugin_count\": 5\n    }\n)\n\nplugins = ctx_with_data.get_data(\"plugins\", [])\nprint(f\"Plugins available: {ctx_with_data.get_data('plugin_count')}\")\nprint(f\"First plugin: {plugins[0]}\")\n\nPlugins available: 5\nFirst plugin: {'name': 'voxtral', 'title': 'Voxtral HF'}\n\n\n\n# Batch updates\nctx.update_state({\n    \"file_path\": \"/path/to/file.mp3\",\n    \"confirmed\": True\n})\n\nprint(f\"All state: {ctx.get_all_state()}\")\n\nAll state: {'plugin_id': 'transcription_voxtral', 'step': 1, 'file_path': '/path/to/file.mp3', 'confirmed': True}",
+    "crumbs": [
+      "core",
+      "Interaction Context"
+    ]
+  },
+  {
+    "objectID": "core/context.html#using-context-in-render-functions",
+    "href": "core/context.html#using-context-in-render-functions",
+    "title": "Interaction Context",
+    "section": "Using Context in Render Functions",
+    "text": "Using Context in Render Functions\nHere’s how the context is typically used within step render functions:\n\n# Example render function signature\ndef render_plugin_selector(ctx: InteractionContext):\n    \"\"\"Render plugin selection step.\"\"\"\n    # Access loaded data\n    plugins = ctx.get_data(\"plugins\", [])\n    \n    # Access current state\n    selected = ctx.get(\"plugin_id\")\n    \n    # Could access request if needed\n    # app_state = ctx.request.app.state\n    \n    # Return rendered UI\n    return f\"Render {len(plugins)} plugins, selected: {selected}\"\n\n\n# Simulate using the render function\ntest_ctx = InteractionContext(\n    state={\"plugin_id\": \"plugin_1\"},\n    data={\"plugins\": [{}, {}]}  # 2 plugins\n)\n\nrender_plugin_selector(test_ctx)\n\n'Render 2 plugins, selected: plugin_1'",
+    "crumbs": [
+      "core",
+      "Interaction Context"
+    ]
+  }
+]
