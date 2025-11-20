@@ -98,3 +98,15 @@ class InteractionHtmlIds(AppHtmlIds):
                            ) -> str:  # HTML ID for modal content area
         """Generate HTML ID for modal content area."""
         return f"modal-{modal_id}-content"
+    
+    @staticmethod
+    def sse_status(connection_id: str  # SSE connection identifier
+                  ) -> str:  # HTML ID for SSE status indicator
+        """Generate HTML ID for SSE connection status indicator."""
+        return f"sse-status-{connection_id}"
+    
+    @staticmethod
+    def sse_element(connection_id: str  # SSE connection identifier
+                   ) -> str:  # HTML ID for SSE connection element
+        """Generate HTML ID for SSE connection element."""
+        return f"sse-element-{connection_id}"

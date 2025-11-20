@@ -15,14 +15,15 @@ pip install cjm_fasthtml_interactions
     ├── core/ (2)
     │   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data
     │   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components
-    └── patterns/ (5)
-        ├── async_loading.ipynb     # Pattern for asynchronous content loading with skeleton loaders and loading indicators
-        ├── master_detail.ipynb     # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.
-        ├── modal_dialog.ipynb      # Pattern for modal dialogs with customizable content, sizes, and actions
-        ├── step_flow.ipynb         # Multi-step wizard pattern with state management, navigation, and route generation
-        └── tabbed_interface.ipynb  # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
+    └── patterns/ (6)
+        ├── async_loading.ipynb           # Pattern for asynchronous content loading with skeleton loaders and loading indicators
+        ├── master_detail.ipynb           # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.
+        ├── modal_dialog.ipynb            # Pattern for modal dialogs with customizable content, sizes, and actions
+        ├── sse_connection_monitor.ipynb  # Pattern for monitoring Server-Sent Events (SSE) connections with visual status indicators and automatic reconnection
+        ├── step_flow.ipynb               # Multi-step wizard pattern with state management, navigation, and route generation
+        └── tabbed_interface.ipynb        # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
 
-Total: 7 notebooks across 2 directories
+Total: 8 notebooks across 2 directories
 
 ## Module Dependencies
 
@@ -33,6 +34,7 @@ graph LR
     patterns_async_loading[patterns.async_loading<br/>Async Loading Container]
     patterns_master_detail[patterns.master_detail<br/>Master-Detail]
     patterns_modal_dialog[patterns.modal_dialog<br/>Modal Dialog]
+    patterns_sse_connection_monitor[patterns.sse_connection_monitor<br/>SSE Connection Monitor]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
     patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
 
@@ -40,13 +42,14 @@ graph LR
     patterns_master_detail --> core_html_ids
     patterns_modal_dialog --> patterns_async_loading
     patterns_modal_dialog --> core_html_ids
+    patterns_sse_connection_monitor --> core_html_ids
     patterns_step_flow --> core_context
     patterns_step_flow --> core_html_ids
     patterns_tabbed_interface --> core_context
     patterns_tabbed_interface --> core_html_ids
 ```
 
-*8 cross-module dependencies detected*
+*9 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -254,6 +257,14 @@ class InteractionHtmlIds(AppHtmlIds):
     def modal_dialog_content(modal_id: str  # Modal identifier
                                ) -> str:  # HTML ID for modal content area
         "Generate HTML ID for modal content area."
+    
+    def sse_status(connection_id: str  # SSE connection identifier
+                      ) -> str:  # HTML ID for SSE status indicator
+        "Generate HTML ID for SSE connection status indicator."
+    
+    def sse_element(connection_id: str  # SSE connection identifier
+                       ) -> str:  # HTML ID for SSE connection element
+        "Generate HTML ID for SSE connection element."
 ```
 
 ### Master-Detail (`master_detail.ipynb`)
@@ -519,6 +530,159 @@ def ModalTriggerButton(
 ``` python
 class ModalSize(Enum):
     "Predefined size options for modal dialogs."
+```
+
+### SSE Connection Monitor (`sse_connection_monitor.ipynb`)
+
+> Pattern for monitoring Server-Sent Events (SSE) connections with
+> visual status indicators and automatic reconnection
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.patterns.sse_connection_monitor import (
+    SSEConnectionConfig,
+    create_connection_status_indicators,
+    SSEConnectionMonitorScript,
+    SSEConnectionMonitor
+)
+```
+
+#### Functions
+
+``` python
+def create_connection_status_indicators(
+    status_size: str = "sm",  # Size of status indicator dot (xs, sm, md, lg)
+    show_text: bool = True,  # Whether to show status text
+    text_size: str = "text-sm",  # Text size class
+    hide_text_on_mobile: bool = True  # Hide text on small screens
+) -> Dict[str, FT]:  # Dictionary of status state to indicator element
+    """
+    Create status indicator elements for different connection states.
+    
+    Returns a dictionary with keys: 'active', 'disconnected', 'error', 'reconnecting'
+    Each value is a Span element with a status dot and optional text.
+    
+    Examples:
+        # Default indicators
+        indicators = create_connection_status_indicators()
+        
+        # Larger indicators without text
+        indicators = create_connection_status_indicators(
+            status_size="md",
+            show_text=False
+        )
+        
+        # Always show text
+        indicators = create_connection_status_indicators(
+            hide_text_on_mobile=False
+        )
+    """
+```
+
+``` python
+def SSEConnectionMonitorScript(
+    connection_id: str,  # Unique identifier for this SSE connection
+    status_indicators: Dict[str, FT],  # Status indicator elements for each state
+    config: Optional[SSEConnectionConfig] = None  # Configuration options
+) -> FT:  # Script element with monitoring code
+    """
+    Create a script that monitors SSE connection status and manages reconnection.
+    
+    The script listens to HTMX SSE events and updates the status indicator based on
+    connection state. It handles automatic reconnection with exponential backoff,
+    server shutdown detection, and tab visibility changes.
+    
+    Examples:
+        # Create indicators and monitor script
+        indicators = create_connection_status_indicators()
+        script = SSEConnectionMonitorScript(
+            connection_id="my-stream",
+            status_indicators=indicators
+        )
+        
+        # Custom configuration
+        config = SSEConnectionConfig(
+            max_reconnect_attempts=5,
+            reconnect_delay=2000,
+            log_to_console=False
+        )
+        script = SSEConnectionMonitorScript(
+            connection_id="my-stream",
+            status_indicators=indicators,
+            config=config
+        )
+    """
+```
+
+``` python
+def SSEConnectionMonitor(
+    connection_id: str,  # Unique identifier for this SSE connection
+    status_size: str = "sm",  # Size of status indicator
+    show_text: bool = True,  # Whether to show status text
+    hide_text_on_mobile: bool = True,  # Hide text on small screens
+    config: Optional[SSEConnectionConfig] = None,  # Configuration options
+    container_cls: Optional[str] = None  # Additional CSS classes for status container
+) -> tuple[FT, FT]:  # Tuple of (status_container, monitor_script)
+    """
+    Create a complete SSE connection monitoring system.
+    
+    Returns a tuple of (status_container, monitor_script) that should be added to your page.
+    The status container displays the current connection status, and the monitor script
+    manages the connection monitoring and updates.
+    
+    Examples:
+        # Simple monitor with default settings
+        status, script = SSEConnectionMonitor(
+            connection_id="dashboard-stream"
+        )
+        
+        # Custom configuration
+        config = SSEConnectionConfig(
+            max_reconnect_attempts=5,
+            reconnect_delay=2000
+        )
+        status, script = SSEConnectionMonitor(
+            connection_id="data-stream",
+            status_size="md",
+            config=config,
+            container_cls="my-custom-class"
+        )
+        
+        # Use in page
+        def my_page():
+            status, script = SSEConnectionMonitor(connection_id="events")
+            return Div(
+                # Header with status
+                Div(
+                    H1("Dashboard"),
+                    status  # Status indicator
+                ),
+                # SSE connection element
+                Div(
+                    hx_ext="sse",
+                    sse_connect="/stream/events",
+                    sse_swap="message",
+                    id=InteractionHtmlIds.sse_element("events")
+                ),
+                # Monitor script
+                script
+            )
+    """
+```
+
+#### Classes
+
+``` python
+@dataclass
+class SSEConnectionConfig:
+    "Configuration for SSE connection monitoring."
+    
+    max_reconnect_attempts: int = 10  # Maximum number of reconnection attempts
+    reconnect_delay: int = 1000  # Initial reconnect delay in milliseconds
+    max_backoff_multiplier: int = 5  # Maximum backoff multiplier for reconnect delay
+    monitor_visibility: bool = True  # Monitor tab visibility and reconnect when visible
+    log_to_console: bool = True  # Enable console logging for debugging
 ```
 
 ### Step Flow (`step_flow.ipynb`)
