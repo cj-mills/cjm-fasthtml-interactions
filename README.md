@@ -15,12 +15,13 @@ pip install cjm_fasthtml_interactions
     ├── core/ (2)
     │   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data
     │   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components
-    └── patterns/ (3)
+    └── patterns/ (4)
+        ├── async_loading.ipynb     # Pattern for asynchronous content loading with skeleton loaders and loading indicators
         ├── master_detail.ipynb     # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.
         ├── step_flow.ipynb         # Multi-step wizard pattern with state management, navigation, and route generation
         └── tabbed_interface.ipynb  # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
 
-Total: 5 notebooks across 2 directories
+Total: 6 notebooks across 2 directories
 
 ## Module Dependencies
 
@@ -28,16 +29,17 @@ Total: 5 notebooks across 2 directories
 graph LR
     core_context[core.context<br/>Interaction Context]
     core_html_ids[core.html_ids<br/>HTML IDs]
+    patterns_async_loading[patterns.async_loading<br/>Async Loading Container]
     patterns_master_detail[patterns.master_detail<br/>Master-Detail]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
     patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
 
-    patterns_master_detail --> core_context
     patterns_master_detail --> core_html_ids
-    patterns_step_flow --> core_context
+    patterns_master_detail --> core_context
     patterns_step_flow --> core_html_ids
-    patterns_tabbed_interface --> core_context
+    patterns_step_flow --> core_context
     patterns_tabbed_interface --> core_html_ids
+    patterns_tabbed_interface --> core_context
 ```
 
 *6 cross-module dependencies detected*
@@ -49,6 +51,80 @@ No CLI commands found in this project.
 ## Module Overview
 
 Detailed documentation for each module in the project:
+
+### Async Loading Container (`async_loading.ipynb`)
+
+> Pattern for asynchronous content loading with skeleton loaders and
+> loading indicators
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.patterns.async_loading import (
+    LoadingType,
+    AsyncLoadingContainer
+)
+```
+
+#### Functions
+
+``` python
+def AsyncLoadingContainer(
+    container_id: str,  # HTML ID for the container
+    load_url: str,  # URL to fetch content from
+    loading_type: LoadingType = LoadingType.SPINNER,  # Type of loading indicator
+    loading_size: str = "lg",  # Size of loading indicator (xs, sm, md, lg)
+    loading_message: Optional[str] = None,  # Optional message to display while loading
+    skeleton_content: Optional[Any] = None,  # Optional skeleton/placeholder content
+    trigger: str = "load",  # HTMX trigger event (default: load on page load)
+    swap: str = "outerHTML",  # HTMX swap method (default: replace entire container)
+    container_cls: Optional[str] = None,  # Additional CSS classes for container
+    **kwargs  # Additional attributes for the container
+) -> FT:  # Div element with async loading configured
+    """
+    Create a container that asynchronously loads content from a URL.
+    
+    The container displays a loading indicator initially and uses HTMX to load
+    content when triggered. Once loaded, the entire container is replaced with
+    the fetched content (by default using outerHTML swap).
+    
+    Examples:
+        # Simple spinner loader
+        AsyncLoadingContainer(
+            container_id="my-content",
+            load_url="/api/get-content"
+        )
+        
+        # With loading message
+        AsyncLoadingContainer(
+            container_id="dashboard-stats",
+            load_url="/api/stats",
+            loading_message="Loading statistics..."
+        )
+        
+        # With skeleton content
+        AsyncLoadingContainer(
+            container_id="user-card",
+            load_url="/api/user/123",
+            loading_type=LoadingType.NONE,
+            skeleton_content=Div("User profile skeleton...", cls="skeleton")
+        )
+        
+        # Delayed load (triggered by intersection)
+        AsyncLoadingContainer(
+            container_id="lazy-image",
+            load_url="/api/image/456",
+            trigger="intersect once"
+        )
+    """
+```
+
+#### Classes
+
+``` python
+class LoadingType(Enum):
+    "Types of loading indicators for async content."
+```
 
 ### Interaction Context (`context.ipynb`)
 

@@ -39,6 +39,7 @@ print("="*70)
 from cjm_fasthtml_interactions.patterns.step_flow import Step, StepFlow
 from cjm_fasthtml_interactions.patterns.tabbed_interface import Tab, TabbedInterface
 from cjm_fasthtml_interactions.patterns.master_detail import MasterDetail, DetailItem, DetailItemGroup
+from cjm_fasthtml_interactions.patterns.async_loading import AsyncLoadingContainer, LoadingType
 from cjm_fasthtml_interactions.core.context import InteractionContext
 from cjm_fasthtml_interactions.core.html_ids import InteractionHtmlIds
 from cjm_fasthtml_app_core.core.html_ids import AppHtmlIds
@@ -58,6 +59,7 @@ from cjm_fasthtml_daisyui.components.data_display.badge import badge_colors
 from cjm_fasthtml_daisyui.components.data_input.text_input import text_input
 from cjm_fasthtml_daisyui.components.data_input.select import select
 from cjm_fasthtml_daisyui.components.navigation.link import link, link_colors
+from cjm_fasthtml_daisyui.utilities.semantic_colors import bg_dui
 
 print("✓ All library components imported successfully")
 
@@ -684,6 +686,14 @@ def index(request):
                     cls=combine_classes(btn, btn_colors.success, btn_sizes.lg, m.r(2), m.b(2))
                 ),
                 A(
+                    "Async Loading Demo",
+                    href=async_loading.to(),
+                    hx_get=async_loading.to(),
+                    hx_target=f"#{AppHtmlIds.MAIN_CONTENT}",
+                    hx_push_url="true",
+                    cls=combine_classes(btn, btn_colors.info, btn_sizes.lg, m.r(2), m.b(2))
+                ),
+                A(
                     "View Features",
                     href=features.to(),
                     hx_get=features.to(),
@@ -706,6 +716,169 @@ def index(request):
         request,
         home_content,
         wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+    )
+
+@rt
+def async_loading(request):
+    """Async loading patterns demo page."""
+    import time
+
+    def async_content():
+        return Div(
+            H1("Async Loading Container Pattern",
+               cls=combine_classes(font_size._3xl, font_weight.bold, m.b(6), text_align.center)),
+
+            P("The AsyncLoadingContainer pattern enables asynchronous content loading with customizable loading indicators.",
+              cls=combine_classes(text_align.center, m.b(8), max_w._3xl, m.x.auto)),
+
+            # Example 1: Spinner loader
+            Div(
+                H2("Example 1: Spinner Loader",
+                   cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+                P("Simple spinner with loading message",
+                  cls=combine_classes(m.b(4))),
+                AsyncLoadingContainer(
+                    container_id="spinner-demo",
+                    load_url="/async_loading/content/spinner",
+                    loading_message="Loading content...",
+                    container_cls=str(combine_classes(card, bg_dui.base_100))
+                ),
+                cls=str(m.b(8))
+            ),
+
+            # Example 2: Different loading styles
+            Div(
+                H2("Example 2: Different Loading Styles",
+                   cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+                P("Various loading indicator styles from DaisyUI",
+                  cls=combine_classes(m.b(4))),
+                Div(
+                    Div(
+                        H3("Dots", cls=combine_classes(font_weight.semibold, m.b(2))),
+                        AsyncLoadingContainer(
+                            container_id="dots-demo",
+                            load_url="/async_loading/content/dots",
+                            loading_type=LoadingType.DOTS,
+                            loading_size="md",
+                            container_cls=str(combine_classes(card, bg_dui.base_100))
+                        )
+                    ),
+                    Div(
+                        H3("Ring", cls=combine_classes(font_weight.semibold, m.b(2))),
+                        AsyncLoadingContainer(
+                            container_id="ring-demo",
+                            load_url="/async_loading/content/ring",
+                            loading_type=LoadingType.RING,
+                            loading_size="md",
+                            container_cls=str(combine_classes(card, bg_dui.base_100))
+                        )
+                    ),
+                    Div(
+                        H3("Ball", cls=combine_classes(font_weight.semibold, m.b(2))),
+                        AsyncLoadingContainer(
+                            container_id="ball-demo",
+                            load_url="/async_loading/content/ball",
+                            loading_type=LoadingType.BALL,
+                            loading_size="md",
+                            container_cls=str(combine_classes(card, bg_dui.base_100))
+                        )
+                    ),
+                    cls=combine_classes(grid_display, grid_cols._1, grid_cols._3.md, gap._4, m.b(8))
+                ),
+                cls=str(m.b(8))
+            ),
+
+            # Example 3: innerHTML swap
+            Div(
+                H2("Example 3: Inner Content Swap",
+                   cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+                P("Container persists, only inner content is swapped",
+                  cls=combine_classes(m.b(4))),
+                AsyncLoadingContainer(
+                    container_id="inner-swap-demo",
+                    load_url="/async_loading/content/inner",
+                    swap="innerHTML",
+                    loading_type=LoadingType.SPINNER,
+                    container_cls=str(combine_classes(card, card_body, bg_dui.base_200, p(8)))
+                ),
+                cls=str(m.b(8))
+            ),
+
+            cls=combine_classes(
+                container,
+                max_w._6xl,
+                m.x.auto,
+                p(8)
+            )
+        )
+
+    return handle_htmx_request(
+        request,
+        async_content,
+        wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+    )
+
+# Async loading content endpoints
+@rt("/async_loading/content/spinner")
+def async_content_spinner():
+    """Return loaded content after delay (spinner example)."""
+    import time
+    time.sleep(1.5)
+    return Div(
+        H3("Content Loaded!", cls=combine_classes(font_size.xl, font_weight.bold, m.b(2))),
+        P("This content was loaded asynchronously using HTMX after a 1.5 second delay."),
+        P(f"Loaded at: {time.strftime('%H:%M:%S')}"),
+        id="spinner-demo",
+        cls=combine_classes(card, card_body, bg_dui.base_100)
+    )
+
+@rt("/async_loading/content/dots")
+def async_content_dots():
+    """Return loaded content for dots example."""
+    import time
+    time.sleep(1)
+    return Div(
+        P("Dots loader", cls=combine_classes(font_weight.semibold, m.b(1))),
+        P("Loaded successfully!"),
+        id="dots-demo",
+        cls=combine_classes(card, card_body, bg_dui.base_100)
+    )
+
+@rt("/async_loading/content/ring")
+def async_content_ring():
+    """Return loaded content for ring example."""
+    import time
+    time.sleep(1.2)
+    return Div(
+        P("Ring loader", cls=combine_classes(font_weight.semibold, m.b(1))),
+        P("Loaded successfully!"),
+        id="ring-demo",
+        cls=combine_classes(card, card_body, bg_dui.base_100)
+    )
+
+@rt("/async_loading/content/ball")
+def async_content_ball():
+    """Return loaded content for ball example."""
+    import time
+    time.sleep(0.8)
+    return Div(
+        P("Ball loader", cls=combine_classes(font_weight.semibold, m.b(1))),
+        P("Loaded successfully!"),
+        id="ball-demo",
+        cls=combine_classes(card, card_body, bg_dui.base_100)
+    )
+
+@rt("/async_loading/content/inner")
+def async_content_inner():
+    """Return loaded content for innerHTML swap example."""
+    import time
+    time.sleep(1)
+    # Note: No ID needed since we're swapping innerHTML
+    return Div(
+        H3("Inner Content", cls=combine_classes(font_size.xl, font_weight.bold, m.b(2))),
+        P("This content replaced only the inner HTML of the container."),
+        P("The container div with its styling and ID persisted."),
+        P(f"Loaded at: {time.strftime('%H:%M:%S')}")
     )
 
 @rt
@@ -797,6 +970,7 @@ navbar = create_navbar(
         ("StepFlow", registration_router.start),
         ("Tabbed UI", dashboard_router.index),
         ("Master-Detail", browser_router.index),
+        ("Async Loading", async_loading),
         ("Features", features)
     ],
     home_route=index,
@@ -818,12 +992,14 @@ print("\n📦 Library Components:")
 print("  • StepFlow - Multi-step wizard pattern")
 print("  • TabbedInterface - Tab-based navigation pattern")
 print("  • MasterDetail - Sidebar navigation pattern")
+print("  • AsyncLoadingContainer - Async content loading with loaders")
 print("  • InteractionContext - Unified context management")
 print("  • InteractionHtmlIds - Centralized ID constants")
 print("  • Step - Declarative step definition")
 print("  • Tab - Declarative tab definition")
 print("  • DetailItem - Declarative detail item definition")
 print("  • DetailItemGroup - Declarative detail group definition")
+print("  • LoadingType - Enum for loading indicator styles")
 print("="*70 + "\n")
 
 
@@ -846,6 +1022,7 @@ if __name__ == "__main__":
     print(f"  http://{display_host}:{port}/register/start    - StepFlow demo (Registration)")
     print(f"  http://{display_host}:{port}/dashboard/        - TabbedInterface demo (Dashboard)")
     print(f"  http://{display_host}:{port}/files/            - MasterDetail demo (File Browser)")
+    print(f"  http://{display_host}:{port}/async_loading     - AsyncLoadingContainer demo")
     print(f"  http://{display_host}:{port}/features          - Feature list")
     print("\n" + "="*70 + "\n")
 
