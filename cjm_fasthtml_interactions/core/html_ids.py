@@ -40,6 +40,11 @@ class InteractionHtmlIds(AppHtmlIds):
     MASTER_DETAIL_MASTER = "master-detail-master"
     MASTER_DETAIL_DETAIL = "master-detail-detail"
     
+    # Modal dialog components
+    MODAL_DIALOG = "modal-dialog"
+    MODAL_DIALOG_BOX = "modal-dialog-box"
+    MODAL_DIALOG_CONTENT = "modal-dialog-content"
+    
     @staticmethod
     def step_content(step_id: str  # Step identifier
                     ) -> str:  # HTML ID for step content
@@ -81,3 +86,15 @@ class InteractionHtmlIds(AppHtmlIds):
                       ) -> str:  # HTML ID for detail content
         """Generate HTML ID for detail content area."""
         return f"detail-{item_id}-content"
+    
+    @staticmethod
+    def modal_dialog(modal_id: str  # Modal identifier
+                    ) -> str:  # HTML ID for modal dialog
+        """Generate HTML ID for a modal dialog."""
+        return f"modal-{modal_id}"
+    
+    @staticmethod
+    def modal_dialog_content(modal_id: str  # Modal identifier
+                           ) -> str:  # HTML ID for modal content area
+        """Generate HTML ID for modal content area."""
+        return f"modal-{modal_id}-content"
