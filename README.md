@@ -15,15 +15,16 @@ pip install cjm_fasthtml_interactions
     ├── core/ (2)
     │   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data
     │   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components
-    └── patterns/ (6)
+    └── patterns/ (7)
         ├── async_loading.ipynb           # Pattern for asynchronous content loading with skeleton loaders and loading indicators
         ├── master_detail.ipynb           # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.
         ├── modal_dialog.ipynb            # Pattern for modal dialogs with customizable content, sizes, and actions
+        ├── pagination.ipynb              # Pattern for navigation between pages of content with HTMX integration
         ├── sse_connection_monitor.ipynb  # Pattern for monitoring Server-Sent Events (SSE) connections with visual status indicators and automatic reconnection
         ├── step_flow.ipynb               # Multi-step wizard pattern with state management, navigation, and route generation
         └── tabbed_interface.ipynb        # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
 
-Total: 8 notebooks across 2 directories
+Total: 9 notebooks across 2 directories
 
 ## Module Dependencies
 
@@ -34,22 +35,24 @@ graph LR
     patterns_async_loading[patterns.async_loading<br/>Async Loading Container]
     patterns_master_detail[patterns.master_detail<br/>Master-Detail]
     patterns_modal_dialog[patterns.modal_dialog<br/>Modal Dialog]
+    patterns_pagination[patterns.pagination<br/>Pagination Controls]
     patterns_sse_connection_monitor[patterns.sse_connection_monitor<br/>SSE Connection Monitor]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
     patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
 
-    patterns_master_detail --> core_context
     patterns_master_detail --> core_html_ids
-    patterns_modal_dialog --> patterns_async_loading
+    patterns_master_detail --> core_context
     patterns_modal_dialog --> core_html_ids
+    patterns_modal_dialog --> patterns_async_loading
+    patterns_pagination --> core_html_ids
     patterns_sse_connection_monitor --> core_html_ids
-    patterns_step_flow --> core_context
     patterns_step_flow --> core_html_ids
-    patterns_tabbed_interface --> core_context
+    patterns_step_flow --> core_context
     patterns_tabbed_interface --> core_html_ids
+    patterns_tabbed_interface --> core_context
 ```
 
-*9 cross-module dependencies detected*
+*10 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -265,6 +268,10 @@ class InteractionHtmlIds(AppHtmlIds):
     def sse_element(connection_id: str  # SSE connection identifier
                        ) -> str:  # HTML ID for SSE connection element
         "Generate HTML ID for SSE connection element."
+    
+    def pagination_controls(context_id: str  # Context identifier (e.g., "library", "search-results")
+                              ) -> str:  # HTML ID for pagination controls
+        "Generate HTML ID for pagination controls in a specific context."
 ```
 
 ### Master-Detail (`master_detail.ipynb`)
@@ -530,6 +537,90 @@ def ModalTriggerButton(
 ``` python
 class ModalSize(Enum):
     "Predefined size options for modal dialogs."
+```
+
+### Pagination Controls (`pagination.ipynb`)
+
+> Pattern for navigation between pages of content with HTMX integration
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.patterns.pagination import (
+    PaginationStyle,
+    PaginationControls
+)
+```
+
+#### Functions
+
+``` python
+def PaginationControls(
+    current_page: int,  # Current page number (1-indexed)
+    total_pages: int,  # Total number of pages
+    route_func: Callable[[int], str],  # Function to generate route for a page number
+    target_id: str,  # HTML ID of element to update with HTMX
+    style: PaginationStyle = PaginationStyle.SIMPLE,  # Pagination display style
+    prev_text: str = "« Previous",  # Text for previous button
+    next_text: str = "Next »",  # Text for next button
+    page_info_format: str = "Page {current} of {total}",  # Format string for page info
+    button_size: str = None,  # Button size class (e.g., btn_sizes.sm)
+    container_cls: Optional[str] = None,  # Additional classes for container
+    push_url: bool = True,  # Whether to update URL with hx-push-url
+    **kwargs  # Additional attributes for the container
+) -> FT:  # Div element with pagination controls
+    """
+    Create pagination navigation controls with HTMX integration.
+    
+    The controls provide Previous/Next navigation with automatic disabled states
+    at page boundaries. Uses HTMX for SPA-like page transitions without full
+    page reloads.
+    
+    Examples:
+        # Simple pagination for media library
+        PaginationControls(
+            current_page=5,
+            total_pages=20,
+            route_func=lambda p: f"/library?page={p}",
+            target_id="library-content"
+        )
+        
+        # With custom styling and text
+        PaginationControls(
+            current_page=1,
+            total_pages=10,
+            route_func=lambda p: media_rt.library.to(page=p, view="grid"),
+            target_id=HtmlIds.MAIN_CONTENT,
+            prev_text="← Back",
+            next_text="Forward →",
+            button_size=str(btn_sizes.sm)
+        )
+        
+        # Compact style without page info
+        PaginationControls(
+            current_page=3,
+            total_pages=8,
+            route_func=lambda p: f"/results?page={p}",
+            target_id="results",
+            style=PaginationStyle.COMPACT
+        )
+        
+        # Without URL updates (for modals/drawers)
+        PaginationControls(
+            current_page=2,
+            total_pages=5,
+            route_func=lambda p: f"/api/items?page={p}",
+            target_id="modal-content",
+            push_url=False
+        )
+    """
+```
+
+#### Classes
+
+``` python
+class PaginationStyle(Enum):
+    "Display styles for pagination controls."
 ```
 
 ### SSE Connection Monitor (`sse_connection_monitor.ipynb`)

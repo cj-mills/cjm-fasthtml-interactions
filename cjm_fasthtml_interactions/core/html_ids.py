@@ -45,6 +45,9 @@ class InteractionHtmlIds(AppHtmlIds):
     MODAL_DIALOG_BOX = "modal-dialog-box"
     MODAL_DIALOG_CONTENT = "modal-dialog-content"
     
+    # Pagination components
+    PAGINATION_CONTROLS = "pagination-controls"
+    
     @staticmethod
     def step_content(step_id: str  # Step identifier
                     ) -> str:  # HTML ID for step content
@@ -110,3 +113,9 @@ class InteractionHtmlIds(AppHtmlIds):
                    ) -> str:  # HTML ID for SSE connection element
         """Generate HTML ID for SSE connection element."""
         return f"sse-element-{connection_id}"
+    
+    @staticmethod
+    def pagination_controls(context_id: str  # Context identifier (e.g., "library", "search-results")
+                          ) -> str:  # HTML ID for pagination controls
+        """Generate HTML ID for pagination controls in a specific context."""
+        return f"pagination-{context_id}"
