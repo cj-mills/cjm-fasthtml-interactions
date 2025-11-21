@@ -31,6 +31,7 @@ def PaginationControls(
     route_func: Callable[[int], str],  # Function to generate route for a page number
     target_id: str,  # HTML ID of element to update with HTMX
     style: PaginationStyle = PaginationStyle.SIMPLE,  # Pagination display style
+    swap: str = "outerHTML",  # HTMX swap strategy (outerHTML, innerHTML, beforeend, etc.)
     prev_text: str = "« Previous",  # Text for previous button
     next_text: str = "Next »",  # Text for next button
     page_info_format: str = "Page {current} of {total}",  # Format string for page info
@@ -82,6 +83,15 @@ def PaginationControls(
             target_id="modal-content",
             push_url=False
         )
+        
+        # With innerHTML swap (replaces content inside target)
+        PaginationControls(
+            current_page=3,
+            total_pages=10,
+            route_func=lambda p: f"/items?page={p}",
+            target_id="items-container",
+            swap="innerHTML"
+        )
     """
     # Calculate prev/next page numbers
     prev_page = max(1, current_page - 1)
@@ -102,7 +112,7 @@ def PaginationControls(
         href=route_func(prev_page),
         hx_get=route_func(prev_page),
         hx_target=InteractionHtmlIds.as_selector(target_id),
-        hx_swap="outerHTML",
+        hx_swap=swap,
         hx_push_url="true" if push_url else None,
         cls=combine_classes(
             *button_classes,
@@ -117,7 +127,7 @@ def PaginationControls(
         href=route_func(next_page),
         hx_get=route_func(next_page),
         hx_target=InteractionHtmlIds.as_selector(target_id),
-        hx_swap="outerHTML",
+        hx_swap=swap,
         hx_push_url="true" if push_url else None,
         cls=combine_classes(
             *button_classes,
