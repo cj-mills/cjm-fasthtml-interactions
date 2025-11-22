@@ -99,8 +99,8 @@ def on_registration_complete(state: dict, request):
             Div(
                 A(
                     "Start Another Registration",
-                    href=registration_router.start.to(),
-                    hx_get=registration_router.start.to(),
+                    href=step_flow_ar.start.to(),
+                    hx_get=step_flow_ar.start.to(),
                     hx_target=f"#{InteractionHtmlIds.STEP_FLOW_CONTAINER}",
                     hx_push_url="true",
                     cls=combine_classes(btn, btn_colors.primary)
@@ -150,7 +150,82 @@ registration_flow = StepFlow(
 registration_router = registration_flow.create_router(prefix="/workflow")
 
 
+def render_registration_page(request, sess):
+    """
+    Render the complete registration page with header and workflow.
+
+    Args:
+        request: FastHTML request object
+        sess: FastHTML session object
+
+    Returns:
+        Complete registration layout
+    """
+    return Div(
+        # Header
+        Div(
+            H1("Registration Wizard",
+               cls=combine_classes(font_size._3xl, font_weight.bold, m.b(2))),
+            P("Complete the multi-step registration process using the StepFlow pattern.",
+              cls=combine_classes(m.b(6))),
+            cls=str(m.b(6))
+        ),
+
+        # StepFlow workflow
+        registration_router.start(request, sess),
+
+        cls=combine_classes(
+            max_w._4xl,
+            m.x.auto,
+            p(6)
+        )
+    )
+
+
 @step_flow_ar
-def index(request):
-    """StepFlow demo index - redirects to workflow start."""
-    return RedirectResponse(url=registration_router.start.to(), status_code=303)
+def index(request, sess):
+    """
+    StepFlow demo index route.
+
+    Handles both:
+    - HTMX requests: Returns complete page content (header + workflow)
+    - Full page requests: Returns complete page with navbar and layout
+    """
+    def content():
+        return render_registration_page(request, sess)
+
+    # Import navbar from demo_app to avoid circular import
+    from demo_app import navbar
+    return handle_htmx_request(
+        request,
+        content,
+        wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+    )
+
+
+@step_flow_ar
+def start(request, sess):
+    """
+    Route for starting/resuming the workflow.
+
+    Handles both:
+    - HTMX requests: Returns just the workflow content
+    - Full page requests: Returns complete page with navbar and layout
+    """
+    from cjm_fasthtml_app_core.core.htmx import is_htmx_request
+
+    # For HTMX requests, delegate to workflow router's start function
+    if is_htmx_request(request):
+        return registration_router.start(request, sess)
+
+    # For full page requests, return complete page with navbar
+    def content():
+        return render_registration_page(request, sess)
+
+    # Import navbar from demo_app to avoid circular import
+    from demo_app import navbar
+    return handle_htmx_request(
+        request,
+        content,
+        wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+    )

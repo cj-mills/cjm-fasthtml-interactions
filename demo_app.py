@@ -101,8 +101,7 @@ navbar = create_navbar(
         ("Async Loading", async_loading_ar.index),
         ("Modal Dialog", modal_dialog_ar.index),
         ("SSE Monitor", sse_monitor_ar.index),
-        ("Pagination", pagination_ar.index),
-        ("Features", home_ar.features)
+        ("Pagination", pagination_ar.index)
     ],
     home_route=home_ar.index,
     theme_selector=True
@@ -182,7 +181,6 @@ if __name__ == "__main__":
     print(f"  http://{display_host}:{port}/modal_dialogs/      - ModalDialog demo")
     print(f"  http://{display_host}:{port}/sse_monitor/        - SSEConnectionMonitor demo")
     print(f"  http://{display_host}:{port}/pagination_demo/    - PaginationControls demo")
-    print(f"  http://{display_host}:{port}/features            - Feature list")
     print("\n" + "="*70 + "\n")
 
     # Open browser after a short delay

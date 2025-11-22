@@ -120,14 +120,6 @@ def index(request):
                     hx_push_url="true",
                     cls=combine_classes(btn, btn_colors.success, btn_sizes.lg, m.r(2), m.b(2))
                 ),
-                A(
-                    "View Features",
-                    href=home_ar.features.to(),
-                    hx_get=home_ar.features.to(),
-                    hx_target=f"#{AppHtmlIds.MAIN_CONTENT}",
-                    hx_push_url="true",
-                    cls=combine_classes(btn, btn_colors.accent, btn_sizes.lg, m.b(2))
-                ),
             ),
 
             cls=combine_classes(
@@ -148,85 +140,3 @@ def index(request):
     )
 
 
-@home_ar
-def features(request):
-    """Page listing all library features."""
-
-    def features_content():
-        return Div(
-            H1("StepFlow Pattern Features",
-               cls=combine_classes(font_size._3xl, font_weight.bold, m.b(6))),
-
-            # StepFlow Pattern
-            Div(
-                H2("StepFlow Class", cls=combine_classes(font_size._2xl, font_weight.bold, m.b(3))),
-                P("Multi-step wizard pattern with automatic route generation:",
-                  cls=combine_classes(m.b(2))),
-                Ul(
-                    Li("Define steps declaratively with ", Code("Step"), " objects"),
-                    Li("Automatic route generation (start, next, back, reset)"),
-                    Li("State persistence with ", Code("WorkflowSession")),
-                    Li("Optional progress indicator with daisyUI steps"),
-                    Li("Form data collection and validation"),
-                    Li("Customizable navigation buttons"),
-                    cls=combine_classes(m.l(6), m.b(6))
-                ),
-            ),
-
-            # Context Management
-            Div(
-                H2("InteractionContext", cls=combine_classes(font_size._2xl, font_weight.bold, m.b(3))),
-                P("Unified context for step rendering:",
-                  cls=combine_classes(m.b(2))),
-                Ul(
-                    Li("Access to workflow state (", Code("ctx.get()"), ", ", Code("ctx.set()"), ")"),
-                    Li("Custom data from loaders (", Code("ctx.get_data()"), ")"),
-                    Li("Request and session objects"),
-                    Li("Batch state updates (", Code("ctx.update_state()"), ")"),
-                    cls=combine_classes(m.l(6), m.b(6))
-                ),
-            ),
-
-            # Navigation
-            Div(
-                H2("Navigation Controls", cls=combine_classes(font_size._2xl, font_weight.bold, m.b(3))),
-                P("Built-in navigation with proper HTMX integration:",
-                  cls=combine_classes(m.b(2))),
-                Ul(
-                    Li("Back button (returns to previous step)"),
-                    Li("Continue/Submit button (advances or completes)"),
-                    Li("Cancel button (resets workflow)"),
-                    Li("Form-aware (proper button types for submission)"),
-                    cls=combine_classes(m.l(6), m.b(6))
-                ),
-            ),
-
-            # HTML IDs
-            Div(
-                H2("InteractionHtmlIds", cls=combine_classes(font_size._2xl, font_weight.bold, m.b(3))),
-                P("Centralized HTML ID constants:",
-                  cls=combine_classes(m.b(2))),
-                Ul(
-                    Li(f"STEP_FLOW_CONTAINER = '{InteractionHtmlIds.STEP_FLOW_CONTAINER}'"),
-                    Li(f"STEP_FLOW_PROGRESS = '{InteractionHtmlIds.STEP_FLOW_PROGRESS}'"),
-                    Li(f"STEP_FLOW_NAVIGATION = '{InteractionHtmlIds.STEP_FLOW_NAVIGATION}'"),
-                    Li("Dynamic step IDs via ", Code("step_content()"), " and ", Code("step_indicator()")),
-                    cls=combine_classes(m.l(6), m.b(6))
-                ),
-            ),
-
-            cls=combine_classes(
-                container,
-                max_w._4xl,
-                m.x.auto,
-                p(8)
-            )
-        )
-
-    # Import navbar from demo_app to avoid circular import
-    from demo_app import navbar
-    return handle_htmx_request(
-        request,
-        features_content,
-        wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
-    )

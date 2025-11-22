@@ -155,7 +155,88 @@ dashboard_tabs = TabbedInterface(
 dashboard_router = dashboard_tabs.create_router(prefix="/tabs")
 
 
+def render_dashboard_page(request, sess, current_tab: str = "overview"):
+    """
+    Render the complete dashboard page with header and tabs.
+
+    Args:
+        request: FastHTML request object
+        sess: FastHTML session object
+        current_tab: Currently active tab ID
+
+    Returns:
+        Complete dashboard layout
+    """
+    return Div(
+        # Header
+        Div(
+            H1("Interactive Dashboard",
+               cls=combine_classes(font_size._3xl, font_weight.bold, m.b(2))),
+            P("Explore the TabbedInterface pattern with this interactive dashboard example.",
+              cls=combine_classes(m.b(6))),
+            cls=str(m.b(6))
+        ),
+
+        # Tabbed interface (tabs + content)
+        dashboard_tabs.render_full_interface(
+            current_tab_id=current_tab,
+            tab_route_func=lambda tid: tabbed_interface_ar.tab.to(tab_id=tid),
+            request=request,
+            sess=sess
+        ),
+
+        cls=combine_classes(
+            max_w._6xl,
+            m.x.auto,
+            p(6)
+        )
+    )
+
+
 @tabbed_interface_ar
-def index(request):
-    """TabbedInterface demo index - redirects to dashboard."""
-    return RedirectResponse(url=dashboard_router.index.to(), status_code=303)
+def index(request, sess):
+    """
+    TabbedInterface demo index route.
+
+    Handles both:
+    - HTMX requests: Returns complete page content (header + dashboard)
+    - Full page requests: Returns complete page with navbar and layout
+    """
+    def content():
+        return render_dashboard_page(request, sess)
+
+    # Import navbar from demo_app to avoid circular import
+    from demo_app import navbar
+    return handle_htmx_request(
+        request,
+        content,
+        wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+    )
+
+
+@tabbed_interface_ar
+def tab(request, sess, tab_id: str = "overview"):
+    """
+    Route for loading individual tab content.
+
+    Handles both:
+    - HTMX requests: Returns just the tab content
+    - Full page requests: Returns complete dashboard with tabs and page layout
+    """
+    from cjm_fasthtml_app_core.core.htmx import is_htmx_request
+
+    # For HTMX requests, delegate to dashboard router's tab function
+    if is_htmx_request(request):
+        return dashboard_router.tab(request, sess, tab_id=tab_id)
+
+    # For full page requests, return complete dashboard page with navbar
+    def content():
+        return render_dashboard_page(request, sess, current_tab=tab_id)
+
+    # Import navbar from demo_app to avoid circular import
+    from demo_app import navbar
+    return handle_htmx_request(
+        request,
+        content,
+        wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+    )

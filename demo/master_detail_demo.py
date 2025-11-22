@@ -273,7 +273,88 @@ file_browser = MasterDetail(
 browser_router = file_browser.create_router(prefix="/browser")
 
 
+def render_file_browser_page(request, sess, active_item: str = "overview"):
+    """
+    Render the complete file browser page with header and master-detail interface.
+
+    Args:
+        request: FastHTML request object
+        sess: FastHTML session object
+        active_item: Currently active item ID
+
+    Returns:
+        Complete file browser layout
+    """
+    return Div(
+        # Header
+        Div(
+            H1("File Browser",
+               cls=combine_classes(font_size._3xl, font_weight.bold, m.b(2))),
+            P("Explore the MasterDetail pattern with this file browser example featuring hierarchical navigation.",
+              cls=combine_classes(m.b(6))),
+            cls=str(m.b(6))
+        ),
+
+        # Master-Detail interface (sidebar + detail content)
+        file_browser.render_full_interface(
+            active_item_id=active_item,
+            item_route_func=lambda iid: master_detail_ar.detail.to(item_id=iid),
+            request=request,
+            sess=sess
+        ),
+
+        cls=combine_classes(
+            max_w._7xl,
+            m.x.auto,
+            p(6)
+        )
+    )
+
+
 @master_detail_ar
-def index(request):
-    """MasterDetail demo index - redirects to file browser."""
-    return RedirectResponse(url=browser_router.index.to(), status_code=303)
+def index(request, sess):
+    """
+    MasterDetail demo index route.
+
+    Handles both:
+    - HTMX requests: Returns complete page content (header + file browser)
+    - Full page requests: Returns complete page with navbar and layout
+    """
+    def content():
+        return render_file_browser_page(request, sess)
+
+    # Import navbar from demo_app to avoid circular import
+    from demo_app import navbar
+    return handle_htmx_request(
+        request,
+        content,
+        wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+    )
+
+
+@master_detail_ar
+def detail(request, sess, item_id: str = "overview"):
+    """
+    Route for loading individual item detail content.
+
+    Handles both:
+    - HTMX requests: Returns just the detail content (and updated master list)
+    - Full page requests: Returns complete file browser with page layout
+    """
+    from cjm_fasthtml_app_core.core.htmx import is_htmx_request
+
+    # For HTMX requests, delegate to browser router's detail function
+    if is_htmx_request(request):
+        return browser_router.detail(request, sess, item_id=item_id)
+
+    # For full page requests, return complete file browser page with navbar
+    def content():
+        return render_file_browser_page(request, sess, active_item=item_id)
+
+    # Import navbar from demo_app to avoid circular import
+    from demo_app import navbar
+    return handle_htmx_request(
+        request,
+        content,
+        wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+    )
