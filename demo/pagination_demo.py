@@ -68,6 +68,25 @@ def render_example3_items(items, page, request):
     )
 
 
+def render_example4_items(items, page, request):
+    """Render items for Example 4 (with First/Last buttons)."""
+    total_items = TOTAL_ITEMS
+    items_per_page = 10
+    start_idx = (page - 1) * items_per_page + 1
+    end_idx = start_idx + len(items) - 1
+
+    return Div(
+        H3("Large Dataset", cls=combine_classes(font_weight.semibold, m.b(2))),
+        P(f"Showing items {start_idx}-{end_idx} of {total_items}", cls=combine_classes(m.b(4))),
+        P("With First/Last buttons for quick navigation", cls=combine_classes(m.b(4))),
+        Ul(
+            *[Li(f"{item} (Page {page})", cls=str(m.b(2))) for item in items[:5]],
+            cls=combine_classes(m.l(6))
+        ),
+        cls=combine_classes(card_body)
+    )
+
+
 # Create pagination instances for each example
 example1_pagination = Pagination(
     pagination_id="example1",
@@ -101,10 +120,21 @@ example3_pagination = Pagination(
     push_url=False
 )
 
+example4_pagination = Pagination(
+    pagination_id="example4",
+    data_loader=load_demo_items,
+    render_items=render_example4_items,
+    items_per_page=10,
+    show_endpoints=True,
+    preserve_params=["example"],
+    push_url=False
+)
+
 # Create routers for each example
 example1_router = example1_pagination.create_router(prefix="/pagination_demo/example1")
 example2_router = example2_pagination.create_router(prefix="/pagination_demo/example2")
 example3_router = example3_pagination.create_router(prefix="/pagination_demo/example3")
+example4_router = example4_pagination.create_router(prefix="/pagination_demo/example4")
 
 # Create APIRouter for main demo page
 pagination_ar = APIRouter(prefix="/pagination_demo")
@@ -189,7 +219,29 @@ def index(request):
                 cls=str(m.b(8))
             ),
 
-            # Example 4: Features overview
+            # Example 4: First/Last buttons
+            Div(
+                H2("Example 4: First/Last Buttons",
+                   cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
+                P("Pagination with First/Last buttons for quick navigation to endpoints",
+                  cls=combine_classes(m.b(4))),
+
+                Div(
+                    # Placeholder - will be replaced by HTMX
+                    Div(
+                        P("Loading...", cls=combine_classes(text_align.center, p(4))),
+                        cls=combine_classes(card, bg_dui.base_100, p(6))
+                    ),
+                    hx_get=example4_router.content.to(page=1, example="4"),
+                    hx_trigger="load",
+                    hx_target="this",
+                    hx_swap="outerHTML",
+                    id=example4_pagination.content_id
+                ),
+                cls=str(m.b(8))
+            ),
+
+            # Example 5: Features overview
             Div(
                 H2("Features",
                    cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),

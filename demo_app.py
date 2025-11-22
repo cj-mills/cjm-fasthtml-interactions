@@ -66,7 +66,7 @@ from demo.master_detail_demo import master_detail_ar, browser_router
 from demo.async_loading_demo import async_loading_ar
 from demo.modal_dialog_demo import modal_dialog_ar
 from demo.sse_monitor_demo import sse_monitor_ar
-from demo.pagination_demo import pagination_ar, example1_router, example2_router, example3_router
+from demo.pagination_demo import pagination_ar, example1_router, example2_router, example3_router, example4_router
 from demo.home import home_ar
 
 print("\n" + "="*70)
@@ -126,7 +126,8 @@ register_routes(
     pagination_ar,
     example1_router,
     example2_router,
-    example3_router
+    example3_router,
+    example4_router
 )
 
 # Debug: Print all registered routes

@@ -44,6 +44,9 @@ class Pagination:
         page_info_format: str = "Page {current} of {total}",  # Format for page info
         button_size: str = None,  # Button size class
         push_url: bool = True,  # Whether to update URL with hx-push-url
+        show_endpoints: bool = False,  # Whether to show First/Last buttons
+        first_text: str = "«« First",  # Text for first page button
+        last_text: str = "Last »»",  # Text for last page button
     ):
         """Initialize pagination manager."""
         self.pagination_id = pagination_id
@@ -57,6 +60,9 @@ class Pagination:
         self.page_info_format = page_info_format
         self.button_size = button_size
         self.push_url = push_url
+        self.show_endpoints = show_endpoints
+        self.first_text = first_text
+        self.last_text = last_text
         
         # Auto-generate IDs if not provided
         self.container_id = container_id or InteractionHtmlIds.pagination_container(pagination_id)
@@ -121,6 +127,26 @@ def render_navigation_controls(self:Pagination,
     if self.button_size:
         button_classes.append(self.button_size)
     
+    # Build button group content
+    button_group_parts = []
+    
+    # Add First button if enabled
+    if self.show_endpoints:
+        first_button = A(
+            self.first_text,
+            href=route_func(1),
+            hx_get=route_func(1),
+            hx_target=InteractionHtmlIds.as_selector(self.content_id),
+            hx_swap="outerHTML",
+            hx_push_url="true" if self.push_url else None,
+            cls=combine_classes(
+                *button_classes,
+                btn_styles.ghost if not is_first_page else btn_behaviors.disabled
+            ),
+            disabled=is_first_page
+        )
+        button_group_parts.append(first_button)
+    
     # Create Previous button
     prev_button = A(
         self.prev_text,
@@ -135,6 +161,17 @@ def render_navigation_controls(self:Pagination,
         ),
         disabled=is_first_page
     )
+    button_group_parts.append(prev_button)
+    
+    # Add page info for SIMPLE style
+    if self.style == PaginationStyle.SIMPLE:
+        page_info = self.page_info_format.format(
+            current=current_page,
+            total=total_pages
+        )
+        button_group_parts.append(
+            Span(page_info, cls=str(m.x(4)))
+        )
     
     # Create Next button
     next_button = A(
@@ -150,21 +187,24 @@ def render_navigation_controls(self:Pagination,
         ),
         disabled=is_last_page
     )
-    
-    # Build button group content
-    button_group_parts = [prev_button]
-    
-    # Add page info for SIMPLE style
-    if self.style == PaginationStyle.SIMPLE:
-        page_info = self.page_info_format.format(
-            current=current_page,
-            total=total_pages
-        )
-        button_group_parts.append(
-            Span(page_info, cls=str(m.x(4)))
-        )
-    
     button_group_parts.append(next_button)
+    
+    # Add Last button if enabled
+    if self.show_endpoints:
+        last_button = A(
+            self.last_text,
+            href=route_func(total_pages),
+            hx_get=route_func(total_pages),
+            hx_target=InteractionHtmlIds.as_selector(self.content_id),
+            hx_swap="outerHTML",
+            hx_push_url="true" if self.push_url else None,
+            cls=combine_classes(
+                *button_classes,
+                btn_styles.ghost if not is_last_page else btn_behaviors.disabled
+            ),
+            disabled=is_last_page
+        )
+        button_group_parts.append(last_button)
     
     # Build container classes
     container_classes = [
