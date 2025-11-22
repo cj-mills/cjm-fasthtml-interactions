@@ -47,6 +47,7 @@ class Pagination:
         show_endpoints: bool = False,  # Whether to show First/Last buttons
         first_text: str = "«« First",  # Text for first page button
         last_text: str = "Last »»",  # Text for last page button
+        redirect_route: Optional[Callable[[int, Dict[str, Any]], str]] = None,  # Route to redirect non-HTMX requests
     ):
         """Initialize pagination manager."""
         self.pagination_id = pagination_id
@@ -63,6 +64,7 @@ class Pagination:
         self.show_endpoints = show_endpoints
         self.first_text = first_text
         self.last_text = last_text
+        self.redirect_route = redirect_route
         
         # Auto-generate IDs if not provided
         self.container_id = container_id or InteractionHtmlIds.pagination_container(pagination_id)
@@ -260,6 +262,22 @@ def create_router(self:Pagination,
     @router
     def content(request, page: int = 1, **kwargs):
         """Handle paginated content requests."""
+        from cjm_fasthtml_app_core.core.htmx import is_htmx_request
+        
+        # Check if this is a non-HTMX request (direct navigation/refresh)
+        if not is_htmx_request(request) and self.redirect_route:
+            # Build query params dict from preserved params
+            params = {"page": page}
+            for param in self.preserve_params:
+                value = request.query_params.get(param)
+                if value:
+                    params[param] = value
+            
+            # Redirect to parent route with query params
+            redirect_url = self.redirect_route(page, params)
+            return RedirectResponse(url=redirect_url, status_code=303)
+        
+        # HTMX request or no redirect configured: return paginated content
         # Load all items
         all_items = self.data_loader(request)
         
