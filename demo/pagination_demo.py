@@ -1,144 +1,125 @@
-"""PaginationControls pattern demo - Navigation between pages with various styles."""
+"""Pagination pattern demo - Navigation between pages with automatic route generation."""
 
 from demo import *
 
-# Create APIRouter for pagination routes
+# Sample data for demonstration
+TOTAL_ITEMS = 100
+
+def load_demo_items(request):
+    """Load all items - filtered by example parameter."""
+    example = request.query_params.get("example", "1") if request else "1"
+    # For demo, generate 100 items for each example
+    return [f"Item {i}" for i in range(1, TOTAL_ITEMS + 1)]
+
+
+def render_example1_items(items, page, request):
+    """Render items for Example 1 (grid view)."""
+    total_items = TOTAL_ITEMS
+    items_per_page = 10
+    start_idx = (page - 1) * items_per_page + 1
+    end_idx = start_idx + len(items) - 1
+
+    return Div(
+        # Header
+        Div(
+            H3("Item List", cls=combine_classes(font_weight.semibold, m.b(2))),
+            P(f"Showing items {start_idx}-{end_idx} of {total_items}",
+              cls=combine_classes(m.b(4))),
+            cls=combine_classes(card_body, bg_dui.base_200)
+        ),
+
+        # Items grid
+        Div(
+            *[
+                Div(
+                    Div(
+                        H4(f"Item #{start_idx + idx}", cls=combine_classes(font_weight.bold, m.b(2))),
+                        P(f"This is item number {start_idx + idx} in the list.", cls=combine_classes(m.b(2))),
+                        P(f"Page {page}", cls=combine_classes(font_size.sm)),
+                        cls=combine_classes(card_body)
+                    ),
+                    cls=combine_classes(card, bg_dui.base_100)
+                )
+                for idx, item in enumerate(items)
+            ],
+            cls=combine_classes(grid_display, grid_cols._1, grid_cols._2.md, grid_cols._3.lg, gap._4)
+        )
+    )
+
+
+def render_example2_items(items, page, request):
+    """Render items for Example 2 (compact pagination)."""
+    return Div(
+        H3("Results List", cls=combine_classes(font_weight.semibold, m.b(4))),
+        Ul(
+            *[Li(f"{item} (Page {page})", cls=str(m.b(2))) for item in items[:5]],
+            cls=combine_classes(m.l(6))
+        ),
+        cls=combine_classes(card_body)
+    )
+
+
+def render_example3_items(items, page, request):
+    """Render items for Example 3 (custom styling)."""
+    return Div(
+        H3("Search Results", cls=combine_classes(font_weight.semibold, m.b(2))),
+        P(f"Custom button text and smaller size (Page {page})", cls=combine_classes(m.b(4))),
+        cls=combine_classes(card_body)
+    )
+
+
+# Create pagination instances for each example
+example1_pagination = Pagination(
+    pagination_id="example1",
+    data_loader=load_demo_items,
+    render_items=render_example1_items,
+    items_per_page=10,
+    preserve_params=["example"],
+    push_url=False
+)
+
+example2_pagination = Pagination(
+    pagination_id="example2",
+    data_loader=load_demo_items,
+    render_items=render_example2_items,
+    items_per_page=10,
+    style=PaginationStyle.COMPACT,
+    preserve_params=["example"],
+    push_url=False
+)
+
+example3_pagination = Pagination(
+    pagination_id="example3",
+    data_loader=load_demo_items,
+    render_items=render_example3_items,
+    items_per_page=10,
+    prev_text="← Back",
+    next_text="Forward →",
+    button_size=str(btn_sizes.sm),
+    page_info_format="{current}/{total}",
+    preserve_params=["example"],
+    push_url=False
+)
+
+# Create routers for each example
+example1_router = example1_pagination.create_router(prefix="/pagination_demo/example1")
+example2_router = example2_pagination.create_router(prefix="/pagination_demo/example2")
+example3_router = example3_pagination.create_router(prefix="/pagination_demo/example3")
+
+# Create APIRouter for main demo page
 pagination_ar = APIRouter(prefix="/pagination_demo")
 
 
 @pagination_ar
-def index(request, page: int = 1, example: str = None):
-    """Pagination controls patterns demo page."""
+def index(request):
+    """Pagination pattern demo page."""
 
-    # Sample data for demonstration
-    total_items = 100
-    items_per_page = 10
-    total_pages = (total_items + items_per_page - 1) // items_per_page
-
-    # Calculate items for current page
-    start_idx = (page - 1) * items_per_page
-    end_idx = min(start_idx + items_per_page, total_items)
-    current_items = list(range(start_idx + 1, end_idx + 1))
-
-    # If this is an HTMX request for a specific example's paginated content, return only that content
-    if example == "1" and request.headers.get('HX-Request'):
-        # Helper function to generate route for page (example 1)
-        def make_route_ex1(p: int) -> str:
-            return f"/pagination_demo?page={p}&example=1"
-
-        return Div(
-            # Header
-            Div(
-                H3("Item List", cls=combine_classes(font_weight.semibold, m.b(2))),
-                P(f"Showing items {start_idx + 1}-{end_idx} of {total_items}",
-                  cls=combine_classes(m.b(4))),
-                cls=combine_classes(card_body, bg_dui.base_200)
-            ),
-
-            # Items grid
-            Div(
-                *[
-                    Div(
-                        Div(
-                            H4(f"Item #{item}", cls=combine_classes(font_weight.bold, m.b(2))),
-                            P(f"This is item number {item} in the list.", cls=combine_classes(m.b(2))),
-                            P(f"Page {page} of {total_pages}", cls=combine_classes(font_size.sm)),
-                            cls=combine_classes(card_body)
-                        ),
-                        cls=combine_classes(card, bg_dui.base_100)
-                    )
-                    for item in current_items
-                ],
-                cls=combine_classes(grid_display, grid_cols._1, grid_cols._2.md, grid_cols._3.lg, gap._4, m.b(6))
-            ),
-
-            # Pagination controls
-            PaginationControls(
-                current_page=page,
-                total_pages=total_pages,
-                route_func=make_route_ex1,
-                target_id="pagination-content-1"
-            ),
-
-            id="pagination-content-1",
-            cls=combine_classes(card, bg_dui.base_100, p(6))
-        )
-
-    elif example == "2" and request.headers.get('HX-Request'):
-        # Helper function to generate route for page (example 2)
-        def make_route_ex2(p: int) -> str:
-            return f"/pagination_demo?page={p}&example=2"
-
-        return Div(
-            Div(
-                H3("Results List", cls=combine_classes(font_weight.semibold, m.b(4))),
-                Ul(
-                    *[Li(f"Result item {i} (Page {page})", cls=str(m.b(2))) for i in range(1, 6)],
-                    cls=combine_classes(m.l(6), m.b(6))
-                ),
-                cls=combine_classes(card_body)
-            ),
-
-            # Compact pagination (no page info)
-            PaginationControls(
-                current_page=page,
-                total_pages=total_pages,
-                route_func=make_route_ex2,
-                target_id="pagination-content-2",
-                style=PaginationStyle.COMPACT
-            ),
-
-            id="pagination-content-2",
-            cls=combine_classes(card, bg_dui.base_100, p(6))
-        )
-
-    elif example == "3" and request.headers.get('HX-Request'):
-        # Helper function to generate route for page (example 3)
-        def make_route_ex3(p: int) -> str:
-            return f"/pagination_demo?page={p}&example=3"
-
-        return Div(
-            Div(
-                H3("Search Results", cls=combine_classes(font_weight.semibold, m.b(2))),
-                P(f"Custom button text and smaller size (Page {page})", cls=combine_classes(m.b(4))),
-                cls=combine_classes(card_body)
-            ),
-
-            # Custom styled pagination
-            PaginationControls(
-                current_page=page,
-                total_pages=total_pages,
-                route_func=make_route_ex3,
-                target_id="pagination-content-3",
-                prev_text="← Back",
-                next_text="Forward →",
-                button_size=str(btn_sizes.sm),
-                page_info_format="{current}/{total}"
-            ),
-
-            id="pagination-content-3",
-            cls=combine_classes(card, bg_dui.base_100, p(6))
-        )
-
-    # Otherwise, return the full demo page (for all non-HTMX requests or no example parameter)
     def pagination_content():
-        # Helper function to generate route for page (example 1)
-        def make_route_ex1(p: int) -> str:
-            return f"/pagination_demo?page={p}&example=1"
-
-        # Helper function to generate route for page (example 2)
-        def make_route_ex2(p: int) -> str:
-            return f"/pagination_demo?page={p}&example=2"
-
-        # Helper function to generate route for page (example 3)
-        def make_route_ex3(p: int) -> str:
-            return f"/pagination_demo?page={p}&example=3"
-
         return Div(
-            H1("Pagination Controls Pattern",
+            H1("Pagination Pattern",
                cls=combine_classes(font_size._3xl, font_weight.bold, m.b(6), text_align.center)),
 
-            P("The PaginationControls pattern provides navigation between pages of content with HTMX integration.",
+            P("The Pagination pattern provides automatic route generation and state management for paginated content.",
               cls=combine_classes(text_align.center, m.b(8), max_w._3xl, m.x.auto)),
 
             # Example 1: Simple pagination with paginated content
@@ -150,41 +131,16 @@ def index(request, page: int = 1, example: str = None):
 
                 # Content container that gets updated
                 Div(
-                    # Header
+                    # Placeholder - will be replaced by HTMX
                     Div(
-                        H3("Item List", cls=combine_classes(font_weight.semibold, m.b(2))),
-                        P(f"Showing items {start_idx + 1}-{end_idx} of {total_items}",
-                          cls=combine_classes(m.b(4))),
-                        cls=combine_classes(card_body, bg_dui.base_200)
+                        P("Loading...", cls=combine_classes(text_align.center, p(4))),
+                        cls=combine_classes(card, bg_dui.base_100, p(6))
                     ),
-
-                    # Items grid
-                    Div(
-                        *[
-                            Div(
-                                Div(
-                                    H4(f"Item #{item}", cls=combine_classes(font_weight.bold, m.b(2))),
-                                    P(f"This is item number {item} in the list.", cls=combine_classes(m.b(2))),
-                                    P(f"Page {page} of {total_pages}", cls=combine_classes(font_size.sm)),
-                                    cls=combine_classes(card_body)
-                                ),
-                                cls=combine_classes(card, bg_dui.base_100)
-                            )
-                            for item in current_items
-                        ],
-                        cls=combine_classes(grid_display, grid_cols._1, grid_cols._2.md, grid_cols._3.lg, gap._4, m.b(6))
-                    ),
-
-                    # Pagination controls
-                    PaginationControls(
-                        current_page=page,
-                        total_pages=total_pages,
-                        route_func=make_route_ex1,
-                        target_id="pagination-content-1"
-                    ),
-
-                    id="pagination-content-1",
-                    cls=combine_classes(card, bg_dui.base_100, p(6))
+                    hx_get=example1_router.content.to(page=1, example="1"),
+                    hx_trigger="load",
+                    hx_target="this",
+                    hx_swap="outerHTML",
+                    id=example1_pagination.content_id
                 ),
                 cls=str(m.b(8))
             ),
@@ -197,26 +153,16 @@ def index(request, page: int = 1, example: str = None):
                   cls=combine_classes(m.b(4))),
 
                 Div(
+                    # Placeholder - will be replaced by HTMX
                     Div(
-                        H3("Results List", cls=combine_classes(font_weight.semibold, m.b(4))),
-                        Ul(
-                            *[Li(f"Result item {i} (Page {page})", cls=str(m.b(2))) for i in range(1, 6)],
-                            cls=combine_classes(m.l(6), m.b(6))
-                        ),
-                        cls=combine_classes(card_body)
+                        P("Loading...", cls=combine_classes(text_align.center, p(4))),
+                        cls=combine_classes(card, bg_dui.base_100, p(6))
                     ),
-
-                    # Compact pagination (no page info)
-                    PaginationControls(
-                        current_page=page,
-                        total_pages=total_pages,
-                        route_func=make_route_ex2,
-                        target_id="pagination-content-2",
-                        style=PaginationStyle.COMPACT
-                    ),
-
-                    id="pagination-content-2",
-                    cls=combine_classes(card, bg_dui.base_100, p(6))
+                    hx_get=example2_router.content.to(page=1, example="2"),
+                    hx_trigger="load",
+                    hx_target="this",
+                    hx_swap="outerHTML",
+                    id=example2_pagination.content_id
                 ),
                 cls=str(m.b(8))
             ),
@@ -229,26 +175,16 @@ def index(request, page: int = 1, example: str = None):
                   cls=combine_classes(m.b(4))),
 
                 Div(
+                    # Placeholder - will be replaced by HTMX
                     Div(
-                        H3("Search Results", cls=combine_classes(font_weight.semibold, m.b(2))),
-                        P(f"Custom button text and smaller size (Page {page})", cls=combine_classes(m.b(4))),
-                        cls=combine_classes(card_body)
+                        P("Loading...", cls=combine_classes(text_align.center, p(4))),
+                        cls=combine_classes(card, bg_dui.base_100, p(6))
                     ),
-
-                    # Custom styled pagination
-                    PaginationControls(
-                        current_page=page,
-                        total_pages=total_pages,
-                        route_func=make_route_ex3,
-                        target_id="pagination-content-3",
-                        prev_text="← Back",
-                        next_text="Forward →",
-                        button_size=str(btn_sizes.sm),
-                        page_info_format="{current}/{total}"
-                    ),
-
-                    id="pagination-content-3",
-                    cls=combine_classes(card, bg_dui.base_100, p(6))
+                    hx_get=example3_router.content.to(page=1, example="3"),
+                    hx_trigger="load",
+                    hx_target="this",
+                    hx_swap="outerHTML",
+                    id=example3_pagination.content_id
                 ),
                 cls=str(m.b(8))
             ),
@@ -259,11 +195,11 @@ def index(request, page: int = 1, example: str = None):
                    cls=combine_classes(font_size._2xl, font_weight.bold, m.b(4))),
                 Div(
                     Div(
-                        H3("Navigation", cls=combine_classes(font_weight.semibold, m.b(2))),
+                        H3("Automatic", cls=combine_classes(font_weight.semibold, m.b(2))),
                         Ul(
-                            Li("Previous/Next buttons"),
-                            Li("Automatic disabled states"),
-                            Li("Current page display"),
+                            Li("Route generation"),
+                            Li("Pagination math"),
+                            Li("State preservation"),
                             Li("HTMX integration"),
                             cls=combine_classes(m.l(6))
                         ),
@@ -283,10 +219,10 @@ def index(request, page: int = 1, example: str = None):
                     Div(
                         H3("Integration", cls=combine_classes(font_weight.semibold, m.b(2))),
                         Ul(
-                            Li("SPA-like navigation"),
-                            Li("URL management"),
-                            Li("Target swapping"),
-                            Li("Flexible routing"),
+                            Li("Declarative API"),
+                            Li("Query param preservation"),
+                            Li("Flexible data loading"),
+                            Li("Custom rendering"),
                             cls=combine_classes(m.l(6))
                         ),
                         cls=combine_classes(card_body)

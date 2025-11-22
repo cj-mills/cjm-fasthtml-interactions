@@ -44,12 +44,12 @@ This demo showcases:
    - Tab visibility awareness
    - Server shutdown detection
 
-7. PaginationControls Pattern:
-   - Navigation between pages of content
-   - Automatic disabled states for boundary pages
+7. Pagination Pattern:
+   - Automatic route generation and state management
+   - Pagination math handled automatically
+   - Query parameter preservation
+   - Flexible data loading and rendering
    - HTMX integration for SPA-like navigation
-   - Multiple display styles (simple, compact)
-   - Customizable button text and styling
 """
 
 from fasthtml.common import *
@@ -66,7 +66,7 @@ from demo.master_detail_demo import master_detail_ar, browser_router
 from demo.async_loading_demo import async_loading_ar
 from demo.modal_dialog_demo import modal_dialog_ar
 from demo.sse_monitor_demo import sse_monitor_ar
-from demo.pagination_demo import pagination_ar
+from demo.pagination_demo import pagination_ar, example1_router, example2_router, example3_router
 from demo.home import home_ar
 
 print("\n" + "="*70)
@@ -123,7 +123,10 @@ register_routes(
     async_loading_ar,
     modal_dialog_ar,
     sse_monitor_ar,
-    pagination_ar
+    pagination_ar,
+    example1_router,
+    example2_router,
+    example3_router
 )
 
 # Debug: Print all registered routes
@@ -154,7 +157,7 @@ print("  • LoadingType - Enum for loading indicator styles")
 print("  • ModalSize - Enum for modal size presets")
 print("  • PaginationStyle - Enum for pagination display styles")
 print("  • SSEConnectionConfig - Configuration for SSE monitoring")
-print("  • PaginationControls - Navigation controls for paginated content")
+print("  • Pagination - Automatic route generation for paginated content")
 print("="*70 + "\n")
 
 
@@ -180,7 +183,7 @@ if __name__ == "__main__":
     print(f"  http://{display_host}:{port}/async_loading/      - AsyncLoadingContainer demo")
     print(f"  http://{display_host}:{port}/modal_dialogs/      - ModalDialog demo")
     print(f"  http://{display_host}:{port}/sse_monitor/        - SSEConnectionMonitor demo")
-    print(f"  http://{display_host}:{port}/pagination_demo/    - PaginationControls demo")
+    print(f"  http://{display_host}:{port}/pagination_demo/    - Pagination demo")
     print("\n" + "="*70 + "\n")
 
     # Open browser after a short delay

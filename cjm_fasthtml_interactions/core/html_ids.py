@@ -46,7 +46,9 @@ class InteractionHtmlIds(AppHtmlIds):
     MODAL_DIALOG_CONTENT = "modal-dialog-content"
     
     # Pagination components
-    PAGINATION_CONTROLS = "pagination-controls"
+    PAGINATION_CONTAINER = "pagination-container"
+    PAGINATION_CONTENT = "pagination-content"
+    PAGINATION_NAV = "pagination-nav"
     
     @staticmethod
     def step_content(step_id: str  # Step identifier
@@ -81,7 +83,7 @@ class InteractionHtmlIds(AppHtmlIds):
     @staticmethod
     def master_group(group_id: str  # Group identifier
                     ) -> str:  # HTML ID for master list group
-        """Generate HTML ID for a master list group."""
+        """Generate HTML ID for master list group."""
         return f"master-group-{group_id}"
     
     @staticmethod
@@ -115,7 +117,19 @@ class InteractionHtmlIds(AppHtmlIds):
         return f"sse-element-{connection_id}"
     
     @staticmethod
-    def pagination_controls(context_id: str  # Context identifier (e.g., "library", "search-results")
-                          ) -> str:  # HTML ID for pagination controls
-        """Generate HTML ID for pagination controls in a specific context."""
-        return f"pagination-{context_id}"
+    def pagination_container(pagination_id: str  # Pagination identifier
+                           ) -> str:  # HTML ID for pagination container
+        """Generate HTML ID for pagination container (entire paginated view)."""
+        return f"pagination-{pagination_id}-container"
+    
+    @staticmethod
+    def pagination_content(pagination_id: str  # Pagination identifier
+                         ) -> str:  # HTML ID for pagination content area
+        """Generate HTML ID for pagination content area (items display)."""
+        return f"pagination-{pagination_id}-content"
+    
+    @staticmethod
+    def pagination_nav(pagination_id: str  # Pagination identifier
+                     ) -> str:  # HTML ID for pagination navigation controls
+        """Generate HTML ID for pagination navigation controls."""
+        return f"pagination-{pagination_id}-nav"

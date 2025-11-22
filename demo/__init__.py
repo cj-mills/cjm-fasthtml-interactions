@@ -10,7 +10,7 @@ from cjm_fasthtml_interactions.patterns.master_detail import MasterDetail, Detai
 from cjm_fasthtml_interactions.patterns.async_loading import AsyncLoadingContainer, LoadingType
 from cjm_fasthtml_interactions.patterns.modal_dialog import ModalDialog, ModalTriggerButton, ModalSize
 from cjm_fasthtml_interactions.patterns.sse_connection_monitor import SSEConnectionMonitor, SSEConnectionConfig
-from cjm_fasthtml_interactions.patterns.pagination import PaginationControls, PaginationStyle
+from cjm_fasthtml_interactions.patterns.pagination import Pagination, PaginationStyle
 from cjm_fasthtml_interactions.core.context import InteractionContext
 from cjm_fasthtml_interactions.core.html_ids import InteractionHtmlIds
 from cjm_fasthtml_app_core.core.html_ids import AppHtmlIds
