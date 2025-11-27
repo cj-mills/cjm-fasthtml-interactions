@@ -19,7 +19,7 @@ pip install cjm_fasthtml_interactions
         ├── async_loading.ipynb           # Pattern for asynchronous content loading with skeleton loaders and loading indicators
         ├── master_detail.ipynb           # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.
         ├── modal_dialog.ipynb            # Pattern for modal dialogs with customizable content, sizes, and actions
-        ├── pagination.ipynb              # Pattern for navigation between pages of content with HTMX integration
+        ├── pagination.ipynb              # Pagination pattern with automatic route generation and state management
         ├── sse_connection_monitor.ipynb  # Pattern for monitoring Server-Sent Events (SSE) connections with visual status indicators and automatic reconnection
         ├── step_flow.ipynb               # Multi-step wizard pattern with state management, navigation, and route generation
         └── tabbed_interface.ipynb        # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
@@ -35,7 +35,7 @@ graph LR
     patterns_async_loading[patterns.async_loading<br/>Async Loading Container]
     patterns_master_detail[patterns.master_detail<br/>Master-Detail]
     patterns_modal_dialog[patterns.modal_dialog<br/>Modal Dialog]
-    patterns_pagination[patterns.pagination<br/>Pagination Controls]
+    patterns_pagination[patterns.pagination<br/>Pagination]
     patterns_sse_connection_monitor[patterns.sse_connection_monitor<br/>SSE Connection Monitor]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
     patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
@@ -91,42 +91,7 @@ def AsyncLoadingContainer(
     container_cls: Optional[str] = None,  # Additional CSS classes for container
     **kwargs  # Additional attributes for the container
 ) -> FT:  # Div element with async loading configured
-    """
-    Create a container that asynchronously loads content from a URL.
-    
-    The container displays a loading indicator initially and uses HTMX to load
-    content when triggered. Once loaded, the entire container is replaced with
-    the fetched content (by default using outerHTML swap).
-    
-    Examples:
-        # Simple spinner loader
-        AsyncLoadingContainer(
-            container_id="my-content",
-            load_url="/api/get-content"
-        )
-        
-        # With loading message
-        AsyncLoadingContainer(
-            container_id="dashboard-stats",
-            load_url="/api/stats",
-            loading_message="Loading statistics..."
-        )
-        
-        # With skeleton content
-        AsyncLoadingContainer(
-            container_id="user-card",
-            load_url="/api/user/123",
-            loading_type=LoadingType.NONE,
-            skeleton_content=Div("User profile skeleton...", cls="skeleton")
-        )
-        
-        # Delayed load (triggered by intersection)
-        AsyncLoadingContainer(
-            container_id="lazy-image",
-            load_url="/api/image/456",
-            trigger="intersect once"
-        )
-    """
+    "Create a container that asynchronously loads content from a URL."
 ```
 
 #### Classes
@@ -247,7 +212,7 @@ class InteractionHtmlIds(AppHtmlIds):
     
     def master_group(group_id: str  # Group identifier
                         ) -> str:  # HTML ID for master list group
-        "Generate HTML ID for a master list group."
+        "Generate HTML ID for master list group."
     
     def detail_content(item_id: str  # Item identifier
                           ) -> str:  # HTML ID for detail content
@@ -269,9 +234,17 @@ class InteractionHtmlIds(AppHtmlIds):
                        ) -> str:  # HTML ID for SSE connection element
         "Generate HTML ID for SSE connection element."
     
-    def pagination_controls(context_id: str  # Context identifier (e.g., "library", "search-results")
-                              ) -> str:  # HTML ID for pagination controls
-        "Generate HTML ID for pagination controls in a specific context."
+    def pagination_container(pagination_id: str  # Pagination identifier
+                               ) -> str:  # HTML ID for pagination container
+        "Generate HTML ID for pagination container (entire paginated view)."
+    
+    def pagination_content(pagination_id: str  # Pagination identifier
+                             ) -> str:  # HTML ID for pagination content area
+        "Generate HTML ID for pagination content area (items display)."
+    
+    def pagination_nav(pagination_id: str  # Pagination identifier
+                         ) -> str:  # HTML ID for pagination navigation controls
+        "Generate HTML ID for pagination navigation controls."
 ```
 
 ### Master-Detail (`master_detail.ipynb`)
@@ -460,50 +433,7 @@ def ModalDialog(
     box_cls: Optional[str] = None,  # Additional classes for modal box
     **kwargs  # Additional attributes for the dialog element
 ) -> FT:  # Dialog element with modal dialog configured
-    """
-    Create a modal dialog with customizable content and options.
-    
-    The modal uses the native HTML `<dialog>` element with DaisyUI styling.
-    It can be shown programmatically using `modalId.showModal()` and closed
-    with `modalId.close()` or by clicking the backdrop/close button.
-    
-    Examples:
-        # Simple modal with default settings
-        ModalDialog(
-            modal_id="info-modal",
-            content=Div(
-                H2("Information"),
-                P("This is important information.")
-            )
-        )
-        
-        # Large modal with custom content ID for HTMX updates
-        ModalDialog(
-            modal_id="settings-modal",
-            content=Div("Loading...", id="settings-content"),
-            size=ModalSize.LARGE,
-            content_id="settings-content"
-        )
-        
-        # Full-size modal without close button or backdrop
-        ModalDialog(
-            modal_id="fullscreen-modal",
-            content=Div("Full screen content"),
-            size=ModalSize.FULL,
-            show_close_button=False,
-            close_on_backdrop=False
-        )
-        
-        # Custom size modal with auto-show
-        ModalDialog(
-            modal_id="custom-modal",
-            content=Div("Custom sized modal"),
-            size=ModalSize.CUSTOM,
-            custom_width="w-96",
-            custom_height="h-64",
-            auto_show=True
-        )
-    """
+    "Create a modal dialog using native HTML dialog element with DaisyUI styling."
 ```
 
 ``` python
@@ -513,23 +443,7 @@ def ModalTriggerButton(
     button_cls: Optional[str] = None,  # Additional button classes
     **kwargs  # Additional button attributes
 ) -> FT:  # Button element that triggers modal
-    """
-    Create a button that opens a modal dialog.
-    
-    Examples:
-        # Simple trigger button
-        ModalTriggerButton(
-            modal_id="info-modal",
-            label="Show Info"
-        )
-        
-        # Styled trigger button
-        ModalTriggerButton(
-            modal_id="settings-modal",
-            label="Settings",
-            button_cls=str(combine_classes(btn, btn_colors.primary))
-        )
-    """
+    "Create a button that opens a modal dialog."
 ```
 
 #### Classes
@@ -539,81 +453,77 @@ class ModalSize(Enum):
     "Predefined size options for modal dialogs."
 ```
 
-### Pagination Controls (`pagination.ipynb`)
+### Pagination (`pagination.ipynb`)
 
-> Pattern for navigation between pages of content with HTMX integration
+> Pagination pattern with automatic route generation and state
+> management
 
 #### Import
 
 ``` python
 from cjm_fasthtml_interactions.patterns.pagination import (
     PaginationStyle,
-    PaginationControls
+    Pagination
 )
 ```
 
 #### Functions
 
 ``` python
-def PaginationControls(
-    current_page: int,  # Current page number (1-indexed)
-    total_pages: int,  # Total number of pages
-    route_func: Callable[[int], str],  # Function to generate route for a page number
-    target_id: str,  # HTML ID of element to update with HTMX
-    style: PaginationStyle = PaginationStyle.SIMPLE,  # Pagination display style
-    prev_text: str = "« Previous",  # Text for previous button
-    next_text: str = "Next »",  # Text for next button
-    page_info_format: str = "Page {current} of {total}",  # Format string for page info
-    button_size: str = None,  # Button size class (e.g., btn_sizes.sm)
-    container_cls: Optional[str] = None,  # Additional classes for container
-    push_url: bool = True,  # Whether to update URL with hx-push-url
-    **kwargs  # Additional attributes for the container
-) -> FT:  # Div element with pagination controls
-    """
-    Create pagination navigation controls with HTMX integration.
-    
-    The controls provide Previous/Next navigation with automatic disabled states
-    at page boundaries. Uses HTMX for SPA-like page transitions without full
-    page reloads.
-    
-    Examples:
-        # Simple pagination for media library
-        PaginationControls(
-            current_page=5,
-            total_pages=20,
-            route_func=lambda p: f"/library?page={p}",
-            target_id="library-content"
-        )
-        
-        # With custom styling and text
-        PaginationControls(
-            current_page=1,
-            total_pages=10,
-            route_func=lambda p: media_rt.library.to(page=p, view="grid"),
-            target_id=HtmlIds.MAIN_CONTENT,
-            prev_text="← Back",
-            next_text="Forward →",
-            button_size=str(btn_sizes.sm)
-        )
-        
-        # Compact style without page info
-        PaginationControls(
-            current_page=3,
-            total_pages=8,
-            route_func=lambda p: f"/results?page={p}",
-            target_id="results",
-            style=PaginationStyle.COMPACT
-        )
-        
-        # Without URL updates (for modals/drawers)
-        PaginationControls(
-            current_page=2,
-            total_pages=5,
-            route_func=lambda p: f"/api/items?page={p}",
-            target_id="modal-content",
-            push_url=False
-        )
-    """
+@patch
+def get_total_pages(self:Pagination, 
+                    total_items: int  # Total number of items
+                   ) -> int:  # Total number of pages
+    "Calculate total number of pages."
+```
+
+``` python
+@patch
+def get_page_items(self:Pagination,
+                   all_items: List[Any],  # All items
+                   page: int  # Current page number (1-indexed)
+                  ) -> tuple:  # (page_items, start_idx, end_idx)
+    "Get items for the current page."
+```
+
+``` python
+@patch
+def build_route(self:Pagination,
+                page: int,  # Page number
+                request: Any,  # FastHTML request object
+                page_route_func: Callable  # Route function from create_router
+               ) -> str:  # Complete route with preserved params
+    "Build route URL with preserved query parameters."
+```
+
+``` python
+@patch
+def render_navigation_controls(self:Pagination,
+                               current_page: int,  # Current page number
+                               total_pages: int,  # Total number of pages
+                               route_func: Callable[[int], str]  # Function to generate route for page
+                              ) -> FT:  # Navigation controls element
+    "Render pagination navigation controls."
+```
+
+``` python
+@patch
+def render_page_content(self:Pagination,
+                       page_items: List[Any],  # Items for current page
+                       current_page: int,  # Current page number
+                       total_pages: int,  # Total number of pages
+                       request: Any,  # FastHTML request object
+                       route_func: Callable[[int], str]  # Function to generate route for page
+                      ) -> FT:  # Complete page content with items and navigation
+    "Render complete page content with items and pagination controls."
+```
+
+``` python
+@patch
+def create_router(self:Pagination,
+                  prefix: str = ""  # URL prefix for routes (e.g., "/library")
+                 ) -> APIRouter:  # APIRouter with generated routes
+    "Create FastHTML router with generated routes for pagination."
 ```
 
 #### Classes
@@ -621,6 +531,53 @@ def PaginationControls(
 ``` python
 class PaginationStyle(Enum):
     "Display styles for pagination controls."
+```
+
+``` python
+class Pagination:
+    def __init__(
+        self,
+        pagination_id: str,  # Unique identifier for this pagination instance
+        data_loader: Callable[[Any], List[Any]],  # Function that returns all items
+        render_items: Callable[[List[Any], int, Any], Any],  # Function to render items for a page
+        items_per_page: int = 20,  # Number of items per page
+        container_id: str = None,  # HTML ID for container (auto-generated if None)
+        content_id: str = None,  # HTML ID for content area (auto-generated if None)
+        preserve_params: List[str] = None,  # Query parameters to preserve
+        style: PaginationStyle = PaginationStyle.SIMPLE,  # Pagination display style
+        prev_text: str = "« Previous",  # Text for previous button
+        next_text: str = "Next »",  # Text for next button
+        page_info_format: str = "Page {current} of {total}",  # Format for page info
+        button_size: str = None,  # Button size class
+        push_url: bool = True,  # Whether to update URL with hx-push-url
+        show_endpoints: bool = False,  # Whether to show First/Last buttons
+        first_text: str = "«« First",  # Text for first page button
+        last_text: str = "Last »»",  # Text for last page button
+        redirect_route: Optional[Callable[[int, Dict[str, Any]], str]] = None,  # Route to redirect non-HTMX requests
+    )
+    "Manage paginated views with automatic route generation and state management."
+    
+    def __init__(
+            self,
+            pagination_id: str,  # Unique identifier for this pagination instance
+            data_loader: Callable[[Any], List[Any]],  # Function that returns all items
+            render_items: Callable[[List[Any], int, Any], Any],  # Function to render items for a page
+            items_per_page: int = 20,  # Number of items per page
+            container_id: str = None,  # HTML ID for container (auto-generated if None)
+            content_id: str = None,  # HTML ID for content area (auto-generated if None)
+            preserve_params: List[str] = None,  # Query parameters to preserve
+            style: PaginationStyle = PaginationStyle.SIMPLE,  # Pagination display style
+            prev_text: str = "« Previous",  # Text for previous button
+            next_text: str = "Next »",  # Text for next button
+            page_info_format: str = "Page {current} of {total}",  # Format for page info
+            button_size: str = None,  # Button size class
+            push_url: bool = True,  # Whether to update URL with hx-push-url
+            show_endpoints: bool = False,  # Whether to show First/Last buttons
+            first_text: str = "«« First",  # Text for first page button
+            last_text: str = "Last »»",  # Text for last page button
+            redirect_route: Optional[Callable[[int, Dict[str, Any]], str]] = None,  # Route to redirect non-HTMX requests
+        )
+        "Initialize pagination manager."
 ```
 
 ### SSE Connection Monitor (`sse_connection_monitor.ipynb`)
@@ -648,27 +605,7 @@ def create_connection_status_indicators(
     text_size: str = "text-sm",  # Text size class
     hide_text_on_mobile: bool = True  # Hide text on small screens
 ) -> Dict[str, FT]:  # Dictionary of status state to indicator element
-    """
-    Create status indicator elements for different connection states.
-    
-    Returns a dictionary with keys: 'active', 'disconnected', 'error', 'reconnecting'
-    Each value is a Span element with a status dot and optional text.
-    
-    Examples:
-        # Default indicators
-        indicators = create_connection_status_indicators()
-        
-        # Larger indicators without text
-        indicators = create_connection_status_indicators(
-            status_size="md",
-            show_text=False
-        )
-        
-        # Always show text
-        indicators = create_connection_status_indicators(
-            hide_text_on_mobile=False
-        )
-    """
+    "Create status indicator elements for different connection states."
 ```
 
 ``` python
@@ -677,33 +614,7 @@ def SSEConnectionMonitorScript(
     status_indicators: Dict[str, FT],  # Status indicator elements for each state
     config: Optional[SSEConnectionConfig] = None  # Configuration options
 ) -> FT:  # Script element with monitoring code
-    """
-    Create a script that monitors SSE connection status and manages reconnection.
-    
-    The script listens to HTMX SSE events and updates the status indicator based on
-    connection state. It handles automatic reconnection with exponential backoff,
-    server shutdown detection, and tab visibility changes.
-    
-    Examples:
-        # Create indicators and monitor script
-        indicators = create_connection_status_indicators()
-        script = SSEConnectionMonitorScript(
-            connection_id="my-stream",
-            status_indicators=indicators
-        )
-        
-        # Custom configuration
-        config = SSEConnectionConfig(
-            max_reconnect_attempts=5,
-            reconnect_delay=2000,
-            log_to_console=False
-        )
-        script = SSEConnectionMonitorScript(
-            connection_id="my-stream",
-            status_indicators=indicators,
-            config=config
-        )
-    """
+    "Create a script that monitors SSE connection status and manages reconnection."
 ```
 
 ``` python
@@ -715,51 +626,7 @@ def SSEConnectionMonitor(
     config: Optional[SSEConnectionConfig] = None,  # Configuration options
     container_cls: Optional[str] = None  # Additional CSS classes for status container
 ) -> tuple[FT, FT]:  # Tuple of (status_container, monitor_script)
-    """
-    Create a complete SSE connection monitoring system.
-    
-    Returns a tuple of (status_container, monitor_script) that should be added to your page.
-    The status container displays the current connection status, and the monitor script
-    manages the connection monitoring and updates.
-    
-    Examples:
-        # Simple monitor with default settings
-        status, script = SSEConnectionMonitor(
-            connection_id="dashboard-stream"
-        )
-        
-        # Custom configuration
-        config = SSEConnectionConfig(
-            max_reconnect_attempts=5,
-            reconnect_delay=2000
-        )
-        status, script = SSEConnectionMonitor(
-            connection_id="data-stream",
-            status_size="md",
-            config=config,
-            container_cls="my-custom-class"
-        )
-        
-        # Use in page
-        def my_page():
-            status, script = SSEConnectionMonitor(connection_id="events")
-            return Div(
-                # Header with status
-                Div(
-                    H1("Dashboard"),
-                    status  # Status indicator
-                ),
-                # SSE connection element
-                Div(
-                    hx_ext="sse",
-                    sse_connect="/stream/events",
-                    sse_swap="message",
-                    id=InteractionHtmlIds.sse_element("events")
-                ),
-                # Monitor script
-                script
-            )
-    """
+    "Create a complete SSE connection monitoring system."
 ```
 
 #### Classes

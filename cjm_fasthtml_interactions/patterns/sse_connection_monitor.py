@@ -36,26 +36,7 @@ def create_connection_status_indicators(
     text_size: str = "text-sm",  # Text size class
     hide_text_on_mobile: bool = True  # Hide text on small screens
 ) -> Dict[str, FT]:  # Dictionary of status state to indicator element
-    """Create status indicator elements for different connection states.
-    
-    Returns a dictionary with keys: 'active', 'disconnected', 'error', 'reconnecting'
-    Each value is a Span element with a status dot and optional text.
-    
-    Examples:
-        # Default indicators
-        indicators = create_connection_status_indicators()
-        
-        # Larger indicators without text
-        indicators = create_connection_status_indicators(
-            status_size="md",
-            show_text=False
-        )
-        
-        # Always show text
-        indicators = create_connection_status_indicators(
-            hide_text_on_mobile=False
-        )
-    """
+    """Create status indicator elements for different connection states."""
     # Map size string to size class
     size_map = {
         "xs": status_sizes.xs,
@@ -102,32 +83,7 @@ def SSEConnectionMonitorScript(
     status_indicators: Dict[str, FT],  # Status indicator elements for each state
     config: Optional[SSEConnectionConfig] = None  # Configuration options
 ) -> FT:  # Script element with monitoring code
-    """Create a script that monitors SSE connection status and manages reconnection.
-    
-    The script listens to HTMX SSE events and updates the status indicator based on
-    connection state. It handles automatic reconnection with exponential backoff,
-    server shutdown detection, and tab visibility changes.
-    
-    Examples:
-        # Create indicators and monitor script
-        indicators = create_connection_status_indicators()
-        script = SSEConnectionMonitorScript(
-            connection_id="my-stream",
-            status_indicators=indicators
-        )
-        
-        # Custom configuration
-        config = SSEConnectionConfig(
-            max_reconnect_attempts=5,
-            reconnect_delay=2000,
-            log_to_console=False
-        )
-        script = SSEConnectionMonitorScript(
-            connection_id="my-stream",
-            status_indicators=indicators,
-            config=config
-        )
-    """
+    """Create a script that monitors SSE connection status and manages reconnection."""
     if config is None:
         config = SSEConnectionConfig()
     
@@ -272,50 +228,7 @@ def SSEConnectionMonitor(
     config: Optional[SSEConnectionConfig] = None,  # Configuration options
     container_cls: Optional[str] = None  # Additional CSS classes for status container
 ) -> tuple[FT, FT]:  # Tuple of (status_container, monitor_script)
-    """Create a complete SSE connection monitoring system.
-    
-    Returns a tuple of (status_container, monitor_script) that should be added to your page.
-    The status container displays the current connection status, and the monitor script
-    manages the connection monitoring and updates.
-    
-    Examples:
-        # Simple monitor with default settings
-        status, script = SSEConnectionMonitor(
-            connection_id="dashboard-stream"
-        )
-        
-        # Custom configuration
-        config = SSEConnectionConfig(
-            max_reconnect_attempts=5,
-            reconnect_delay=2000
-        )
-        status, script = SSEConnectionMonitor(
-            connection_id="data-stream",
-            status_size="md",
-            config=config,
-            container_cls="my-custom-class"
-        )
-        
-        # Use in page
-        def my_page():
-            status, script = SSEConnectionMonitor(connection_id="events")
-            return Div(
-                # Header with status
-                Div(
-                    H1("Dashboard"),
-                    status  # Status indicator
-                ),
-                # SSE connection element
-                Div(
-                    hx_ext="sse",
-                    sse_connect="/stream/events",
-                    sse_swap="message",
-                    id=InteractionHtmlIds.sse_element("events")
-                ),
-                # Monitor script
-                script
-            )
-    """
+    """Create a complete SSE connection monitoring system."""
     # Create status indicators
     indicators = create_connection_status_indicators(
         status_size=status_size,

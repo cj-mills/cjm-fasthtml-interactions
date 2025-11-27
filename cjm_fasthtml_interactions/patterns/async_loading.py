@@ -39,41 +39,7 @@ def AsyncLoadingContainer(
     container_cls: Optional[str] = None,  # Additional CSS classes for container
     **kwargs  # Additional attributes for the container
 ) -> FT:  # Div element with async loading configured
-    """Create a container that asynchronously loads content from a URL.
-    
-    The container displays a loading indicator initially and uses HTMX to load
-    content when triggered. Once loaded, the entire container is replaced with
-    the fetched content (by default using outerHTML swap).
-    
-    Examples:
-        # Simple spinner loader
-        AsyncLoadingContainer(
-            container_id="my-content",
-            load_url="/api/get-content"
-        )
-        
-        # With loading message
-        AsyncLoadingContainer(
-            container_id="dashboard-stats",
-            load_url="/api/stats",
-            loading_message="Loading statistics..."
-        )
-        
-        # With skeleton content
-        AsyncLoadingContainer(
-            container_id="user-card",
-            load_url="/api/user/123",
-            loading_type=LoadingType.NONE,
-            skeleton_content=Div("User profile skeleton...", cls="skeleton")
-        )
-        
-        # Delayed load (triggered by intersection)
-        AsyncLoadingContainer(
-            container_id="lazy-image",
-            load_url="/api/image/456",
-            trigger="intersect once"
-        )
-    """
+    """Create a container that asynchronously loads content from a URL."""
     # Build content based on loading type
     content_parts = []
     

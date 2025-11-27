@@ -42,49 +42,7 @@ def ModalDialog(
     box_cls: Optional[str] = None,  # Additional classes for modal box
     **kwargs  # Additional attributes for the dialog element
 ) -> FT:  # Dialog element with modal dialog configured
-    """Create a modal dialog with customizable content and options.
-    
-    The modal uses the native HTML `<dialog>` element with DaisyUI styling.
-    It can be shown programmatically using `modalId.showModal()` and closed
-    with `modalId.close()` or by clicking the backdrop/close button.
-    
-    Examples:
-        # Simple modal with default settings
-        ModalDialog(
-            modal_id="info-modal",
-            content=Div(
-                H2("Information"),
-                P("This is important information.")
-            )
-        )
-        
-        # Large modal with custom content ID for HTMX updates
-        ModalDialog(
-            modal_id="settings-modal",
-            content=Div("Loading...", id="settings-content"),
-            size=ModalSize.LARGE,
-            content_id="settings-content"
-        )
-        
-        # Full-size modal without close button or backdrop
-        ModalDialog(
-            modal_id="fullscreen-modal",
-            content=Div("Full screen content"),
-            size=ModalSize.FULL,
-            show_close_button=False,
-            close_on_backdrop=False
-        )
-        
-        # Custom size modal with auto-show
-        ModalDialog(
-            modal_id="custom-modal",
-            content=Div("Custom sized modal"),
-            size=ModalSize.CUSTOM,
-            custom_width="w-96",
-            custom_height="h-64",
-            auto_show=True
-        )
-    """
+    """Create a modal dialog using native HTML dialog element with DaisyUI styling."""
     # Generate modal dialog ID
     dialog_id = InteractionHtmlIds.modal_dialog(modal_id)
     
@@ -204,22 +162,7 @@ def ModalTriggerButton(
     button_cls: Optional[str] = None,  # Additional button classes
     **kwargs  # Additional button attributes
 ) -> FT:  # Button element that triggers modal
-    """Create a button that opens a modal dialog.
-    
-    Examples:
-        # Simple trigger button
-        ModalTriggerButton(
-            modal_id="info-modal",
-            label="Show Info"
-        )
-        
-        # Styled trigger button
-        ModalTriggerButton(
-            modal_id="settings-modal",
-            label="Settings",
-            button_cls=str(combine_classes(btn, btn_colors.primary))
-        )
-    """
+    """Create a button that opens a modal dialog."""
     dialog_id = InteractionHtmlIds.modal_dialog(modal_id)
     
     button_classes = [btn]
