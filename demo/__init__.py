@@ -4,7 +4,7 @@
 from fasthtml.common import *
 
 # Library components
-from cjm_fasthtml_interactions.patterns.step_flow import Step, StepFlow
+from cjm_fasthtml_interactions.patterns.step_flow import Step, StepFlow, WorkflowStateStore
 from cjm_fasthtml_interactions.patterns.tabbed_interface import Tab, TabbedInterface
 from cjm_fasthtml_interactions.patterns.master_detail import MasterDetail, DetailItem, DetailItemGroup
 from cjm_fasthtml_interactions.patterns.async_loading import AsyncLoadingContainer, LoadingType

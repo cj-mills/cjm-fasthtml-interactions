@@ -1,7 +1,51 @@
 """StepFlow pattern demo - Multi-step registration wizard."""
 
+from typing import Dict, Any, Optional
 from fasthtml.common import *
 from demo import *
+
+
+# Simple in-memory state store for the demo
+class InMemoryStateStore:
+    """In-memory workflow state store for demo purposes."""
+
+    def __init__(self):
+        self._current_steps: Dict[str, str] = {}
+        self._states: Dict[str, Dict[str, Any]] = {}
+
+    def _get_session_id(self, sess: Any) -> str:
+        """Get or create a stable session identifier."""
+        import uuid
+        if "_demo_session_id" not in sess:
+            sess["_demo_session_id"] = str(uuid.uuid4())
+        return sess["_demo_session_id"]
+
+    def _make_key(self, flow_id: str, sess: Any) -> str:
+        return f"{flow_id}:{self._get_session_id(sess)}"
+
+    def get_current_step(self, flow_id: str, sess: Any) -> Optional[str]:
+        return self._current_steps.get(self._make_key(flow_id, sess))
+
+    def set_current_step(self, flow_id: str, sess: Any, step_id: str) -> None:
+        self._current_steps[self._make_key(flow_id, sess)] = step_id
+
+    def get_state(self, flow_id: str, sess: Any) -> Dict[str, Any]:
+        return self._states.get(self._make_key(flow_id, sess), {}).copy()
+
+    def update_state(self, flow_id: str, sess: Any, updates: Dict[str, Any]) -> None:
+        key = self._make_key(flow_id, sess)
+        if key not in self._states:
+            self._states[key] = {}
+        self._states[key].update(updates)
+
+    def clear_state(self, flow_id: str, sess: Any) -> None:
+        key = self._make_key(flow_id, sess)
+        self._current_steps.pop(key, None)
+        self._states.pop(key, None)
+
+
+# Create shared state store instance
+demo_state_store = InMemoryStateStore()
 
 # Create APIRouter for step flow demo
 step_flow_ar = APIRouter(prefix="/step_flow")
@@ -142,6 +186,7 @@ registration_flow = StepFlow(
             next_button_text="Complete Registration"
         )
     ],
+    state_store=demo_state_store,  # Server-side state storage
     on_complete=on_registration_complete,
     show_progress=True  # Enable progress indicator
 )
