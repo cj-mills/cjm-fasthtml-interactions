@@ -42,8 +42,8 @@ graph LR
 
     patterns_master_detail --> core_html_ids
     patterns_master_detail --> core_context
-    patterns_modal_dialog --> core_html_ids
     patterns_modal_dialog --> patterns_async_loading
+    patterns_modal_dialog --> core_html_ids
     patterns_pagination --> core_html_ids
     patterns_sse_connection_monitor --> core_html_ids
     patterns_step_flow --> core_html_ids
@@ -652,6 +652,7 @@ class SSEConnectionConfig:
 
 ``` python
 from cjm_fasthtml_interactions.patterns.step_flow import (
+    WorkflowStateStore,
     Step,
     StepFlow
 )
@@ -680,7 +681,7 @@ def get_step_index(self:StepFlow,
 def get_current_step_id(self:StepFlow, 
                         sess: Any  # FastHTML session object
                        ) -> str:  # Current step ID
-    "Get current step ID from session."
+    "Get current step ID from state store."
 ```
 
 ``` python
@@ -689,7 +690,7 @@ def set_current_step(self:StepFlow,
                      sess: Any,  # FastHTML session object
                      step_id: str  # Step ID to set as current
                     ) -> None
-    "Set current step in session."
+    "Set current step in state store."
 ```
 
 ``` python
@@ -729,7 +730,7 @@ def is_first_step(self:StepFlow,
 def get_workflow_state(self:StepFlow, 
                        sess: Any  # FastHTML session object
                       ) -> Dict[str, Any]:  # All workflow state
-    "Get all workflow state from session."
+    "Get all workflow state from state store."
 ```
 
 ``` python
@@ -801,6 +802,44 @@ def create_router(self:StepFlow,
 #### Classes
 
 ``` python
+@runtime_checkable
+class WorkflowStateStore(Protocol):
+    "Protocol for workflow state storage backends."
+    
+    def get_current_step(self,
+                             flow_id: str,  # Workflow identifier
+                             sess: Any  # FastHTML session object (for session ID extraction)
+                            ) -> Optional[str]:  # Current step ID or None
+        "Get current step ID for a workflow."
+    
+    def set_current_step(self,
+                             flow_id: str,  # Workflow identifier
+                             sess: Any,  # FastHTML session object
+                             step_id: str  # Step ID to set as current
+                            ) -> None
+        "Set current step ID for a workflow."
+    
+    def get_state(self,
+                      flow_id: str,  # Workflow identifier
+                      sess: Any  # FastHTML session object
+                     ) -> Dict[str, Any]:  # Workflow state dictionary
+        "Get all workflow state."
+    
+    def update_state(self,
+                         flow_id: str,  # Workflow identifier
+                         sess: Any,  # FastHTML session object
+                         updates: Dict[str, Any]  # State updates to apply
+                        ) -> None
+        "Update workflow state with new values."
+    
+    def clear_state(self,
+                        flow_id: str,  # Workflow identifier
+                        sess: Any  # FastHTML session object
+                       ) -> None
+        "Clear all workflow state."
+```
+
+``` python
 @dataclass
 class Step:
     "Definition of a single step in a multi-step workflow."
@@ -827,6 +866,7 @@ class StepFlow:
         self,
         flow_id: str,  # Unique identifier for this workflow
         steps: List[Step],  # List of step definitions
+        state_store: WorkflowStateStore,  # Storage backend for workflow state
         container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
         on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
         show_progress: bool = False,  # Whether to show progress indicator
@@ -838,6 +878,7 @@ class StepFlow:
             self,
             flow_id: str,  # Unique identifier for this workflow
             steps: List[Step],  # List of step definitions
+            state_store: WorkflowStateStore,  # Storage backend for workflow state
             container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
             on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
             show_progress: bool = False,  # Whether to show progress indicator
