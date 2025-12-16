@@ -12,9 +12,10 @@ pip install cjm_fasthtml_interactions
 ## Project Structure
 
     nbs/
-    ├── core/ (2)
-    │   ├── context.ipynb   # Context management for interaction patterns providing access to state, request, and custom data
-    │   └── html_ids.ipynb  # Centralized HTML ID constants for interaction pattern components
+    ├── core/ (3)
+    │   ├── context.ipynb      # Context management for interaction patterns providing access to state, request, and custom data
+    │   ├── html_ids.ipynb     # Centralized HTML ID constants for interaction pattern components
+    │   └── state_store.ipynb  # Server-side workflow state storage implementations
     └── patterns/ (7)
         ├── async_loading.ipynb           # Pattern for asynchronous content loading with skeleton loaders and loading indicators
         ├── master_detail.ipynb           # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.
@@ -24,7 +25,7 @@ pip install cjm_fasthtml_interactions
         ├── step_flow.ipynb               # Multi-step wizard pattern with state management, navigation, and route generation
         └── tabbed_interface.ipynb        # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling
 
-Total: 9 notebooks across 2 directories
+Total: 10 notebooks across 2 directories
 
 ## Module Dependencies
 
@@ -32,6 +33,7 @@ Total: 9 notebooks across 2 directories
 graph LR
     core_context[core.context<br/>Interaction Context]
     core_html_ids[core.html_ids<br/>HTML IDs]
+    core_state_store[core.state_store<br/>Workflow State Store]
     patterns_async_loading[patterns.async_loading<br/>Async Loading Container]
     patterns_master_detail[patterns.master_detail<br/>Master-Detail]
     patterns_modal_dialog[patterns.modal_dialog<br/>Modal Dialog]
@@ -40,19 +42,20 @@ graph LR
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
     patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
 
-    patterns_master_detail --> core_html_ids
     patterns_master_detail --> core_context
+    patterns_master_detail --> core_html_ids
     patterns_modal_dialog --> patterns_async_loading
     patterns_modal_dialog --> core_html_ids
     patterns_pagination --> core_html_ids
     patterns_sse_connection_monitor --> core_html_ids
-    patterns_step_flow --> core_html_ids
     patterns_step_flow --> core_context
-    patterns_tabbed_interface --> core_html_ids
+    patterns_step_flow --> core_state_store
+    patterns_step_flow --> core_html_ids
     patterns_tabbed_interface --> core_context
+    patterns_tabbed_interface --> core_html_ids
 ```
 
-*10 cross-module dependencies detected*
+*11 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -643,6 +646,115 @@ class SSEConnectionConfig:
     log_to_console: bool = True  # Enable console logging for debugging
 ```
 
+### Workflow State Store (`state_store.ipynb`)
+
+> Server-side workflow state storage implementations
+
+#### Import
+
+``` python
+from cjm_fasthtml_interactions.core.state_store import (
+    WorkflowStateStore,
+    get_session_id,
+    InMemoryWorkflowStateStore
+)
+```
+
+#### Functions
+
+``` python
+def get_session_id(
+    sess: Any,  # FastHTML session object
+    key: str = "_workflow_session_id"  # Session key for storing the ID
+) -> str:  # Stable session identifier
+    "Get or create a stable session identifier."
+```
+
+#### Classes
+
+``` python
+@runtime_checkable
+class WorkflowStateStore(Protocol):
+    "Protocol for workflow state storage backends."
+    
+    def get_current_step(self,
+                             flow_id: str,  # Workflow identifier
+                             sess: Any  # FastHTML session object
+                            ) -> Optional[str]:  # Current step ID or None
+        "Get current step ID for a workflow."
+    
+    def set_current_step(self,
+                             flow_id: str,  # Workflow identifier
+                             sess: Any,  # FastHTML session object
+                             step_id: str  # Step ID to set as current
+                            ) -> None
+        "Set current step ID for a workflow."
+    
+    def get_state(self,
+                      flow_id: str,  # Workflow identifier
+                      sess: Any  # FastHTML session object
+                     ) -> Dict[str, Any]:  # Workflow state dictionary
+        "Get all workflow state."
+    
+    def update_state(self,
+                         flow_id: str,  # Workflow identifier
+                         sess: Any,  # FastHTML session object
+                         updates: Dict[str, Any]  # State updates to apply
+                        ) -> None
+        "Update workflow state with new values."
+    
+    def clear_state(self,
+                        flow_id: str,  # Workflow identifier
+                        sess: Any  # FastHTML session object
+                       ) -> None
+        "Clear all workflow state."
+```
+
+``` python
+class InMemoryWorkflowStateStore:
+    def __init__(self):
+        """Initialize empty state storage."""
+        self._current_steps: Dict[str, str] = {}  # {flow_id:session_id -> step_id}
+    "In-memory workflow state storage for development and testing."
+    
+    def __init__(self):
+            """Initialize empty state storage."""
+            self._current_steps: Dict[str, str] = {}  # {flow_id:session_id -> step_id}
+        "Initialize empty state storage."
+    
+    def get_current_step(self,
+                             flow_id: str,  # Workflow identifier
+                             sess: Any  # FastHTML session object
+                            ) -> Optional[str]:  # Current step ID or None
+        "Get current step ID for a workflow."
+    
+    def set_current_step(self,
+                             flow_id: str,  # Workflow identifier
+                             sess: Any,  # FastHTML session object
+                             step_id: str  # Step ID to set as current
+                            ) -> None
+        "Set current step ID for a workflow."
+    
+    def get_state(self,
+                      flow_id: str,  # Workflow identifier
+                      sess: Any  # FastHTML session object
+                     ) -> Dict[str, Any]:  # Workflow state dictionary
+        "Get all workflow state."
+    
+    def update_state(self,
+                         flow_id: str,  # Workflow identifier
+                         sess: Any,  # FastHTML session object
+                         updates: Dict[str, Any]  # State updates to apply
+                        ) -> None
+        "Update workflow state with new values."
+    
+    def clear_state(self,
+                        flow_id: str,  # Workflow identifier
+                        sess: Any  # FastHTML session object
+                       ) -> None
+        "Clear all workflow state."
+```
+
 ### Step Flow (`step_flow.ipynb`)
 
 > Multi-step wizard pattern with state management, navigation, and route
@@ -652,7 +764,6 @@ class SSEConnectionConfig:
 
 ``` python
 from cjm_fasthtml_interactions.patterns.step_flow import (
-    WorkflowStateStore,
     Step,
     StepFlow
 )
@@ -802,44 +913,6 @@ def create_router(self:StepFlow,
 #### Classes
 
 ``` python
-@runtime_checkable
-class WorkflowStateStore(Protocol):
-    "Protocol for workflow state storage backends."
-    
-    def get_current_step(self,
-                             flow_id: str,  # Workflow identifier
-                             sess: Any  # FastHTML session object (for session ID extraction)
-                            ) -> Optional[str]:  # Current step ID or None
-        "Get current step ID for a workflow."
-    
-    def set_current_step(self,
-                             flow_id: str,  # Workflow identifier
-                             sess: Any,  # FastHTML session object
-                             step_id: str  # Step ID to set as current
-                            ) -> None
-        "Set current step ID for a workflow."
-    
-    def get_state(self,
-                      flow_id: str,  # Workflow identifier
-                      sess: Any  # FastHTML session object
-                     ) -> Dict[str, Any]:  # Workflow state dictionary
-        "Get all workflow state."
-    
-    def update_state(self,
-                         flow_id: str,  # Workflow identifier
-                         sess: Any,  # FastHTML session object
-                         updates: Dict[str, Any]  # State updates to apply
-                        ) -> None
-        "Update workflow state with new values."
-    
-    def clear_state(self,
-                        flow_id: str,  # Workflow identifier
-                        sess: Any  # FastHTML session object
-                       ) -> None
-        "Clear all workflow state."
-```
-
-``` python
 @dataclass
 class Step:
     "Definition of a single step in a multi-step workflow."
@@ -866,7 +939,7 @@ class StepFlow:
         self,
         flow_id: str,  # Unique identifier for this workflow
         steps: List[Step],  # List of step definitions
-        state_store: WorkflowStateStore,  # Storage backend for workflow state
+        state_store: Optional[WorkflowStateStore] = None,  # Storage backend (defaults to InMemoryWorkflowStateStore)
         container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
         on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
         show_progress: bool = False,  # Whether to show progress indicator
@@ -878,7 +951,7 @@ class StepFlow:
             self,
             flow_id: str,  # Unique identifier for this workflow
             steps: List[Step],  # List of step definitions
-            state_store: WorkflowStateStore,  # Storage backend for workflow state
+            state_store: Optional[WorkflowStateStore] = None,  # Storage backend (defaults to InMemoryWorkflowStateStore)
             container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
             on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
             show_progress: bool = False,  # Whether to show progress indicator
