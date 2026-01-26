@@ -5,6 +5,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: fastai/workflows/nbdev-ci@master
+      - uses: answerdotai/workflows/nbdev-ci@master
         with:
-          version: '3.11'
+          version: '3.12'
