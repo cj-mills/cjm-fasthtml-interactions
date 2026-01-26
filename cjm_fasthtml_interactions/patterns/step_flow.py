@@ -56,7 +56,8 @@ class StepFlow:
         container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
         on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
         show_progress: bool = False,  # Whether to show progress indicator
-        wrap_in_form: bool = True  # Whether to wrap content + navigation in a form
+        wrap_in_form: bool = True,  # Whether to wrap content + navigation in a form
+        debug: bool = False  # Whether to print debug information
     ):
         """Initialize step flow manager."""
         self.flow_id = flow_id
@@ -66,6 +67,7 @@ class StepFlow:
         self.on_complete = on_complete
         self.show_progress = show_progress
         self.wrap_in_form = wrap_in_form
+        self.debug = debug
         
         # Build step index for quick lookup
         self.step_index = {step.id: idx for idx, step in enumerate(steps)}
@@ -187,7 +189,29 @@ def clear_workflow(self:StepFlow,
     """Clear all workflow state."""
     self.state_store.clear_state(self.flow_id, sess)
 
-# %% ../../nbs/patterns/step_flow.ipynb 23
+# %% ../../nbs/patterns/step_flow.ipynb 22
+@patch
+def _summarize_state(self:StepFlow, 
+                     state: Dict[str, Any]  # State dictionary to summarize
+                    ) -> str:  # Human-readable summary string
+    """Create a concise summary of state for debug output."""
+    if not state:
+        return "{}"
+    
+    parts = []
+    for key, value in state.items():
+        if isinstance(value, list):
+            parts.append(f"{key}: list[{len(value)}]")
+        elif isinstance(value, dict):
+            parts.append(f"{key}: dict[{len(value)} keys]")
+        elif isinstance(value, str) and len(value) > 50:
+            parts.append(f"{key}: str[{len(value)} chars]")
+        else:
+            parts.append(f"{key}: {repr(value)}")
+    
+    return "{" + ", ".join(parts) + "}"
+
+# %% ../../nbs/patterns/step_flow.ipynb 24
 @patch
 def create_context(self:StepFlow, 
                    request: Any,  # FastHTML request object
@@ -210,7 +234,7 @@ def create_context(self:StepFlow,
         data=data
     )
 
-# %% ../../nbs/patterns/step_flow.ipynb 24
+# %% ../../nbs/patterns/step_flow.ipynb 25
 @patch
 def render_progress(self:StepFlow, 
                     sess: Any  # FastHTML session object
@@ -238,7 +262,7 @@ def render_progress(self:StepFlow,
         id=InteractionHtmlIds.STEP_FLOW_PROGRESS
     )
 
-# %% ../../nbs/patterns/step_flow.ipynb 25
+# %% ../../nbs/patterns/step_flow.ipynb 26
 @patch
 def render_step_content(self:StepFlow,
                         step_obj: Step,  # Step to render
@@ -283,7 +307,7 @@ def render_step_content(self:StepFlow,
     else:
         return Div(*components)
 
-# %% ../../nbs/patterns/step_flow.ipynb 26
+# %% ../../nbs/patterns/step_flow.ipynb 27
 @patch
 def render_navigation(self:StepFlow,
                       step_id: str,  # Current step ID
@@ -351,7 +375,7 @@ def render_navigation(self:StepFlow,
         cls=combine_classes(flex_display, gap(2), justify.end, m.t(4))
     )
 
-# %% ../../nbs/patterns/step_flow.ipynb 28
+# %% ../../nbs/patterns/step_flow.ipynb 29
 @patch
 def create_router(self:StepFlow,
                   prefix: str = ""  # URL prefix for routes (e.g., "/transcription")
@@ -393,7 +417,8 @@ def create_router(self:StepFlow,
         current_step_id = self.get_current_step_id(sess)
         current_step = self.get_step(current_step_id)
         
-        print(f"DEBUG StepFlow: current_step_id={current_step_id}, is_last={self.is_last_step(current_step_id)}")
+        if self.debug:
+            print(f"DEBUG StepFlow: current_step_id={current_step_id}, is_last={self.is_last_step(current_step_id)}")
 
         if not current_step:
             return start(request, sess)
@@ -406,23 +431,27 @@ def create_router(self:StepFlow,
 
             # Update workflow state with form data
             if form_dict:
-                print(f"DEBUG StepFlow: form_dict={form_dict}")
+                if self.debug:
+                    print(f"DEBUG StepFlow: form_dict keys={list(form_dict.keys())}")
                 self.update_workflow_state(sess, form_dict)
         except Exception as e:
-            print(f"DEBUG StepFlow: Exception getting form data: {e}")
+            if self.debug:
+                print(f"DEBUG StepFlow: Exception getting form data: {e}")
             # No form data or error reading it
             pass
 
         # Validate current step before advancing
         state = self.get_workflow_state(sess)
-        print(f"DEBUG StepFlow: state={state}")
+        if self.debug:
+            print(f"DEBUG StepFlow: state={self._summarize_state(state)}")
         is_valid = current_step.is_valid(state)
-        print(f"DEBUG StepFlow: is_valid={is_valid}")
+        if self.debug:
+            print(f"DEBUG StepFlow: is_valid={is_valid}")
         
         if not is_valid:
             # Validation failed, re-render current step
-            # TODO: In future, could add error messaging here
-            print(f"DEBUG StepFlow: Validation failed, re-rendering current step")
+            if self.debug:
+                print(f"DEBUG StepFlow: Validation failed, re-rendering current step")
             ctx = self.create_context(request, sess, current_step)
             step_content = self.render_step_content(
                 step_obj=current_step,
@@ -435,7 +464,8 @@ def create_router(self:StepFlow,
 
         # Check if this is the last step
         if self.is_last_step(current_step_id):
-            print(f"DEBUG StepFlow: This is the last step, calling on_complete")
+            if self.debug:
+                print(f"DEBUG StepFlow: This is the last step, calling on_complete")
             # Complete the workflow
             if self.on_complete:
                 state = self.get_workflow_state(sess)
@@ -443,18 +473,21 @@ def create_router(self:StepFlow,
                 import inspect
                 if inspect.iscoroutinefunction(self.on_complete):
                     result = await self.on_complete(state, request)
-                    print(f"DEBUG StepFlow: on_complete returned (async)")
+                    if self.debug:
+                        print(f"DEBUG StepFlow: on_complete returned (async)")
                     return result
                 else:
                     result = self.on_complete(state, request)
-                    print(f"DEBUG StepFlow: on_complete returned (sync)")
+                    if self.debug:
+                        print(f"DEBUG StepFlow: on_complete returned (sync)")
                     return result
             else:
                 # No completion handler, just show success
                 return Div("Workflow completed!", id=self.container_id)
 
         # Move to next step
-        print(f"DEBUG StepFlow: Moving to next step")
+        if self.debug:
+            print(f"DEBUG StepFlow: Moving to next step")
         next_step_id = self.get_next_step_id(current_step_id)
         if next_step_id:
             self.set_current_step(sess, next_step_id)

@@ -48,8 +48,8 @@ graph LR
     patterns_modal_dialog --> core_html_ids
     patterns_pagination --> core_html_ids
     patterns_sse_connection_monitor --> core_html_ids
-    patterns_step_flow --> core_context
     patterns_step_flow --> core_state_store
+    patterns_step_flow --> core_context
     patterns_step_flow --> core_html_ids
     patterns_tabbed_interface --> core_context
     patterns_tabbed_interface --> core_html_ids
@@ -863,6 +863,14 @@ def clear_workflow(self:StepFlow,
 
 ``` python
 @patch
+def _summarize_state(self:StepFlow, 
+                     state: Dict[str, Any]  # State dictionary to summarize
+                    ) -> str:  # Human-readable summary string
+    "Create a concise summary of state for debug output."
+```
+
+``` python
+@patch
 def create_context(self:StepFlow, 
                    request: Any,  # FastHTML request object
                    sess: Any,  # FastHTML session object
@@ -943,7 +951,8 @@ class StepFlow:
         container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
         on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
         show_progress: bool = False,  # Whether to show progress indicator
-        wrap_in_form: bool = True  # Whether to wrap content + navigation in a form
+        wrap_in_form: bool = True,  # Whether to wrap content + navigation in a form
+        debug: bool = False  # Whether to print debug information
     )
     "Manage multi-step workflows with automatic route generation and state management."
     
@@ -955,7 +964,8 @@ class StepFlow:
             container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
             on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
             show_progress: bool = False,  # Whether to show progress indicator
-            wrap_in_form: bool = True  # Whether to wrap content + navigation in a form
+            wrap_in_form: bool = True,  # Whether to wrap content + navigation in a form
+            debug: bool = False  # Whether to print debug information
         )
         "Initialize step flow manager."
 ```
