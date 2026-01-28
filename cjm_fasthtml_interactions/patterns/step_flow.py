@@ -279,7 +279,7 @@ def render_step_content(self:StepFlow,
         components.append(
             Div(
                 self.render_progress(ctx.session),
-                cls=combine_classes(m.b(6))
+                # cls=combine_classes(m.b(6))
             )
         )
     
@@ -372,7 +372,12 @@ def render_navigation(self:StepFlow,
     return Div(
         *buttons,
         id=InteractionHtmlIds.STEP_FLOW_NAVIGATION,
-        cls=combine_classes(flex_display, gap(2), justify.end, m.t(4))
+        cls=combine_classes(
+            flex_display, 
+            gap(2), 
+            justify.end, 
+            # m.t(4)
+        )
     )
 
 # %% ../../nbs/patterns/step_flow.ipynb #smobkysszl
