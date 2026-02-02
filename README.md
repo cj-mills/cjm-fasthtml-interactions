@@ -42,17 +42,17 @@ graph LR
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
     patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
 
-    patterns_master_detail --> core_html_ids
     patterns_master_detail --> core_context
-    patterns_modal_dialog --> core_html_ids
+    patterns_master_detail --> core_html_ids
     patterns_modal_dialog --> patterns_async_loading
+    patterns_modal_dialog --> core_html_ids
     patterns_pagination --> core_html_ids
     patterns_sse_connection_monitor --> core_html_ids
     patterns_step_flow --> core_state_store
-    patterns_step_flow --> core_html_ids
     patterns_step_flow --> core_context
-    patterns_tabbed_interface --> core_html_ids
+    patterns_step_flow --> core_html_ids
     patterns_tabbed_interface --> core_context
+    patterns_tabbed_interface --> core_html_ids
 ```
 
 *11 cross-module dependencies detected*

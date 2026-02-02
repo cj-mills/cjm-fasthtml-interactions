@@ -302,7 +302,7 @@ def render_step_content(self:StepFlow,
             *components,
             hx_post=next_route,
             hx_target=InteractionHtmlIds.as_selector(self.container_id),
-            hx_swap="innerHTML"
+            hx_swap="outerHTML"
         )
     else:
         return Div(*components)
@@ -329,7 +329,7 @@ def render_navigation(self:StepFlow,
                 "← Back",
                 hx_get=back_route,
                 hx_target=InteractionHtmlIds.as_selector(self.container_id),
-                hx_swap="innerHTML",
+                hx_swap="outerHTML",
                 type="button",  # Important: prevent form submission
                 id=InteractionHtmlIds.STEP_FLOW_BACK_BTN,
                 cls=combine_classes(btn, btn_styles.ghost)
@@ -350,7 +350,7 @@ def render_navigation(self:StepFlow,
         button_attrs.update({
             "hx_post": next_route,
             "hx_target": InteractionHtmlIds.as_selector(self.container_id),
-            "hx_swap": "innerHTML"
+            "hx_swap": "outerHTML"
         })
     
     buttons.append(Button(button_text, **button_attrs))
@@ -362,7 +362,7 @@ def render_navigation(self:StepFlow,
                 "Cancel",
                 hx_get=cancel_route,
                 hx_target=InteractionHtmlIds.as_selector(self.container_id),
-                hx_swap="innerHTML",
+                hx_swap="outerHTML",
                 type="button",  # Important: prevent form submission
                 id=InteractionHtmlIds.STEP_FLOW_CANCEL_BTN,
                 cls=combine_classes(btn, btn_styles.ghost)
