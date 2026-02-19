@@ -1,0 +1,810 @@
+[
+  {
+    "objectID": "core/context.html",
+    "href": "core/context.html",
+    "title": "Interaction Context",
+    "section": "",
+    "text": "The InteractionContext class provides a unified interface for accessing state, request data, and custom data within interaction patterns. This allows render functions and handlers to access everything they need without passing many individual parameters.\n\nsource\n\n\n\ndef InteractionContext(\n    state:Dict=&lt;factory&gt;, request:Optional=None, session:Optional=None, data:Dict=&lt;factory&gt;, metadata:Dict=&lt;factory&gt;\n)-&gt;None:\n\nContext for interaction patterns providing access to state, request, and custom data.",
+    "crumbs": [
+      "core",
+      "Interaction Context"
+    ]
+  },
+  {
+    "objectID": "core/context.html#interactioncontext-class",
+    "href": "core/context.html#interactioncontext-class",
+    "title": "Interaction Context",
+    "section": "",
+    "text": "The InteractionContext class provides a unified interface for accessing state, request data, and custom data within interaction patterns. This allows render functions and handlers to access everything they need without passing many individual parameters.\n\nsource\n\n\n\ndef InteractionContext(\n    state:Dict=&lt;factory&gt;, request:Optional=None, session:Optional=None, data:Dict=&lt;factory&gt;, metadata:Dict=&lt;factory&gt;\n)-&gt;None:\n\nContext for interaction patterns providing access to state, request, and custom data.",
+    "crumbs": [
+      "core",
+      "Interaction Context"
+    ]
+  },
+  {
+    "objectID": "core/context.html#usage-examples",
+    "href": "core/context.html#usage-examples",
+    "title": "Interaction Context",
+    "section": "Usage Examples",
+    "text": "Usage Examples\nThe InteractionContext is typically created and managed by interaction pattern classes (like StepFlow), but here are examples showing how it’s used:\n\n# Create a context\nctx = InteractionContext()\nctx\n\nInteractionContext(state={}, request=None, session=None, data={}, metadata={})\n\n\n\n# Store and retrieve state\nctx.set(\"plugin_id\", \"transcription_voxtral\")\nctx.set(\"step\", 1)\n\nprint(f\"Plugin ID: {ctx.get('plugin_id')}\")\nprint(f\"Has file_path: {ctx.has('file_path')}\")\n\nPlugin ID: transcription_voxtral\nHas file_path: False\n\n\n\n# Context with custom data (typically from data loaders)\nctx_with_data = InteractionContext(\n    state={\"user_id\": \"123\"},\n    data={\n        \"plugins\": [\n            {\"name\": \"voxtral\", \"title\": \"Voxtral HF\"},\n            {\"name\": \"whisper\", \"title\": \"Whisper\"}\n        ],\n        \"plugin_count\": 5\n    }\n)\n\nplugins = ctx_with_data.get_data(\"plugins\", [])\nprint(f\"Plugins available: {ctx_with_data.get_data('plugin_count')}\")\nprint(f\"First plugin: {plugins[0]}\")\n\nPlugins available: 5\nFirst plugin: {'name': 'voxtral', 'title': 'Voxtral HF'}\n\n\n\n# Batch updates\nctx.update_state({\n    \"file_path\": \"/path/to/file.mp3\",\n    \"confirmed\": True\n})\n\nprint(f\"All state: {ctx.get_all_state()}\")\n\nAll state: {'plugin_id': 'transcription_voxtral', 'step': 1, 'file_path': '/path/to/file.mp3', 'confirmed': True}",
+    "crumbs": [
+      "core",
+      "Interaction Context"
+    ]
+  },
+  {
+    "objectID": "core/context.html#using-context-in-render-functions",
+    "href": "core/context.html#using-context-in-render-functions",
+    "title": "Interaction Context",
+    "section": "Using Context in Render Functions",
+    "text": "Using Context in Render Functions\nHere’s how the context is typically used within step render functions:\n\n# Example render function signature\ndef render_plugin_selector(ctx: InteractionContext):\n    \"\"\"Render plugin selection step.\"\"\"\n    # Access loaded data\n    plugins = ctx.get_data(\"plugins\", [])\n    \n    # Access current state\n    selected = ctx.get(\"plugin_id\")\n    \n    # Could access request if needed\n    # app_state = ctx.request.app.state\n    \n    # Return rendered UI\n    return f\"Render {len(plugins)} plugins, selected: {selected}\"\n\n\n# Simulate using the render function\ntest_ctx = InteractionContext(\n    state={\"plugin_id\": \"plugin_1\"},\n    data={\"plugins\": [{}, {}]}  # 2 plugins\n)\n\nrender_plugin_selector(test_ctx)\n\n'Render 2 plugins, selected: plugin_1'",
+    "crumbs": [
+      "core",
+      "Interaction Context"
+    ]
+  },
+  {
+    "objectID": "core/state_store.html",
+    "href": "core/state_store.html",
+    "title": "Workflow State Store",
+    "section": "",
+    "text": "The WorkflowStateStore protocol defines the interface for persisting workflow state. This allows patterns like StepFlow to work with different storage backends (in-memory, file-based, database) without being coupled to any specific implementation.\nImplementations receive the sess (session) object to extract a session identifier for scoping state to individual users.\n\nsource\n\n\n\ndef WorkflowStateStore(\n    args:VAR_POSITIONAL, kwargs:VAR_KEYWORD\n):\n\nProtocol for workflow state storage backends.",
+    "crumbs": [
+      "core",
+      "Workflow State Store"
+    ]
+  },
+  {
+    "objectID": "core/state_store.html#workflowstatestore-protocol",
+    "href": "core/state_store.html#workflowstatestore-protocol",
+    "title": "Workflow State Store",
+    "section": "",
+    "text": "The WorkflowStateStore protocol defines the interface for persisting workflow state. This allows patterns like StepFlow to work with different storage backends (in-memory, file-based, database) without being coupled to any specific implementation.\nImplementations receive the sess (session) object to extract a session identifier for scoping state to individual users.\n\nsource\n\n\n\ndef WorkflowStateStore(\n    args:VAR_POSITIONAL, kwargs:VAR_KEYWORD\n):\n\nProtocol for workflow state storage backends.",
+    "crumbs": [
+      "core",
+      "Workflow State Store"
+    ]
+  },
+  {
+    "objectID": "core/state_store.html#session-id-extraction",
+    "href": "core/state_store.html#session-id-extraction",
+    "title": "Workflow State Store",
+    "section": "Session ID Extraction",
+    "text": "Session ID Extraction\nThe state store needs a way to identify individual users/sessions. We store a small UUID in the session object itself (the only thing we store there) and use it as a key for server-side storage.\n\nsource\n\nget_session_id\n\ndef get_session_id(\n    sess:Any, # FastHTML session object\n    key:str='_workflow_session_id', # Session key for storing the ID\n)-&gt;str: # Stable session identifier\n\nGet or create a stable session identifier.",
+    "crumbs": [
+      "core",
+      "Workflow State Store"
+    ]
+  },
+  {
+    "objectID": "core/state_store.html#inmemoryworkflowstatestore",
+    "href": "core/state_store.html#inmemoryworkflowstatestore",
+    "title": "Workflow State Store",
+    "section": "InMemoryWorkflowStateStore",
+    "text": "InMemoryWorkflowStateStore\nA simple in-memory implementation of WorkflowStateStore suitable for development and testing. State is lost when the server restarts.\nFor production use, this can be replaced with a file-based or database-backed implementation that follows the same protocol.\n\nsource\n\nInMemoryWorkflowStateStore\n\ndef InMemoryWorkflowStateStore(\n    \n):\n\nIn-memory workflow state storage for development and testing.",
+    "crumbs": [
+      "core",
+      "Workflow State Store"
+    ]
+  },
+  {
+    "objectID": "core/state_store.html#usage-example",
+    "href": "core/state_store.html#usage-example",
+    "title": "Workflow State Store",
+    "section": "Usage Example",
+    "text": "Usage Example\n\n# Create a store instance\nstore = InMemoryWorkflowStateStore()\n\n# Mock session object (in real usage, this comes from FastHTML)\nmock_sess = {}\n\n# Store and retrieve state\nstore.set_current_step(\"my_workflow\", mock_sess, \"step_1\")\nprint(f\"Current step: {store.get_current_step('my_workflow', mock_sess)}\")\n\nstore.update_state(\"my_workflow\", mock_sess, {\"name\": \"Alice\", \"email\": \"alice@example.com\"})\nprint(f\"State: {store.get_state('my_workflow', mock_sess)}\")\n\n# Session only contains the session ID\nprint(f\"Session contents: {mock_sess}\")\n\nCurrent step: step_1\nState: {'name': 'Alice', 'email': 'alice@example.com'}\nSession contents: {'_workflow_session_id': 'c51f6c6f-f753-403c-a92a-3ae4e4275ba1'}\n\n\n\n# Verify it satisfies the protocol\nassert isinstance(store, WorkflowStateStore), \"InMemoryWorkflowStateStore must implement WorkflowStateStore protocol\"\nprint(\"Protocol check passed!\")\n\nProtocol check passed!",
+    "crumbs": [
+      "core",
+      "Workflow State Store"
+    ]
+  },
+  {
+    "objectID": "patterns/modal_dialog.html",
+    "href": "patterns/modal_dialog.html",
+    "title": "Modal Dialog",
+    "section": "",
+    "text": "The ModalSize enum defines predefined size options for modal dialogs.\n\nsource\n\n\n\ndef ModalSize(\n    args:VAR_POSITIONAL, kwds:VAR_KEYWORD\n):\n\nPredefined size options for modal dialogs.",
+    "crumbs": [
+      "patterns",
+      "Modal Dialog"
+    ]
+  },
+  {
+    "objectID": "patterns/modal_dialog.html#modal-size-options",
+    "href": "patterns/modal_dialog.html#modal-size-options",
+    "title": "Modal Dialog",
+    "section": "",
+    "text": "The ModalSize enum defines predefined size options for modal dialogs.\n\nsource\n\n\n\ndef ModalSize(\n    args:VAR_POSITIONAL, kwds:VAR_KEYWORD\n):\n\nPredefined size options for modal dialogs.",
+    "crumbs": [
+      "patterns",
+      "Modal Dialog"
+    ]
+  },
+  {
+    "objectID": "patterns/modal_dialog.html#modaldialog-function",
+    "href": "patterns/modal_dialog.html#modaldialog-function",
+    "title": "Modal Dialog",
+    "section": "ModalDialog Function",
+    "text": "ModalDialog Function\nThe ModalDialog function creates a modal dialog component using DaisyUI’s modal system.\nKey features: - Native HTML &lt;dialog&gt; element with DaisyUI styling - Customizable sizes (small, medium, large, xlarge, full, or custom) - Optional close button (top-right X button) - Optional backdrop for closing on outside click - Support for HTMX updates to modal content - Programmatic show/close via JavaScript API - Auto-show support for immediate display - Flexible content area with optional styling\n\nsource\n\nModalDialog\n\ndef ModalDialog(\n    modal_id:str, # Unique identifier for the modal\n    content:Any, # Content to display in the modal\n    size:Union=&lt;ModalSize.MEDIUM: 'md'&gt;, # Size preset or custom size\n    show_close_button:bool=True, # Whether to show X close button in top-right\n    close_on_backdrop:bool=True, # Whether clicking backdrop closes modal\n    auto_show:bool=False, # Whether to show modal immediately on render\n    content_id:Optional=None, # Optional ID for content area (for HTMX targeting)\n    custom_width:Optional=None, # Custom width class (e.g., \"w-96\")\n    custom_height:Optional=None, # Custom height class (e.g., \"h-screen\")\n    box_cls:Optional=None, # Additional classes for modal box\n    kwargs:VAR_KEYWORD\n)-&gt;FT: # Dialog element with modal dialog configured\n\nCreate a modal dialog using native HTML dialog element with DaisyUI styling.",
+    "crumbs": [
+      "patterns",
+      "Modal Dialog"
+    ]
+  },
+  {
+    "objectID": "patterns/modal_dialog.html#trigger-button-helper",
+    "href": "patterns/modal_dialog.html#trigger-button-helper",
+    "title": "Modal Dialog",
+    "section": "Trigger Button Helper",
+    "text": "Trigger Button Helper\nHelper function to create a button that opens a modal dialog.\n\nsource\n\nModalTriggerButton\n\ndef ModalTriggerButton(\n    modal_id:str, # ID of the modal to trigger\n    label:str, # Button label text\n    button_cls:Optional=None, # Additional button classes\n    kwargs:VAR_KEYWORD\n)-&gt;FT: # Button element that triggers modal\n\nCreate a button that opens a modal dialog.",
+    "crumbs": [
+      "patterns",
+      "Modal Dialog"
+    ]
+  },
+  {
+    "objectID": "patterns/modal_dialog.html#usage-examples",
+    "href": "patterns/modal_dialog.html#usage-examples",
+    "title": "Modal Dialog",
+    "section": "Usage Examples",
+    "text": "Usage Examples\nHere are complete examples showing different modal use cases:\n\nfrom cjm_fasthtml_daisyui.components.data_display.card import card_body, card_title\nfrom cjm_fasthtml_daisyui.components.actions.button import btn_colors\n\n# Example 1: Simple info modal\nsimple_modal = ModalDialog(\n    modal_id=\"info\",\n    content=Div(\n        H2(\"Information\", cls=str(card_title)),\n        P(\"This is a simple informational modal.\"),\n        cls=str(card_body)\n    ),\n    size=ModalSize.SMALL\n)\n\n# Trigger button\ntrigger_btn = ModalTriggerButton(\n    modal_id=\"info\",\n    label=\"Show Info\",\n    button_cls=str(btn_colors.info)\n)\n\nprint(\"Example 1: Simple info modal\")\nprint(f\"Modal ID: {InteractionHtmlIds.modal_dialog('info')}\")\nprint(f\"Trigger: {trigger_btn}\")\n\nExample 1: Simple info modal\nModal ID: modal-info\nTrigger: &lt;button onclick=\"document.getElementById('modal-info').showModal()\" class=\"btn btn-info\"&gt;Show Info&lt;/button&gt;\n\n\n\n# Example 2: Large modal with HTMX content loading\nfrom cjm_fasthtml_interactions.patterns.async_loading import AsyncLoadingContainer, LoadingType\n\n# Modal with async loading content\nloading_modal = ModalDialog(\n    modal_id=\"settings\",\n    content=AsyncLoadingContainer(\n        container_id=\"settings-form\",\n        load_url=\"/api/settings/form\",\n        loading_type=LoadingType.SPINNER,\n        loading_message=\"Loading settings...\"\n    ),\n    size=ModalSize.LARGE,\n    content_id=\"settings-form\"\n)\n\nprint(\"Example 2: Modal with async content\")\nprint(f\"Modal ID: {InteractionHtmlIds.modal_dialog('settings')}\")\nprint(f\"Content ID: {InteractionHtmlIds.modal_dialog_content('settings')}\")\n\nExample 2: Modal with async content\nModal ID: modal-settings\nContent ID: modal-settings-content\n\n\n\n# Example 3: Full-screen modal for media viewing\nfullscreen_modal = ModalDialog(\n    modal_id=\"media-viewer\",\n    content=Div(\n        Img(src=\"/images/large-photo.jpg\", alt=\"Photo\"),\n        cls=combine_classes(\"flex\", \"items-center\", \"justify-center\")\n    ),\n    size=ModalSize.FULL,\n    show_close_button=True,\n    close_on_backdrop=True\n)\n\nprint(\"Example 3: Full-screen media viewer\")\nprint(f\"Modal ID: {InteractionHtmlIds.modal_dialog('media-viewer')}\")\n\nExample 3: Full-screen media viewer\nModal ID: modal-media-viewer\n\n\n\n# Example 4: Custom size modal with auto-show\ncustom_modal = ModalDialog(\n    modal_id=\"welcome\",\n    content=Div(\n        H2(\"Welcome!\", cls=str(card_title)),\n        P(\"Thanks for visiting our app.\"),\n        cls=str(card_body)\n    ),\n    size=ModalSize.CUSTOM,\n    custom_width=\"w-96\",\n    custom_height=\"h-48\",\n    auto_show=True\n)\n\nprint(\"Example 4: Custom size with auto-show\")\nprint(f\"Modal ID: {InteractionHtmlIds.modal_dialog('welcome')}\")\n\nExample 4: Custom size with auto-show\nModal ID: modal-welcome",
+    "crumbs": [
+      "patterns",
+      "Modal Dialog"
+    ]
+  },
+  {
+    "objectID": "patterns/modal_dialog.html#programmatic-control",
+    "href": "patterns/modal_dialog.html#programmatic-control",
+    "title": "Modal Dialog",
+    "section": "Programmatic Control",
+    "text": "Programmatic Control\nYou can show and close modals programmatically using JavaScript:\n// Show modal\ndocument.getElementById('modal-my-modal').showModal();\n\n// Close modal\ndocument.getElementById('modal-my-modal').close();\nOr in Python, using the helper to generate the correct JavaScript:\n# In your button onclick\nButton(\n    \"Open Modal\",\n    onclick=f\"document.getElementById('{InteractionHtmlIds.modal_dialog('my-modal')}').showModal()\"\n)\n\n# Or use ModalTriggerButton helper\nModalTriggerButton(\n    modal_id=\"my-modal\",\n    label=\"Open Modal\"\n)",
+    "crumbs": [
+      "patterns",
+      "Modal Dialog"
+    ]
+  },
+  {
+    "objectID": "patterns/modal_dialog.html#htmx-integration",
+    "href": "patterns/modal_dialog.html#htmx-integration",
+    "title": "Modal Dialog",
+    "section": "HTMX Integration",
+    "text": "HTMX Integration\nModals work seamlessly with HTMX for dynamic content updates:\n\nUpdate Modal Content\nTarget the content area to update modal contents:\n# Create modal with content ID\nmodal = ModalDialog(\n    modal_id=\"details\",\n    content=Div(\"Initial content\", id=\"details-content\"),\n    content_id=\"details-content\"\n)\n\n# Button that updates modal content and shows it\nButton(\n    \"Load Details\",\n    hx_get=\"/api/details/123\",\n    hx_target=InteractionHtmlIds.as_selector(\n        InteractionHtmlIds.modal_dialog_content(\"details\")\n    ),\n    hx_swap=\"innerHTML\",\n    # Show modal after content loads\n    hx_on__after_swap=f\"document.getElementById('{InteractionHtmlIds.modal_dialog('details')}').showModal()\"\n)\n\n\nClose Modal After Action\nClose modal after a successful form submission:\n# Form inside modal\nForm(\n    # ... form fields ...\n    Button(\"Save\", type=\"submit\"),\n    hx_post=\"/api/save\",\n    # Close modal on success\n    hx_on__after_request=f\"\"\"\n        if (event.detail.successful) {{\n            document.getElementById('{InteractionHtmlIds.modal_dialog('my-modal')}').close();\n        }}\n    \"\"\"\n)",
+    "crumbs": [
+      "patterns",
+      "Modal Dialog"
+    ]
+  },
+  {
+    "objectID": "patterns/modal_dialog.html#server-side-responses",
+    "href": "patterns/modal_dialog.html#server-side-responses",
+    "title": "Modal Dialog",
+    "section": "Server-Side Responses",
+    "text": "Server-Side Responses\nWhen updating modal content via HTMX, return just the content:\n@app.get(\"/api/details/{id}\")\ndef get_details(id: str):\n    # Load data\n    details = load_details(id)\n    \n    # Return just the content (will replace content area)\n    return Div(\n        H2(details[\"title\"]),\n        P(details[\"description\"]),\n        # Include ID to match target\n        id=InteractionHtmlIds.modal_dialog_content(\"details\")\n    )\nTo show a modal from server-side response, use OOB swap:\n@app.post(\"/api/trigger-action\")\ndef trigger_action():\n    # Perform action\n    result = do_something()\n    \n    # Create modal with auto-show\n    result_modal = ModalDialog(\n        modal_id=\"result\",\n        content=Div(\n            H2(\"Success!\"),\n            P(f\"Action completed: {result}\")\n        ),\n        auto_show=True\n    )\n    \n    # Add OOB swap to inject modal into page\n    result_modal.attrs['hx-swap-oob'] = 'beforeend:body'\n    \n    return Div(\n        P(\"Action completed\"),  # Main response\n        result_modal  # OOB modal\n    )",
+    "crumbs": [
+      "patterns",
+      "Modal Dialog"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html",
+    "href": "patterns/tabbed_interface.html",
+    "title": "Tabbed Interface",
+    "section": "",
+    "text": "The Tab class defines a single tab in a tabbed interface. Each tab has: - Unique identifier - Display label - Optional title (tooltip on hover) - Render function that generates the UI - Optional data loader for fetching required data\n\nsource\n\n\n\ndef Tab(\n    id:str, label:str, render:Callable, title:Optional=None, data_loader:Optional=None, load_on_demand:bool=True\n)-&gt;None:\n\nDefinition of a single tab in a tabbed interface.",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#tab-definition",
+    "href": "patterns/tabbed_interface.html#tab-definition",
+    "title": "Tabbed Interface",
+    "section": "",
+    "text": "The Tab class defines a single tab in a tabbed interface. Each tab has: - Unique identifier - Display label - Optional title (tooltip on hover) - Render function that generates the UI - Optional data loader for fetching required data\n\nsource\n\n\n\ndef Tab(\n    id:str, label:str, render:Callable, title:Optional=None, data_loader:Optional=None, load_on_demand:bool=True\n)-&gt;None:\n\nDefinition of a single tab in a tabbed interface.",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#tabbedinterface-class",
+    "href": "patterns/tabbed_interface.html#tabbedinterface-class",
+    "title": "Tabbed Interface",
+    "section": "TabbedInterface Class",
+    "text": "TabbedInterface Class\nThe TabbedInterface class manages a multi-tab interface. It: - Renders tab navigation using DaisyUI radio-based tabs - Manages tab content loading via HTMX - Supports direct navigation to specific tabs via URL - Generates routes automatically - Supports different tab styles (lift, bordered, boxed)\n\nsource\n\nTabbedInterface\n\ndef TabbedInterface(\n    interface_id:str, # Unique identifier for this interface\n    tabs_list:List, # List of tab definitions\n    default_tab:Optional=None, # Default tab ID (defaults to first tab)\n    container_id:str='tabbed-interface-container', # HTML ID for container\n    tabs_id:str='tabbed-interface-tabs', # HTML ID for tabs element\n    content_id:str='tabbed-interface-content', # HTML ID for content area\n    tab_style:Optional=None, # DaisyUI tab style (lift, bordered, boxed)\n    show_on_htmx_only:bool=False, # Whether to show full page layout for non-HTMX requests\n):\n\nManage multi-tab interfaces with automatic route generation and HTMX content loading.",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#tab-management-methods",
+    "href": "patterns/tabbed_interface.html#tab-management-methods",
+    "title": "Tabbed Interface",
+    "section": "Tab Management Methods",
+    "text": "Tab Management Methods\n\nsource\n\nTabbedInterface.get_tab\n\ndef get_tab(\n    tab_id:str, # Tab identifier\n)-&gt;Optional: # Tab object or None\n\nGet tab by ID.\n\nsource\n\n\nTabbedInterface.get_tab_index\n\ndef get_tab_index(\n    tab_id:str, # Tab identifier\n)-&gt;Optional: # Tab index or None\n\nGet tab index by ID.",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#context-and-rendering-methods",
+    "href": "patterns/tabbed_interface.html#context-and-rendering-methods",
+    "title": "Tabbed Interface",
+    "section": "Context and Rendering Methods",
+    "text": "Context and Rendering Methods\n\nsource\n\nTabbedInterface.create_context\n\ndef create_context(\n    request:Any, # FastHTML request object\n    sess:Any, # FastHTML session object\n    tab:Tab, # Current tab\n)-&gt;InteractionContext: # Interaction context for rendering\n\nCreate interaction context for a tab.\n\nsource\n\n\nTabbedInterface.render_tabs\n\ndef render_tabs(\n    current_tab_id:str, # Currently active tab ID\n    tab_route_func:Callable, # Function to generate tab route\n)-&gt;FT: # Tab navigation element\n\nRender tab navigation using DaisyUI radio-based tabs.\n\nsource\n\n\nTabbedInterface.render_tab_content\n\ndef render_tab_content(\n    tab_obj:Tab, # Tab to render\n    ctx:InteractionContext, # Interaction context\n)-&gt;FT: # Tab content\n\nRender tab content.\n\nsource\n\n\nTabbedInterface.render_full_interface\n\ndef render_full_interface(\n    current_tab_id:str, # Currently active tab ID\n    tab_route_func:Callable, # Function to generate tab route\n    request:Any, # FastHTML request object\n    sess:Any, # FastHTML session object\n)-&gt;FT: # Complete tabbed interface\n\nRender complete tabbed interface with tabs and content area.",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#route-generation",
+    "href": "patterns/tabbed_interface.html#route-generation",
+    "title": "Tabbed Interface",
+    "section": "Route Generation",
+    "text": "Route Generation\n\nsource\n\nTabbedInterface.create_router\n\ndef create_router(\n    prefix:str='', # URL prefix for routes (e.g., \"/dashboard\")\n)-&gt;APIRouter: # APIRouter with generated routes\n\nCreate FastHTML router with generated routes for this tabbed interface.",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/tabbed_interface.html#usage-example",
+    "href": "patterns/tabbed_interface.html#usage-example",
+    "title": "Tabbed Interface",
+    "section": "Usage Example",
+    "text": "Usage Example\nHere’s a complete example showing how to create a tabbed interface:\n\n# Example: Simple 3-tab dashboard\nfrom fasthtml.common import Div, H2, P, H3, Ul, Li\n\n# Define render functions for each tab\ndef render_overview(ctx: InteractionContext):\n    \"\"\"Render overview tab.\"\"\"\n    stats = ctx.get_data(\"stats\", {})\n    return Div(\n        H2(\"Overview\"),\n        P(f\"Total items: {stats.get('total', 0)}\"),\n        P(f\"Active items: {stats.get('active', 0)}\")\n    )\n\ndef render_settings(ctx: InteractionContext):\n    \"\"\"Render settings tab.\"\"\"\n    return Div(\n        H2(\"Settings\"),\n        H3(\"Configuration Options\"),\n        Ul(\n            Li(\"Theme: Dark\"),\n            Li(\"Language: English\"),\n            Li(\"Notifications: Enabled\")\n        )\n    )\n\ndef render_help(ctx: InteractionContext):\n    \"\"\"Render help tab.\"\"\"\n    return Div(\n        H2(\"Help\"),\n        P(\"Welcome to the help section.\"),\n        P(\"Find documentation and guides here.\")\n    )\n\n# Optional data loader for overview tab\ndef load_overview_data(request):\n    \"\"\"Load statistics for overview tab.\"\"\"\n    return {\n        \"stats\": {\n            \"total\": 42,\n            \"active\": 15\n        }\n    }\n\n# Create the tabbed interface with lift style\ndashboard_tabs = TabbedInterface(\n    interface_id=\"dashboard\",\n    tabs_list=[\n        Tab(\n            id=\"overview\",\n            label=\"Overview\",\n            title=\"Dashboard Overview\",\n            render=render_overview,\n            data_loader=load_overview_data\n        ),\n        Tab(\n            id=\"settings\",\n            label=\"Settings\",\n            title=\"Configuration Settings\",\n            render=render_settings\n        ),\n        Tab(\n            id=\"help\",\n            label=\"Help\",\n            title=\"Help & Documentation\",\n            render=render_help\n        )\n    ],\n    tab_style=\"lift\"  # Use DaisyUI lift style\n)\n\n# Generate router\ndashboard_router = dashboard_tabs.create_router(prefix=\"/dashboard\")\n\n# In your FastHTML app, register the router:\n# from cjm_fasthtml_app_core.core.routing import register_routes\n# register_routes(app, dashboard_router)\n#\n# Or directly:\n# dashboard_router.to_app(app)\n\n\n# Test tabbed interface structure\nprint(f\"Interface has {len(dashboard_tabs.tabs_list)} tabs\")\nprint(f\"Default tab: {dashboard_tabs.default_tab}\")\nprint(f\"Tab IDs: {list(dashboard_tabs.tab_index.keys())}\")\nprint(f\"Tab style: {dashboard_tabs.tab_style}\")\n\nInterface has 3 tabs\nDefault tab: overview\nTab IDs: ['overview', 'settings', 'help']\nTab style: lift",
+    "crumbs": [
+      "patterns",
+      "Tabbed Interface"
+    ]
+  },
+  {
+    "objectID": "patterns/async_loading.html",
+    "href": "patterns/async_loading.html",
+    "title": "Async Loading Container",
+    "section": "",
+    "text": "The LoadingType enum defines the types of loading indicators available.\n\nsource\n\n\n\ndef LoadingType(\n    args:VAR_POSITIONAL, kwds:VAR_KEYWORD\n):\n\nTypes of loading indicators for async content.",
+    "crumbs": [
+      "patterns",
+      "Async Loading Container"
+    ]
+  },
+  {
+    "objectID": "patterns/async_loading.html#loading-indicator-types",
+    "href": "patterns/async_loading.html#loading-indicator-types",
+    "title": "Async Loading Container",
+    "section": "",
+    "text": "The LoadingType enum defines the types of loading indicators available.\n\nsource\n\n\n\ndef LoadingType(\n    args:VAR_POSITIONAL, kwds:VAR_KEYWORD\n):\n\nTypes of loading indicators for async content.",
+    "crumbs": [
+      "patterns",
+      "Async Loading Container"
+    ]
+  },
+  {
+    "objectID": "patterns/async_loading.html#asyncloadingcontainer-function",
+    "href": "patterns/async_loading.html#asyncloadingcontainer-function",
+    "title": "Async Loading Container",
+    "section": "AsyncLoadingContainer Function",
+    "text": "AsyncLoadingContainer Function\nThe AsyncLoadingContainer function creates a container that displays a loading indicator and asynchronously loads content from a URL using HTMX.\nKey features: - Displays loading indicator initially - Loads content via HTMX when triggered - Replaces itself with loaded content (outerHTML swap) - Customizable loading indicators - Support for skeleton loaders - Optional custom styling\n\nsource\n\nAsyncLoadingContainer\n\ndef AsyncLoadingContainer(\n    container_id:str, # HTML ID for the container\n    load_url:str, # URL to fetch content from\n    loading_type:LoadingType=&lt;LoadingType.SPINNER: 'spinner'&gt;, # Type of loading indicator\n    loading_size:str='lg', # Size of loading indicator (xs, sm, md, lg)\n    loading_message:Optional=None, # Optional message to display while loading\n    skeleton_content:Optional=None, # Optional skeleton/placeholder content\n    trigger:str='load', # HTMX trigger event (default: load on page load)\n    swap:str='outerHTML', # HTMX swap method (default: replace entire container)\n    container_cls:Optional=None, # Additional CSS classes for container\n    kwargs:VAR_KEYWORD\n)-&gt;FT: # Div element with async loading configured\n\nCreate a container that asynchronously loads content from a URL.",
+    "crumbs": [
+      "patterns",
+      "Async Loading Container"
+    ]
+  },
+  {
+    "objectID": "patterns/async_loading.html#usage-examples",
+    "href": "patterns/async_loading.html#usage-examples",
+    "title": "Async Loading Container",
+    "section": "Usage Examples",
+    "text": "Usage Examples\nHere are complete examples showing different use cases:\n\nfrom cjm_fasthtml_daisyui.components.data_display.card import card\nfrom cjm_fasthtml_daisyui.utilities.semantic_colors import bg_dui\n\n# Example 1: Simple spinner loader for a dashboard card\nsimple_loader = AsyncLoadingContainer(\n    container_id=\"stats-card\",\n    load_url=\"/api/dashboard/stats\",\n    loading_message=\"Loading statistics...\",\n    container_cls=str(combine_classes(card, bg_dui.base_100))\n)\n\nprint(\"Example 1: Simple spinner loader\")\nprint(simple_loader)\n\nExample 1: Simple spinner loader\nstats-card\n\n\n\n# Example 2: Skeleton loader for card content\nfrom cjm_fasthtml_daisyui.components.feedback.skeleton import skeleton\n\nskeleton_card = Div(\n    Div(cls=combine_classes(skeleton, \"h-32\", \"w-full\", m.b(4))),\n    Div(cls=combine_classes(skeleton, \"h-4\", \"w-full\", m.b(2))),\n    Div(cls=combine_classes(skeleton, \"h-4\", \"w-3/4\")),\n    cls=str(p(4))\n)\n\nskeleton_loader = AsyncLoadingContainer(\n    container_id=\"user-profile\",\n    load_url=\"/api/user/profile\",\n    loading_type=LoadingType.NONE,\n    skeleton_content=skeleton_card,\n    container_cls=str(combine_classes(card, bg_dui.base_100))\n)\n\nprint(\"Example 2: Skeleton loader\")\nprint(skeleton_loader)\n\nExample 2: Skeleton loader\nuser-profile\n\n\n\n# Example 3: Different loading indicator styles\nprint(\"Example 3: Different loading styles\")\n\nfor loading_style in [LoadingType.SPINNER, LoadingType.DOTS, LoadingType.RING]:\n    loader = AsyncLoadingContainer(\n        container_id=f\"content-{loading_style.value}\",\n        load_url=\"/api/content\",\n        loading_type=loading_style,\n        loading_size=\"md\"\n    )\n    print(f\"  {loading_style.value}: Created\")\n\nExample 3: Different loading styles\n  spinner: Created\n  dots: Created\n  ring: Created\n\n\n\n# Example 4: Lazy loading with intersection observer\nlazy_loader = AsyncLoadingContainer(\n    container_id=\"lazy-content\",\n    load_url=\"/api/heavy-content\",\n    trigger=\"intersect once\",  # Load only when scrolled into view\n    loading_type=LoadingType.SPINNER,\n    loading_message=\"Loading when visible...\"\n)\n\nprint(\"Example 4: Lazy loading\")\nprint(lazy_loader)\n\nExample 4: Lazy loading\nlazy-content",
+    "crumbs": [
+      "patterns",
+      "Async Loading Container"
+    ]
+  },
+  {
+    "objectID": "patterns/async_loading.html#server-side-response",
+    "href": "patterns/async_loading.html#server-side-response",
+    "title": "Async Loading Container",
+    "section": "Server-Side Response",
+    "text": "Server-Side Response\nThe endpoint specified in load_url should return the complete content that will replace the loading container. Since the default swap is outerHTML, the returned content should include the container with the same ID:\n@app.get(\"/api/dashboard/stats\")\ndef get_stats():\n    # Load your data\n    stats = get_statistics()\n    \n    # Return complete card with same ID\n    return Div(\n        H3(\"Statistics\"),\n        P(f\"Total: {stats['total']}\"),\n        P(f\"Active: {stats['active']}\"),\n        id=\"stats-card\",  # Same ID as the loading container\n        cls=combine_classes(card, card_body, bg_dui.base_100)\n    )\nAlternatively, use swap=\"innerHTML\" to replace only the container’s contents:\n# Container\nAsyncLoadingContainer(\n    container_id=\"stats-card\",\n    load_url=\"/api/dashboard/stats\",\n    swap=\"innerHTML\",\n    container_cls=str(combine_classes(card, card_body, bg_dui.base_100))\n)\n\n# Endpoint - no need to include container\n@app.get(\"/api/dashboard/stats\")\ndef get_stats():\n    stats = get_statistics()\n    return Div(\n        H3(\"Statistics\"),\n        P(f\"Total: {stats['total']}\"),\n        P(f\"Active: {stats['active']}\")\n    )",
+    "crumbs": [
+      "patterns",
+      "Async Loading Container"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "cjm-fasthtml-interactions",
+    "section": "",
+    "text": "pip install cjm_fasthtml_interactions",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "cjm-fasthtml-interactions",
+    "section": "",
+    "text": "pip install cjm_fasthtml_interactions",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#project-structure",
+    "href": "index.html#project-structure",
+    "title": "cjm-fasthtml-interactions",
+    "section": "Project Structure",
+    "text": "Project Structure\nnbs/\n├── core/ (3)\n│   ├── context.ipynb      # Context management for interaction patterns providing access to state, request, and custom data\n│   ├── html_ids.ipynb     # Centralized HTML ID constants for interaction pattern components\n│   └── state_store.ipynb  # Server-side workflow state storage implementations\n└── patterns/ (7)\n    ├── async_loading.ipynb           # Pattern for asynchronous content loading with skeleton loaders and loading indicators\n    ├── master_detail.ipynb           # Responsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.\n    ├── modal_dialog.ipynb            # Pattern for modal dialogs with customizable content, sizes, and actions\n    ├── pagination.ipynb              # Pagination pattern with automatic route generation and state management\n    ├── sse_connection_monitor.ipynb  # Pattern for monitoring Server-Sent Events (SSE) connections with visual status indicators and automatic reconnection\n    ├── step_flow.ipynb               # Multi-step wizard pattern with state management, navigation, and route generation\n    └── tabbed_interface.ipynb        # Multi-tab interface pattern with automatic routing, state management, and DaisyUI styling\nTotal: 10 notebooks across 2 directories",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#module-dependencies",
+    "href": "index.html#module-dependencies",
+    "title": "cjm-fasthtml-interactions",
+    "section": "Module Dependencies",
+    "text": "Module Dependencies\ngraph LR\n    core_context[core.context&lt;br/&gt;Interaction Context]\n    core_html_ids[core.html_ids&lt;br/&gt;HTML IDs]\n    core_state_store[core.state_store&lt;br/&gt;Workflow State Store]\n    patterns_async_loading[patterns.async_loading&lt;br/&gt;Async Loading Container]\n    patterns_master_detail[patterns.master_detail&lt;br/&gt;Master-Detail]\n    patterns_modal_dialog[patterns.modal_dialog&lt;br/&gt;Modal Dialog]\n    patterns_pagination[patterns.pagination&lt;br/&gt;Pagination]\n    patterns_sse_connection_monitor[patterns.sse_connection_monitor&lt;br/&gt;SSE Connection Monitor]\n    patterns_step_flow[patterns.step_flow&lt;br/&gt;Step Flow]\n    patterns_tabbed_interface[patterns.tabbed_interface&lt;br/&gt;Tabbed Interface]\n\n    patterns_master_detail --&gt; core_html_ids\n    patterns_master_detail --&gt; core_context\n    patterns_modal_dialog --&gt; core_html_ids\n    patterns_modal_dialog --&gt; patterns_async_loading\n    patterns_pagination --&gt; core_html_ids\n    patterns_sse_connection_monitor --&gt; core_html_ids\n    patterns_step_flow --&gt; core_state_store\n    patterns_step_flow --&gt; core_html_ids\n    patterns_step_flow --&gt; core_context\n    patterns_tabbed_interface --&gt; core_html_ids\n    patterns_tabbed_interface --&gt; core_context\n11 cross-module dependencies detected",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#cli-reference",
+    "href": "index.html#cli-reference",
+    "title": "cjm-fasthtml-interactions",
+    "section": "CLI Reference",
+    "text": "CLI Reference\nNo CLI commands found in this project.",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "index.html#module-overview",
+    "href": "index.html#module-overview",
+    "title": "cjm-fasthtml-interactions",
+    "section": "Module Overview",
+    "text": "Module Overview\nDetailed documentation for each module in the project:\n\nAsync Loading Container (async_loading.ipynb)\n\nPattern for asynchronous content loading with skeleton loaders and loading indicators\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.async_loading import (\n    LoadingType,\n    AsyncLoadingContainer\n)\n\n\nFunctions\ndef AsyncLoadingContainer(\n    container_id: str,  # HTML ID for the container\n    load_url: str,  # URL to fetch content from\n    loading_type: LoadingType = LoadingType.SPINNER,  # Type of loading indicator\n    loading_size: str = \"lg\",  # Size of loading indicator (xs, sm, md, lg)\n    loading_message: Optional[str] = None,  # Optional message to display while loading\n    skeleton_content: Optional[Any] = None,  # Optional skeleton/placeholder content\n    trigger: str = \"load\",  # HTMX trigger event (default: load on page load)\n    swap: str = \"outerHTML\",  # HTMX swap method (default: replace entire container)\n    container_cls: Optional[str] = None,  # Additional CSS classes for container\n    **kwargs  # Additional attributes for the container\n) -&gt; FT:  # Div element with async loading configured\n    \"Create a container that asynchronously loads content from a URL.\"\n\n\nClasses\nclass LoadingType(Enum):\n    \"Types of loading indicators for async content.\"\n\n\n\nInteraction Context (context.ipynb)\n\nContext management for interaction patterns providing access to state, request, and custom data\n\n\nImport\nfrom cjm_fasthtml_interactions.core.context import (\n    InteractionContext\n)\n\n\nClasses\n@dataclass\nclass InteractionContext:\n    \"Context for interaction patterns providing access to state, request, and custom data.\"\n    \n    state: Dict[str, Any] = field(...)  # Workflow state\n    request: Optional[Any]  # FastHTML request object\n    session: Optional[Any]  # FastHTML session object\n    data: Dict[str, Any] = field(...)  # Custom data from data loaders\n    metadata: Dict[str, Any] = field(...)  # Additional metadata\n    \n    def get(self,\n                key: str,  # Key to retrieve from state\n                default: Any = None  # Default value if key not found\n               ) -&gt; Any:  # Value from state or default\n        \"Get value from workflow state.\"\n    \n    def get_data(self,\n                     key: str,  # Key to retrieve from data\n                     default: Any = None  # Default value if key not found\n                    ) -&gt; Any:  # Value from data or default\n        \"Get value from custom data.\"\n    \n    def has(self,\n                key: str  # Key to check in state\n               ) -&gt; bool:  # True if key exists in state\n        \"Check if key exists in workflow state.\"\n    \n    def set(self,\n                key: str,  # Key to set in state\n                value: Any  # Value to store\n               ) -&gt; None\n        \"Set value in workflow state.\"\n    \n    def get_all_state(self) -&gt; Dict[str, Any]:  # All workflow state\n            \"\"\"Get all workflow state as dictionary.\"\"\"\n            return self.state.copy()\n        \n        def update_state(self, \n                         updates: Dict[str, Any]  # State updates to apply\n                        ) -&gt; None\n        \"Get all workflow state as dictionary.\"\n    \n    def update_state(self,\n                         updates: Dict[str, Any]  # State updates to apply\n                        ) -&gt; None\n        \"Update multiple state values at once.\"\n\n\n\nHTML IDs (html_ids.ipynb)\n\nCentralized HTML ID constants for interaction pattern components\n\n\nImport\nfrom cjm_fasthtml_interactions.core.html_ids import (\n    InteractionHtmlIds\n)\n\n\nClasses\nclass InteractionHtmlIds(AppHtmlIds):\n    \"\"\"\n    HTML ID constants for interaction pattern components.\n    \n    Inherits from AppHtmlIds:\n        - MAIN_CONTENT = \"main-content\"\n        - ALERT_CONTAINER = \"alert-container\"\n        - as_selector(id_str) - static method\n    \"\"\"\n    \n    def step_content(step_id: str  # Step identifier\n                        ) -&gt; str:  # HTML ID for step content\n        \"Generate HTML ID for a specific step's content.\"\n    \n    def step_indicator(step_id: str  # Step identifier\n                          ) -&gt; str:  # HTML ID for step indicator\n        \"Generate HTML ID for a specific step's progress indicator.\"\n    \n    def tab_radio(tab_id: str  # Tab identifier\n                     ) -&gt; str:  # HTML ID for tab radio input\n        \"Generate HTML ID for a specific tab's radio input.\"\n    \n    def tab_content(tab_id: str  # Tab identifier\n                       ) -&gt; str:  # HTML ID for tab content\n        \"Generate HTML ID for a specific tab's content.\"\n    \n    def master_item(item_id: str  # Item identifier\n                       ) -&gt; str:  # HTML ID for master list item\n        \"Generate HTML ID for a master list item.\"\n    \n    def master_group(group_id: str  # Group identifier\n                        ) -&gt; str:  # HTML ID for master list group\n        \"Generate HTML ID for master list group.\"\n    \n    def detail_content(item_id: str  # Item identifier\n                          ) -&gt; str:  # HTML ID for detail content\n        \"Generate HTML ID for detail content area.\"\n    \n    def modal_dialog(modal_id: str  # Modal identifier\n                        ) -&gt; str:  # HTML ID for modal dialog\n        \"Generate HTML ID for a modal dialog.\"\n    \n    def modal_dialog_content(modal_id: str  # Modal identifier\n                               ) -&gt; str:  # HTML ID for modal content area\n        \"Generate HTML ID for modal content area.\"\n    \n    def sse_status(connection_id: str  # SSE connection identifier\n                      ) -&gt; str:  # HTML ID for SSE status indicator\n        \"Generate HTML ID for SSE connection status indicator.\"\n    \n    def sse_element(connection_id: str  # SSE connection identifier\n                       ) -&gt; str:  # HTML ID for SSE connection element\n        \"Generate HTML ID for SSE connection element.\"\n    \n    def pagination_container(pagination_id: str  # Pagination identifier\n                               ) -&gt; str:  # HTML ID for pagination container\n        \"Generate HTML ID for pagination container (entire paginated view).\"\n    \n    def pagination_content(pagination_id: str  # Pagination identifier\n                             ) -&gt; str:  # HTML ID for pagination content area\n        \"Generate HTML ID for pagination content area (items display).\"\n    \n    def pagination_nav(pagination_id: str  # Pagination identifier\n                         ) -&gt; str:  # HTML ID for pagination navigation controls\n        \"Generate HTML ID for pagination navigation controls.\"\n\n\n\nMaster-Detail (master_detail.ipynb)\n\nResponsive sidebar navigation pattern with master list and detail content area. On mobile devices, the sidebar is hidden in a drawer that can be toggled. On desktop (lg+ screens), the sidebar is always visible.\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.master_detail import (\n    DetailItem,\n    DetailItemGroup,\n    MasterDetail\n)\n\n\nFunctions\n@patch\ndef get_item(self:MasterDetail, \n             item_id: str  # Item identifier\n            ) -&gt; Optional[DetailItem]:  # DetailItem or None\n    \"Get item by ID.\"\n@patch\ndef create_context(self:MasterDetail, \n                   request: Any,  # FastHTML request object\n                   sess: Any,  # FastHTML session object\n                   item: DetailItem  # Current item\n                  ) -&gt; InteractionContext:  # Interaction context for rendering\n    \"Create interaction context for an item.\"\n@patch\ndef render_master(self:MasterDetail,\n                  active_item_id: str,  # Currently active item ID\n                  item_route_func: Callable[[str], str],  # Function to generate item route\n                  include_wrapper: bool = True  # Whether to include outer wrapper div\n                 ) -&gt; FT:  # Master list element\n    \"Render master list (sidebar) with items and groups.\"\n@patch\ndef _render_menu_items(self:MasterDetail,\n                       active_item_id: str,  # Currently active item ID\n                       item_route_func: Callable[[str], str]  # Function to generate item route\n                      ) -&gt; List[FT]:  # List of menu item elements\n    \"Render menu items and groups (internal helper).\"\n@patch\ndef render_master_oob(self:MasterDetail,\n                      active_item_id: str,  # Currently active item ID\n                      item_route_func: Callable[[str], str]  # Function to generate item route\n                     ) -&gt; FT:  # Master list with OOB swap attribute\n    \"Render master list with OOB swap attribute for coordinated updates.\"\n@patch\ndef render_detail(self:MasterDetail,\n                  item: DetailItem,  # Item to render\n                  ctx: InteractionContext  # Interaction context\n                 ) -&gt; FT:  # Detail content\n    \"Render detail content for an item.\"\n@patch\ndef render_full_interface(self:MasterDetail,\n                         active_item_id: str,  # Currently active item ID\n                         item_route_func: Callable[[str], str],  # Function to generate item route\n                         request: Any,  # FastHTML request object\n                         sess: Any  # FastHTML session object\n                        ) -&gt; FT:  # Complete master-detail interface\n    \"Render complete responsive master-detail interface with drawer for mobile.\"\n@patch\ndef create_router(self:MasterDetail,\n                  prefix: str = \"\"  # URL prefix for routes (e.g., \"/media\")\n                 ) -&gt; APIRouter:  # APIRouter with generated routes\n    \"Create FastHTML router with generated routes for this master-detail interface.\"\n\n\nClasses\n@dataclass\nclass DetailItem:\n    \"Definition of a single item in the master-detail pattern.\"\n    \n    id: str  # Unique identifier\n    label: str  # Display text in master list\n    render: Callable[[InteractionContext], Any]  # Function to render detail view\n    badge_text: Optional[str]  # Optional badge text (e.g., \"configured\", \"3 items\")\n    badge_color: Optional[str]  # Badge color class (e.g., badge_colors.success)\n    icon: Optional[Any]  # Optional icon element\n    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function\n    load_on_demand: bool = True  # Whether to load content only when item is selected\n@dataclass\nclass DetailItemGroup:\n    \"Group of related detail items in a collapsible section.\"\n    \n    id: str  # Group identifier\n    title: str  # Group display title\n    items: List[DetailItem]  # Items in this group\n    default_open: bool = True  # Whether group is expanded by default\n    icon: Optional[Any]  # Optional group icon\n    badge_text: Optional[str]  # Optional badge for the group\n    badge_color: Optional[str]  # Badge color for the group\nclass MasterDetail:\n    def __init__(\n        self,\n        interface_id: str,  # Unique identifier for this interface\n        items: List[Union[DetailItem, DetailItemGroup]],  # List of items/groups\n        default_item: Optional[str] = None,  # Default item ID (defaults to first item)\n        container_id: str = InteractionHtmlIds.MASTER_DETAIL_CONTAINER,  # HTML ID for container\n        master_id: str = InteractionHtmlIds.MASTER_DETAIL_MASTER,  # HTML ID for master list\n        detail_id: str = InteractionHtmlIds.MASTER_DETAIL_DETAIL,  # HTML ID for detail area\n        master_width: str = \"w-64\",  # Tailwind width class for master list\n        master_title: Optional[str] = None,  # Optional title for master list\n        show_on_htmx_only: bool = False  # Whether to show full interface for non-HTMX requests\n    )\n    \"Manage master-detail interfaces with sidebar navigation and detail content area.\"\n    \n    def __init__(\n            self,\n            interface_id: str,  # Unique identifier for this interface\n            items: List[Union[DetailItem, DetailItemGroup]],  # List of items/groups\n            default_item: Optional[str] = None,  # Default item ID (defaults to first item)\n            container_id: str = InteractionHtmlIds.MASTER_DETAIL_CONTAINER,  # HTML ID for container\n            master_id: str = InteractionHtmlIds.MASTER_DETAIL_MASTER,  # HTML ID for master list\n            detail_id: str = InteractionHtmlIds.MASTER_DETAIL_DETAIL,  # HTML ID for detail area\n            master_width: str = \"w-64\",  # Tailwind width class for master list\n            master_title: Optional[str] = None,  # Optional title for master list\n            show_on_htmx_only: bool = False  # Whether to show full interface for non-HTMX requests\n        )\n        \"Initialize master-detail manager.\"\n\n\n\nModal Dialog (modal_dialog.ipynb)\n\nPattern for modal dialogs with customizable content, sizes, and actions\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.modal_dialog import (\n    ModalSize,\n    ModalDialog,\n    ModalTriggerButton\n)\n\n\nFunctions\ndef ModalDialog(\n    modal_id: str,  # Unique identifier for the modal\n    content: Any,  # Content to display in the modal\n    size: Union[ModalSize, str] = ModalSize.MEDIUM,  # Size preset or custom size\n    show_close_button: bool = True,  # Whether to show X close button in top-right\n    close_on_backdrop: bool = True,  # Whether clicking backdrop closes modal\n    auto_show: bool = False,  # Whether to show modal immediately on render\n    content_id: Optional[str] = None,  # Optional ID for content area (for HTMX targeting)\n    custom_width: Optional[str] = None,  # Custom width class (e.g., \"w-96\")\n    custom_height: Optional[str] = None,  # Custom height class (e.g., \"h-screen\")\n    box_cls: Optional[str] = None,  # Additional classes for modal box\n    **kwargs  # Additional attributes for the dialog element\n) -&gt; FT:  # Dialog element with modal dialog configured\n    \"Create a modal dialog using native HTML dialog element with DaisyUI styling.\"\ndef ModalTriggerButton(\n    modal_id: str,  # ID of the modal to trigger\n    label: str,  # Button label text\n    button_cls: Optional[str] = None,  # Additional button classes\n    **kwargs  # Additional button attributes\n) -&gt; FT:  # Button element that triggers modal\n    \"Create a button that opens a modal dialog.\"\n\n\nClasses\nclass ModalSize(Enum):\n    \"Predefined size options for modal dialogs.\"\n\n\n\nPagination (pagination.ipynb)\n\nPagination pattern with automatic route generation and state management\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.pagination import (\n    PaginationStyle,\n    Pagination\n)\n\n\nFunctions\n@patch\ndef get_total_pages(self:Pagination, \n                    total_items: int  # Total number of items\n                   ) -&gt; int:  # Total number of pages\n    \"Calculate total number of pages.\"\n@patch\ndef get_page_items(self:Pagination,\n                   all_items: List[Any],  # All items\n                   page: int  # Current page number (1-indexed)\n                  ) -&gt; tuple:  # (page_items, start_idx, end_idx)\n    \"Get items for the current page.\"\n@patch\ndef build_route(self:Pagination,\n                page: int,  # Page number\n                request: Any,  # FastHTML request object\n                page_route_func: Callable  # Route function from create_router\n               ) -&gt; str:  # Complete route with preserved params\n    \"Build route URL with preserved query parameters.\"\n@patch\ndef render_navigation_controls(self:Pagination,\n                               current_page: int,  # Current page number\n                               total_pages: int,  # Total number of pages\n                               route_func: Callable[[int], str]  # Function to generate route for page\n                              ) -&gt; FT:  # Navigation controls element\n    \"Render pagination navigation controls.\"\n@patch\ndef render_page_content(self:Pagination,\n                       page_items: List[Any],  # Items for current page\n                       current_page: int,  # Current page number\n                       total_pages: int,  # Total number of pages\n                       request: Any,  # FastHTML request object\n                       route_func: Callable[[int], str]  # Function to generate route for page\n                      ) -&gt; FT:  # Complete page content with items and navigation\n    \"Render complete page content with items and pagination controls.\"\n@patch\ndef create_router(self:Pagination,\n                  prefix: str = \"\"  # URL prefix for routes (e.g., \"/library\")\n                 ) -&gt; APIRouter:  # APIRouter with generated routes\n    \"Create FastHTML router with generated routes for pagination.\"\n\n\nClasses\nclass PaginationStyle(Enum):\n    \"Display styles for pagination controls.\"\nclass Pagination:\n    def __init__(\n        self,\n        pagination_id: str,  # Unique identifier for this pagination instance\n        data_loader: Callable[[Any], List[Any]],  # Function that returns all items\n        render_items: Callable[[List[Any], int, Any], Any],  # Function to render items for a page\n        items_per_page: int = 20,  # Number of items per page\n        container_id: str = None,  # HTML ID for container (auto-generated if None)\n        content_id: str = None,  # HTML ID for content area (auto-generated if None)\n        preserve_params: List[str] = None,  # Query parameters to preserve\n        style: PaginationStyle = PaginationStyle.SIMPLE,  # Pagination display style\n        prev_text: str = \"« Previous\",  # Text for previous button\n        next_text: str = \"Next »\",  # Text for next button\n        page_info_format: str = \"Page {current} of {total}\",  # Format for page info\n        button_size: str = None,  # Button size class\n        push_url: bool = True,  # Whether to update URL with hx-push-url\n        show_endpoints: bool = False,  # Whether to show First/Last buttons\n        first_text: str = \"«« First\",  # Text for first page button\n        last_text: str = \"Last »»\",  # Text for last page button\n        redirect_route: Optional[Callable[[int, Dict[str, Any]], str]] = None,  # Route to redirect non-HTMX requests\n    )\n    \"Manage paginated views with automatic route generation and state management.\"\n    \n    def __init__(\n            self,\n            pagination_id: str,  # Unique identifier for this pagination instance\n            data_loader: Callable[[Any], List[Any]],  # Function that returns all items\n            render_items: Callable[[List[Any], int, Any], Any],  # Function to render items for a page\n            items_per_page: int = 20,  # Number of items per page\n            container_id: str = None,  # HTML ID for container (auto-generated if None)\n            content_id: str = None,  # HTML ID for content area (auto-generated if None)\n            preserve_params: List[str] = None,  # Query parameters to preserve\n            style: PaginationStyle = PaginationStyle.SIMPLE,  # Pagination display style\n            prev_text: str = \"« Previous\",  # Text for previous button\n            next_text: str = \"Next »\",  # Text for next button\n            page_info_format: str = \"Page {current} of {total}\",  # Format for page info\n            button_size: str = None,  # Button size class\n            push_url: bool = True,  # Whether to update URL with hx-push-url\n            show_endpoints: bool = False,  # Whether to show First/Last buttons\n            first_text: str = \"«« First\",  # Text for first page button\n            last_text: str = \"Last »»\",  # Text for last page button\n            redirect_route: Optional[Callable[[int, Dict[str, Any]], str]] = None,  # Route to redirect non-HTMX requests\n        )\n        \"Initialize pagination manager.\"\n\n\n\nSSE Connection Monitor (sse_connection_monitor.ipynb)\n\nPattern for monitoring Server-Sent Events (SSE) connections with visual status indicators and automatic reconnection\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.sse_connection_monitor import (\n    SSEConnectionConfig,\n    create_connection_status_indicators,\n    SSEConnectionMonitorScript,\n    SSEConnectionMonitor\n)\n\n\nFunctions\ndef create_connection_status_indicators(\n    status_size: str = \"sm\",  # Size of status indicator dot (xs, sm, md, lg)\n    show_text: bool = True,  # Whether to show status text\n    text_size: str = \"text-sm\",  # Text size class\n    hide_text_on_mobile: bool = True  # Hide text on small screens\n) -&gt; Dict[str, FT]:  # Dictionary of status state to indicator element\n    \"Create status indicator elements for different connection states.\"\ndef SSEConnectionMonitorScript(\n    connection_id: str,  # Unique identifier for this SSE connection\n    status_indicators: Dict[str, FT],  # Status indicator elements for each state\n    config: Optional[SSEConnectionConfig] = None  # Configuration options\n) -&gt; FT:  # Script element with monitoring code\n    \"Create a script that monitors SSE connection status and manages reconnection.\"\ndef SSEConnectionMonitor(\n    connection_id: str,  # Unique identifier for this SSE connection\n    status_size: str = \"sm\",  # Size of status indicator\n    show_text: bool = True,  # Whether to show status text\n    hide_text_on_mobile: bool = True,  # Hide text on small screens\n    config: Optional[SSEConnectionConfig] = None,  # Configuration options\n    container_cls: Optional[str] = None  # Additional CSS classes for status container\n) -&gt; tuple[FT, FT]:  # Tuple of (status_container, monitor_script)\n    \"Create a complete SSE connection monitoring system.\"\n\n\nClasses\n@dataclass\nclass SSEConnectionConfig:\n    \"Configuration for SSE connection monitoring.\"\n    \n    max_reconnect_attempts: int = 10  # Maximum number of reconnection attempts\n    reconnect_delay: int = 1000  # Initial reconnect delay in milliseconds\n    max_backoff_multiplier: int = 5  # Maximum backoff multiplier for reconnect delay\n    monitor_visibility: bool = True  # Monitor tab visibility and reconnect when visible\n    log_to_console: bool = True  # Enable console logging for debugging\n\n\n\nWorkflow State Store (state_store.ipynb)\n\nServer-side workflow state storage implementations\n\n\nImport\nfrom cjm_fasthtml_interactions.core.state_store import (\n    WorkflowStateStore,\n    get_session_id,\n    InMemoryWorkflowStateStore\n)\n\n\nFunctions\ndef get_session_id(\n    sess: Any,  # FastHTML session object\n    key: str = \"_workflow_session_id\"  # Session key for storing the ID\n) -&gt; str:  # Stable session identifier\n    \"Get or create a stable session identifier.\"\n\n\nClasses\n@runtime_checkable\nclass WorkflowStateStore(Protocol):\n    \"Protocol for workflow state storage backends.\"\n    \n    def get_current_step(self,\n                             flow_id: str,  # Workflow identifier\n                             sess: Any  # FastHTML session object\n                            ) -&gt; Optional[str]:  # Current step ID or None\n        \"Get current step ID for a workflow.\"\n    \n    def set_current_step(self,\n                             flow_id: str,  # Workflow identifier\n                             sess: Any,  # FastHTML session object\n                             step_id: str  # Step ID to set as current\n                            ) -&gt; None\n        \"Set current step ID for a workflow.\"\n    \n    def get_state(self,\n                      flow_id: str,  # Workflow identifier\n                      sess: Any  # FastHTML session object\n                     ) -&gt; Dict[str, Any]:  # Workflow state dictionary\n        \"Get all workflow state.\"\n    \n    def update_state(self,\n                         flow_id: str,  # Workflow identifier\n                         sess: Any,  # FastHTML session object\n                         updates: Dict[str, Any]  # State updates to apply\n                        ) -&gt; None\n        \"Update workflow state with new values.\"\n    \n    def clear_state(self,\n                        flow_id: str,  # Workflow identifier\n                        sess: Any  # FastHTML session object\n                       ) -&gt; None\n        \"Clear all workflow state.\"\nclass InMemoryWorkflowStateStore:\n    def __init__(self):\n        \"\"\"Initialize empty state storage.\"\"\"\n        self._current_steps: Dict[str, str] = {}  # {flow_id:session_id -&gt; step_id}\n    \"In-memory workflow state storage for development and testing.\"\n    \n    def __init__(self):\n            \"\"\"Initialize empty state storage.\"\"\"\n            self._current_steps: Dict[str, str] = {}  # {flow_id:session_id -&gt; step_id}\n        \"Initialize empty state storage.\"\n    \n    def get_current_step(self,\n                             flow_id: str,  # Workflow identifier\n                             sess: Any  # FastHTML session object\n                            ) -&gt; Optional[str]:  # Current step ID or None\n        \"Get current step ID for a workflow.\"\n    \n    def set_current_step(self,\n                             flow_id: str,  # Workflow identifier\n                             sess: Any,  # FastHTML session object\n                             step_id: str  # Step ID to set as current\n                            ) -&gt; None\n        \"Set current step ID for a workflow.\"\n    \n    def get_state(self,\n                      flow_id: str,  # Workflow identifier\n                      sess: Any  # FastHTML session object\n                     ) -&gt; Dict[str, Any]:  # Workflow state dictionary\n        \"Get all workflow state.\"\n    \n    def update_state(self,\n                         flow_id: str,  # Workflow identifier\n                         sess: Any,  # FastHTML session object\n                         updates: Dict[str, Any]  # State updates to apply\n                        ) -&gt; None\n        \"Update workflow state with new values.\"\n    \n    def clear_state(self,\n                        flow_id: str,  # Workflow identifier\n                        sess: Any  # FastHTML session object\n                       ) -&gt; None\n        \"Clear all workflow state.\"\n\n\n\nStep Flow (step_flow.ipynb)\n\nMulti-step wizard pattern with state management, navigation, and route generation\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.step_flow import (\n    Step,\n    StepFlow\n)\n\n\nFunctions\n@patch\ndef get_step(self:StepFlow, \n             step_id: str  # Step identifier\n            ) -&gt; Optional[Step]:  # Step object or None\n    \"Get step by ID.\"\n@patch\ndef get_step_index(self:StepFlow, \n                   step_id: str  # Step identifier\n                  ) -&gt; Optional[int]:  # Step index or None\n    \"Get step index by ID.\"\n@patch\ndef get_current_step_id(self:StepFlow, \n                        sess: Any  # FastHTML session object\n                       ) -&gt; str:  # Current step ID\n    \"Get current step ID from state store.\"\n@patch\ndef set_current_step(self:StepFlow, \n                     sess: Any,  # FastHTML session object\n                     step_id: str  # Step ID to set as current\n                    ) -&gt; None\n    \"Set current step in state store.\"\n@patch\ndef get_next_step_id(self:StepFlow, \n                     current_step_id: str  # Current step ID\n                    ) -&gt; Optional[str]:  # Next step ID or None if last step\n    \"Get the ID of the next step.\"\n@patch\ndef get_previous_step_id(self:StepFlow, \n                         current_step_id: str  # Current step ID\n                        ) -&gt; Optional[str]:  # Previous step ID or None if first step\n    \"Get the ID of the previous step.\"\n@patch\ndef is_last_step(self:StepFlow, \n                 step_id: str  # Step ID to check\n                ) -&gt; bool:  # True if this is the last step\n    \"Check if step is the last step.\"\n@patch\ndef is_first_step(self:StepFlow, \n                  step_id: str  # Step ID to check\n                 ) -&gt; bool:  # True if this is the first step\n    \"Check if step is the first step.\"\n@patch\ndef get_workflow_state(self:StepFlow, \n                       sess: Any  # FastHTML session object\n                      ) -&gt; Dict[str, Any]:  # All workflow state\n    \"Get all workflow state from state store.\"\n@patch\ndef update_workflow_state(self:StepFlow, \n                          sess: Any,  # FastHTML session object\n                          updates: Dict[str, Any]  # State updates\n                         ) -&gt; None\n    \"Update workflow state with new values.\"\n@patch\ndef clear_workflow(self:StepFlow, \n                   sess: Any  # FastHTML session object\n                  ) -&gt; None\n    \"Clear all workflow state.\"\n@patch\ndef _summarize_state(self:StepFlow, \n                     state: Dict[str, Any]  # State dictionary to summarize\n                    ) -&gt; str:  # Human-readable summary string\n    \"Create a concise summary of state for debug output.\"\n@patch\ndef create_context(self:StepFlow, \n                   request: Any,  # FastHTML request object\n                   sess: Any,  # FastHTML session object\n                   step: Step  # Current step\n                  ) -&gt; InteractionContext:  # Interaction context for rendering\n    \"Create interaction context for a step.\"\n@patch\ndef render_progress(self:StepFlow, \n                    sess: Any  # FastHTML session object\n                   ) -&gt; FT:  # Progress indicator or empty Div\n    \"Render progress indicator showing all steps.\"\n@patch\ndef render_step_content(self:StepFlow,\n                        step_obj: Step,  # Step to render\n                        ctx: InteractionContext,  # Interaction context\n                        next_route: str,  # Route for next/submit\n                        back_route: Optional[str] = None,  # Route for back\n                        cancel_route: Optional[str] = None  # Route for cancel\n                       ) -&gt; FT:  # Complete step content with optional progress and navigation\n    \"Render step content with optional progress indicator and navigation.\"\n@patch\ndef render_navigation(self:StepFlow,\n                      step_id: str,  # Current step ID\n                      next_route: str,  # Route for next/submit action\n                      back_route: Optional[str] = None,  # Route for back action\n                      cancel_route: Optional[str] = None,  # Route for cancel action\n                     ) -&gt; FT:  # Navigation button container\n    \"Render navigation buttons for a step.\"\n@patch\ndef create_router(self:StepFlow,\n                  prefix: str = \"\"  # URL prefix for routes (e.g., \"/transcription\")\n                 ) -&gt; APIRouter:  # APIRouter with generated routes\n    \"Create FastHTML router with generated routes for this flow.\"\n\n\nClasses\n@dataclass\nclass Step:\n    \"Definition of a single step in a multi-step workflow.\"\n    \n    id: str  # Unique step identifier (used in URLs)\n    title: str  # Display title for the step\n    render: Callable[[InteractionContext], Any]  # Function to render step UI\n    validate: Optional[Callable[[Dict[str, Any]], bool]]  # Validation function\n    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function\n    data_keys: List[str] = field(...)  # State keys managed by this step\n    can_skip: bool = False  # Whether this step can be skipped\n    show_back: bool = True  # Whether to show back button\n    show_cancel: bool = True  # Whether to show cancel button\n    next_button_text: str = 'Continue'  # Text for next/submit button\n    on_enter: Optional[Callable[[Dict[str, Any], Any, Any], Any]]  # Called when entering step, before render (state, request, sess) -&gt; None or component\n    on_leave: Optional[Callable[[Dict[str, Any], Any, Any], Any]]  # Called after validation, before navigation (state, request, sess) -&gt; None or component\n    \n    def is_valid(self, state: Dict[str, Any]  # Current workflow state\n                    ) -&gt; bool:  # True if step is complete and valid\n        \"Check if step has valid data in state.\"\nclass StepFlow:\n    def __init__(\n        self,\n        flow_id: str,  # Unique identifier for this workflow\n        steps: List[Step],  # List of step definitions\n        state_store: Optional[WorkflowStateStore] = None,  # Storage backend (defaults to InMemoryWorkflowStateStore)\n        container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container\n        on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler\n        show_progress: bool = False,  # Whether to show progress indicator\n        wrap_in_form: bool = True,  # Whether to wrap content + navigation in a form\n        debug: bool = False  # Whether to print debug information\n    )\n    \"Manage multi-step workflows with automatic route generation and state management.\"\n    \n    def __init__(\n            self,\n            flow_id: str,  # Unique identifier for this workflow\n            steps: List[Step],  # List of step definitions\n            state_store: Optional[WorkflowStateStore] = None,  # Storage backend (defaults to InMemoryWorkflowStateStore)\n            container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container\n            on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler\n            show_progress: bool = False,  # Whether to show progress indicator\n            wrap_in_form: bool = True,  # Whether to wrap content + navigation in a form\n            debug: bool = False  # Whether to print debug information\n        )\n        \"Initialize step flow manager.\"\n\n\n\nTabbed Interface (tabbed_interface.ipynb)\n\nMulti-tab interface pattern with automatic routing, state management, and DaisyUI styling\n\n\nImport\nfrom cjm_fasthtml_interactions.patterns.tabbed_interface import (\n    Tab,\n    TabbedInterface\n)\n\n\nFunctions\n@patch\ndef get_tab(self:TabbedInterface, \n            tab_id: str  # Tab identifier\n           ) -&gt; Optional[Tab]:  # Tab object or None\n    \"Get tab by ID.\"\n@patch\ndef get_tab_index(self:TabbedInterface, \n                  tab_id: str  # Tab identifier\n                 ) -&gt; Optional[int]:  # Tab index or None\n    \"Get tab index by ID.\"\n@patch\ndef create_context(self:TabbedInterface, \n                   request: Any,  # FastHTML request object\n                   sess: Any,  # FastHTML session object\n                   tab: Tab  # Current tab\n                  ) -&gt; InteractionContext:  # Interaction context for rendering\n    \"Create interaction context for a tab.\"\n@patch\ndef render_tabs(self:TabbedInterface,\n                current_tab_id: str,  # Currently active tab ID\n                tab_route_func: Callable[[str], str]  # Function to generate tab route\n               ) -&gt; FT:  # Tab navigation element\n    \"Render tab navigation using DaisyUI radio-based tabs.\"\n@patch\ndef render_tab_content(self:TabbedInterface,\n                       tab_obj: Tab,  # Tab to render\n                       ctx: InteractionContext  # Interaction context\n                      ) -&gt; FT:  # Tab content\n    \"Render tab content.\"\n@patch\ndef render_full_interface(self:TabbedInterface,\n                         current_tab_id: str,  # Currently active tab ID\n                         tab_route_func: Callable[[str], str],  # Function to generate tab route\n                         request: Any,  # FastHTML request object\n                         sess: Any  # FastHTML session object\n                        ) -&gt; FT:  # Complete tabbed interface\n    \"Render complete tabbed interface with tabs and content area.\"\n@patch\ndef create_router(self:TabbedInterface,\n                  prefix: str = \"\"  # URL prefix for routes (e.g., \"/dashboard\")\n                 ) -&gt; APIRouter:  # APIRouter with generated routes\n    \"Create FastHTML router with generated routes for this tabbed interface.\"\n\n\nClasses\n@dataclass\nclass Tab:\n    \"Definition of a single tab in a tabbed interface.\"\n    \n    id: str  # Unique tab identifier (used in URLs)\n    label: str  # Display label for the tab\n    render: Callable[[InteractionContext], Any]  # Function to render tab content\n    title: Optional[str]  # Optional title/tooltip for the tab\n    data_loader: Optional[Callable[[Any], Dict[str, Any]]]  # Data loading function\n    load_on_demand: bool = True  # Whether to load content only when tab is selected\nclass TabbedInterface:\n    def __init__(\n        self,\n        interface_id: str,  # Unique identifier for this interface\n        tabs_list: List[Tab],  # List of tab definitions\n        default_tab: Optional[str] = None,  # Default tab ID (defaults to first tab)\n        container_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTAINER,  # HTML ID for container\n        tabs_id: str = InteractionHtmlIds.TABBED_INTERFACE_TABS,  # HTML ID for tabs element\n        content_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTENT,  # HTML ID for content area\n        tab_style: Optional[str] = None,  # DaisyUI tab style (lift, bordered, boxed)\n        show_on_htmx_only: bool = False  # Whether to show full page layout for non-HTMX requests\n    )\n    \"Manage multi-tab interfaces with automatic route generation and HTMX content loading.\"\n    \n    def __init__(\n            self,\n            interface_id: str,  # Unique identifier for this interface\n            tabs_list: List[Tab],  # List of tab definitions\n            default_tab: Optional[str] = None,  # Default tab ID (defaults to first tab)\n            container_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTAINER,  # HTML ID for container\n            tabs_id: str = InteractionHtmlIds.TABBED_INTERFACE_TABS,  # HTML ID for tabs element\n            content_id: str = InteractionHtmlIds.TABBED_INTERFACE_CONTENT,  # HTML ID for content area\n            tab_style: Optional[str] = None,  # DaisyUI tab style (lift, bordered, boxed)\n            show_on_htmx_only: bool = False  # Whether to show full page layout for non-HTMX requests\n        )\n        \"Initialize tabbed interface manager.\"",
+    "crumbs": [
+      "cjm-fasthtml-interactions"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html",
+    "href": "patterns/step_flow.html",
+    "title": "Step Flow",
+    "section": "",
+    "text": "The Step class defines a single step in a multi-step workflow. Each step has: - Unique identifier - Title for display - Render function that generates the UI - Optional validation function - Optional data loader for fetching required data - State keys that this step manages\n\nsource\n\n\n\ndef Step(\n    id:str, title:str, render:Callable, validate:Optional=None, data_loader:Optional=None, data_keys:List=&lt;factory&gt;,\n    can_skip:bool=False, show_back:bool=True, show_cancel:bool=True, next_button_text:str='Continue',\n    on_enter:Optional=None, on_leave:Optional=None\n)-&gt;None:\n\nDefinition of a single step in a multi-step workflow.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#step-definition",
+    "href": "patterns/step_flow.html#step-definition",
+    "title": "Step Flow",
+    "section": "",
+    "text": "The Step class defines a single step in a multi-step workflow. Each step has: - Unique identifier - Title for display - Render function that generates the UI - Optional validation function - Optional data loader for fetching required data - State keys that this step manages\n\nsource\n\n\n\ndef Step(\n    id:str, title:str, render:Callable, validate:Optional=None, data_loader:Optional=None, data_keys:List=&lt;factory&gt;,\n    can_skip:bool=False, show_back:bool=True, show_cancel:bool=True, next_button_text:str='Continue',\n    on_enter:Optional=None, on_leave:Optional=None\n)-&gt;None:\n\nDefinition of a single step in a multi-step workflow.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#stepflow-class",
+    "href": "patterns/step_flow.html#stepflow-class",
+    "title": "Step Flow",
+    "section": "StepFlow Class",
+    "text": "StepFlow Class\nThe StepFlow class manages a multi-step workflow. It: - Tracks current step - Manages navigation between steps - Uses a WorkflowStateStore for server-side state persistence - Generates routes automatically - Provides resumability (returns to last valid step on page load)\n\nsource\n\nStepFlow\n\ndef StepFlow(\n    flow_id:str, # Unique identifier for this workflow\n    steps:List, # List of step definitions\n    state_store:Optional=None, # Storage backend (defaults to InMemoryWorkflowStateStore)\n    container_id:str='step-flow-container', # HTML ID for content container\n    on_complete:Optional=None, # Completion handler\n    show_progress:bool=False, # Whether to show progress indicator\n    wrap_in_form:bool=True, # Whether to wrap content + navigation in a form\n    debug:bool=False, # Whether to print debug information\n):\n\nManage multi-step workflows with automatic route generation and state management.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#step-management-methods",
+    "href": "patterns/step_flow.html#step-management-methods",
+    "title": "Step Flow",
+    "section": "Step Management Methods",
+    "text": "Step Management Methods\n\nsource\n\nStepFlow.get_step\n\ndef get_step(\n    step_id:str, # Step identifier\n)-&gt;Optional: # Step object or None\n\nGet step by ID.\n\nsource\n\n\nStepFlow.get_step_index\n\ndef get_step_index(\n    step_id:str, # Step identifier\n)-&gt;Optional: # Step index or None\n\nGet step index by ID.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#navigation-methods",
+    "href": "patterns/step_flow.html#navigation-methods",
+    "title": "Step Flow",
+    "section": "Navigation Methods",
+    "text": "Navigation Methods\n\nsource\n\nStepFlow.get_current_step_id\n\ndef get_current_step_id(\n    sess:Any, # FastHTML session object\n)-&gt;str: # Current step ID\n\nGet current step ID from state store.\n\nsource\n\n\nStepFlow.set_current_step\n\ndef set_current_step(\n    sess:Any, # FastHTML session object\n    step_id:str, # Step ID to set as current\n)-&gt;None:\n\nSet current step in state store.\n\nsource\n\n\nStepFlow.get_next_step_id\n\ndef get_next_step_id(\n    current_step_id:str, # Current step ID\n)-&gt;Optional: # Next step ID or None if last step\n\nGet the ID of the next step.\n\nsource\n\n\nStepFlow.get_previous_step_id\n\ndef get_previous_step_id(\n    current_step_id:str, # Current step ID\n)-&gt;Optional: # Previous step ID or None if first step\n\nGet the ID of the previous step.\n\nsource\n\n\nStepFlow.is_last_step\n\ndef is_last_step(\n    step_id:str, # Step ID to check\n)-&gt;bool: # True if this is the last step\n\nCheck if step is the last step.\n\nsource\n\n\nStepFlow.is_first_step\n\ndef is_first_step(\n    step_id:str, # Step ID to check\n)-&gt;bool: # True if this is the first step\n\nCheck if step is the first step.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#state-management-methods",
+    "href": "patterns/step_flow.html#state-management-methods",
+    "title": "Step Flow",
+    "section": "State Management Methods",
+    "text": "State Management Methods\n\nsource\n\nStepFlow.get_workflow_state\n\ndef get_workflow_state(\n    sess:Any, # FastHTML session object\n)-&gt;Dict: # All workflow state\n\nGet all workflow state from state store.\n\nsource\n\n\nStepFlow.update_workflow_state\n\ndef update_workflow_state(\n    sess:Any, # FastHTML session object\n    updates:Dict, # State updates\n)-&gt;None:\n\nUpdate workflow state with new values.\n\nsource\n\n\nStepFlow.clear_workflow\n\ndef clear_workflow(\n    sess:Any, # FastHTML session object\n)-&gt;None:\n\nClear all workflow state.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#context-and-rendering-methods",
+    "href": "patterns/step_flow.html#context-and-rendering-methods",
+    "title": "Step Flow",
+    "section": "Context and Rendering Methods",
+    "text": "Context and Rendering Methods\n\nsource\n\nStepFlow.create_context\n\ndef create_context(\n    request:Any, # FastHTML request object\n    sess:Any, # FastHTML session object\n    step:Step, # Current step\n)-&gt;InteractionContext: # Interaction context for rendering\n\nCreate interaction context for a step.\n\nsource\n\n\nStepFlow.render_progress\n\ndef render_progress(\n    sess:Any, # FastHTML session object\n)-&gt;FT: # Progress indicator or empty Div\n\nRender progress indicator showing all steps.\n\nsource\n\n\nStepFlow.render_step_content\n\ndef render_step_content(\n    step_obj:Step, # Step to render\n    ctx:InteractionContext, # Interaction context\n    next_route:str, # Route for next/submit\n    back_route:Optional=None, # Route for back\n    cancel_route:Optional=None, # Route for cancel\n)-&gt;FT: # Complete step content with optional progress and navigation\n\nRender step content with optional progress indicator and navigation.\n\nsource\n\n\nStepFlow.render_navigation\n\ndef render_navigation(\n    step_id:str, # Current step ID\n    next_route:str, # Route for next/submit action\n    back_route:Optional=None, # Route for back action\n    cancel_route:Optional=None, # Route for cancel action\n)-&gt;FT: # Navigation button container\n\nRender navigation buttons for a step.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#route-generation",
+    "href": "patterns/step_flow.html#route-generation",
+    "title": "Step Flow",
+    "section": "Route Generation",
+    "text": "Route Generation\n\nsource\n\nStepFlow.create_router\n\ndef create_router(\n    prefix:str='', # URL prefix for routes (e.g., \"/transcription\")\n)-&gt;APIRouter: # APIRouter with generated routes\n\nCreate FastHTML router with generated routes for this flow.",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/step_flow.html#usage-example",
+    "href": "patterns/step_flow.html#usage-example",
+    "title": "Step Flow",
+    "section": "Usage Example",
+    "text": "Usage Example\nHere’s a complete example showing how to create a multi-step workflow. The StepFlow class uses InMemoryWorkflowStateStore by default, so you don’t need to provide a state store for simple use cases.\n\n# Example: Simple 3-step workflow\nfrom fasthtml.common import Div, H2, P, Form, Input, Label\n\n# Define render functions for each step\ndef render_step1(ctx: InteractionContext):\n    \"\"\"Render first step - collect name.\"\"\"\n    current_name = ctx.get(\"name\", \"\")\n    return Div(\n        H2(\"Step 1: Enter Your Name\"),\n        Label(\"Name:\"),\n        Input(name=\"name\", value=current_name, required=True)\n    )\n\ndef render_step2(ctx: InteractionContext):\n    \"\"\"Render second step - collect email.\"\"\"\n    name = ctx.get(\"name\", \"User\")\n    current_email = ctx.get(\"email\", \"\")\n    return Div(\n        H2(f\"Step 2: Hi {name}, enter your email\"),\n        Label(\"Email:\"),\n        Input(name=\"email\", type=\"email\", value=current_email, required=True)\n    )\n\ndef render_step3(ctx: InteractionContext):\n    \"\"\"Render third step - confirm.\"\"\"\n    name = ctx.get(\"name\", \"\")\n    email = ctx.get(\"email\", \"\")\n    return Div(\n        H2(\"Step 3: Confirm\"),\n        P(f\"Name: {name}\"),\n        P(f\"Email: {email}\")\n    )\n\n# Define completion handler\ndef on_complete(state: Dict[str, Any], request):\n    \"\"\"Handle workflow completion.\"\"\"\n    return Div(\n        H2(\"Success!\"),\n        P(f\"Welcome {state.get('name')}!\"),\n        P(f\"We'll email you at {state.get('email')}\")\n    )\n\n# Create the step flow - uses InMemoryWorkflowStateStore by default\nregistration_flow = StepFlow(\n    flow_id=\"registration\",\n    steps=[\n        Step(\n            id=\"name\",\n            title=\"Enter Name\",\n            render=render_step1,\n            data_keys=[\"name\"]\n        ),\n        Step(\n            id=\"email\",\n            title=\"Enter Email\",\n            render=render_step2,\n            data_keys=[\"email\"]\n        ),\n        Step(\n            id=\"confirm\",\n            title=\"Confirm\",\n            render=render_step3,\n            next_button_text=\"Complete Registration\"\n        )\n    ],\n    on_complete=on_complete,\n    show_progress=True\n)\n\n# Generate router\nregistration_router = registration_flow.create_router(prefix=\"/register\")\n\n# In your FastHTML app, register the router:\n# from cjm_fasthtml_app_core.core.routing import register_routes\n# register_routes(app, registration_router)\n#\n# Or directly:\n# registration_router.to_app(app)\n\n\n# Test step flow navigation\nprint(f\"Flow has {len(registration_flow.steps)} steps\")\nprint(f\"First step: {registration_flow.steps[0].id}\")\nprint(f\"Last step: {registration_flow.steps[-1].id}\")\nprint(f\"Next after 'name': {registration_flow.get_next_step_id('name')}\")\nprint(f\"Previous before 'email': {registration_flow.get_previous_step_id('email')}\")\n\nFlow has 3 steps\nFirst step: name\nLast step: confirm\nNext after 'name': email\nPrevious before 'email': name",
+    "crumbs": [
+      "patterns",
+      "Step Flow"
+    ]
+  },
+  {
+    "objectID": "patterns/sse_connection_monitor.html",
+    "href": "patterns/sse_connection_monitor.html",
+    "title": "SSE Connection Monitor",
+    "section": "",
+    "text": "The SSEConnectionConfig dataclass defines configuration options for the SSE connection monitor.\n\nsource\n\n\n\ndef SSEConnectionConfig(\n    max_reconnect_attempts:int=10, reconnect_delay:int=1000, max_backoff_multiplier:int=5,\n    monitor_visibility:bool=True, log_to_console:bool=True\n)-&gt;None:\n\nConfiguration for SSE connection monitoring.",
+    "crumbs": [
+      "patterns",
+      "SSE Connection Monitor"
+    ]
+  },
+  {
+    "objectID": "patterns/sse_connection_monitor.html#connection-status-configuration",
+    "href": "patterns/sse_connection_monitor.html#connection-status-configuration",
+    "title": "SSE Connection Monitor",
+    "section": "",
+    "text": "The SSEConnectionConfig dataclass defines configuration options for the SSE connection monitor.\n\nsource\n\n\n\ndef SSEConnectionConfig(\n    max_reconnect_attempts:int=10, reconnect_delay:int=1000, max_backoff_multiplier:int=5,\n    monitor_visibility:bool=True, log_to_console:bool=True\n)-&gt;None:\n\nConfiguration for SSE connection monitoring.",
+    "crumbs": [
+      "patterns",
+      "SSE Connection Monitor"
+    ]
+  },
+  {
+    "objectID": "patterns/sse_connection_monitor.html#status-indicator-creation",
+    "href": "patterns/sse_connection_monitor.html#status-indicator-creation",
+    "title": "SSE Connection Monitor",
+    "section": "Status Indicator Creation",
+    "text": "Status Indicator Creation\nHelper function to create status indicators for different connection states.\n\nsource\n\ncreate_connection_status_indicators\n\ndef create_connection_status_indicators(\n    status_size:str='sm', # Size of status indicator dot (xs, sm, md, lg)\n    show_text:bool=True, # Whether to show status text\n    text_size:str='text-sm', # Text size class\n    hide_text_on_mobile:bool=True, # Hide text on small screens\n)-&gt;Dict: # Dictionary of status state to indicator element\n\nCreate status indicator elements for different connection states.",
+    "crumbs": [
+      "patterns",
+      "SSE Connection Monitor"
+    ]
+  },
+  {
+    "objectID": "patterns/sse_connection_monitor.html#sse-connection-monitor-script",
+    "href": "patterns/sse_connection_monitor.html#sse-connection-monitor-script",
+    "title": "SSE Connection Monitor",
+    "section": "SSE Connection Monitor Script",
+    "text": "SSE Connection Monitor Script\nThe SSEConnectionMonitorScript function creates a JavaScript script that monitors SSE connection status.\nKey features: - Monitors HTMX SSE events (open, error, close, message) - Updates visual status indicators - Automatic reconnection with exponential backoff - Handles server shutdown gracefully - Tab visibility awareness (reconnects when tab becomes visible) - Detects OOB swaps that remove SSE element\n\nsource\n\nSSEConnectionMonitorScript\n\ndef SSEConnectionMonitorScript(\n    connection_id:str, # Unique identifier for this SSE connection\n    status_indicators:Dict, # Status indicator elements for each state\n    config:Optional=None, # Configuration options\n)-&gt;FT: # Script element with monitoring code\n\nCreate a script that monitors SSE connection status and manages reconnection.",
+    "crumbs": [
+      "patterns",
+      "SSE Connection Monitor"
+    ]
+  },
+  {
+    "objectID": "patterns/sse_connection_monitor.html#complete-sse-connection-monitor",
+    "href": "patterns/sse_connection_monitor.html#complete-sse-connection-monitor",
+    "title": "SSE Connection Monitor",
+    "section": "Complete SSE Connection Monitor",
+    "text": "Complete SSE Connection Monitor\nThe SSEConnectionMonitor function creates a complete connection monitoring system with status indicator and monitoring script.\n\nsource\n\nSSEConnectionMonitor\n\ndef SSEConnectionMonitor(\n    connection_id:str, # Unique identifier for this SSE connection\n    status_size:str='sm', # Size of status indicator\n    show_text:bool=True, # Whether to show status text\n    hide_text_on_mobile:bool=True, # Hide text on small screens\n    config:Optional=None, # Configuration options\n    container_cls:Optional=None, # Additional CSS classes for status container\n)-&gt;tuple: # Tuple of (status_container, monitor_script)\n\nCreate a complete SSE connection monitoring system.",
+    "crumbs": [
+      "patterns",
+      "SSE Connection Monitor"
+    ]
+  },
+  {
+    "objectID": "patterns/sse_connection_monitor.html#usage-examples",
+    "href": "patterns/sse_connection_monitor.html#usage-examples",
+    "title": "SSE Connection Monitor",
+    "section": "Usage Examples",
+    "text": "Usage Examples\nHere are complete examples showing different SSE monitoring use cases:\n\n# Example 1: Simple connection monitor\nstatus_container, monitor_script = SSEConnectionMonitor(\n    connection_id=\"simple-stream\"\n)\n\nprint(\"Example 1: Simple connection monitor\")\nprint(f\"Status container ID: {InteractionHtmlIds.sse_status('simple-stream')}\")\nprint(f\"SSE element ID: {InteractionHtmlIds.sse_element('simple-stream')}\")\n\nExample 1: Simple connection monitor\nStatus container ID: sse-status-simple-stream\nSSE element ID: sse-element-simple-stream\n\n\n\n# Example 2: Custom configuration\nconfig = SSEConnectionConfig(\n    max_reconnect_attempts=5,\n    reconnect_delay=2000,\n    max_backoff_multiplier=3,\n    log_to_console=False  # Disable logging in production\n)\n\nstatus_container, monitor_script = SSEConnectionMonitor(\n    connection_id=\"dashboard\",\n    status_size=\"md\",\n    config=config\n)\n\nprint(\"Example 2: Custom configuration\")\nprint(f\"Max reconnect attempts: {config.max_reconnect_attempts}\")\nprint(f\"Reconnect delay: {config.reconnect_delay}ms\")\n\nExample 2: Custom configuration\nMax reconnect attempts: 5\nReconnect delay: 2000ms\n\n\n\n# Example 3: Custom status indicators\nfrom cjm_fasthtml_daisyui.components.data_display.badge import badge, badge_colors\n\n# Create custom indicators using badges instead of status dots\ncustom_indicators = {\n    'active': Span(\"Connected\", cls=str(combine_classes(badge, badge_colors.success))),\n    'disconnected': Span(\"Offline\", cls=str(combine_classes(badge, badge_colors.warning))),\n    'error': Span(\"Error\", cls=str(combine_classes(badge, badge_colors.error))),\n    'reconnecting': Span(\"Connecting\", cls=str(combine_classes(badge, badge_colors.info))),\n}\n\n# Create monitor script with custom indicators\nmonitor_script = SSEConnectionMonitorScript(\n    connection_id=\"custom\",\n    status_indicators=custom_indicators\n)\n\nstatus_container = Div(\n    custom_indicators['reconnecting'],\n    id=InteractionHtmlIds.sse_status(\"custom\")\n)\n\nprint(\"Example 3: Custom status indicators using badges\")\n\nExample 3: Custom status indicators using badges",
+    "crumbs": [
+      "patterns",
+      "SSE Connection Monitor"
+    ]
+  },
+  {
+    "objectID": "patterns/sse_connection_monitor.html#complete-page-example",
+    "href": "patterns/sse_connection_monitor.html#complete-page-example",
+    "title": "SSE Connection Monitor",
+    "section": "Complete Page Example",
+    "text": "Complete Page Example\nHere’s a complete example showing how to use the SSE connection monitor in a FastHTML application:\n\nfrom fasthtml.common import Div, H1, P\nfrom cjm_fasthtml_daisyui.components.data_display.card import card, card_body\nfrom cjm_fasthtml_daisyui.utilities.semantic_colors import bg_dui\nfrom cjm_fasthtml_tailwind.utilities.flexbox_and_grid import flex_display, items, justify, gap\nfrom cjm_fasthtml_tailwind.utilities.spacing import p as padding\n\ndef create_dashboard_page():\n    \"\"\"Example dashboard page with SSE monitoring.\"\"\"\n    connection_id = \"dashboard\"\n    \n    # Create connection monitor\n    status_container, monitor_script = SSEConnectionMonitor(\n        connection_id=connection_id,\n        status_size=\"sm\"\n    )\n    \n    return Div(\n        # Header with connection status\n        Div(\n            Div(\n                H1(\"Dashboard\"),\n                status_container,  # Connection status indicator\n                cls=combine_classes(\n                    flex_display,\n                    items.center,\n                    justify.between,\n                    padding.b(4)\n                )\n            )\n        ),\n        \n        # SSE connection element (receives updates)\n        Div(\n            # Content will be updated via SSE\n            P(\"Waiting for updates...\"),\n            hx_ext=\"sse\",\n            sse_connect=\"/stream/dashboard\",\n            sse_swap=\"update\",\n            id=InteractionHtmlIds.sse_element(connection_id),\n            cls=str(combine_classes(card, card_body, bg_dui.base_100))\n        ),\n        \n        # Monitor script (must be included)\n        monitor_script\n    )\n\n# Example route handler\nprint(\"Example: Complete dashboard page with SSE monitoring\")\nprint(\"Route: /dashboard\")\nprint(\"SSE Endpoint: /stream/dashboard\")\n\nExample: Complete dashboard page with SSE monitoring\nRoute: /dashboard\nSSE Endpoint: /stream/dashboard",
+    "crumbs": [
+      "patterns",
+      "SSE Connection Monitor"
+    ]
+  },
+  {
+    "objectID": "patterns/sse_connection_monitor.html#server-side-sse-implementation",
+    "href": "patterns/sse_connection_monitor.html#server-side-sse-implementation",
+    "title": "SSE Connection Monitor",
+    "section": "Server-Side SSE Implementation",
+    "text": "Server-Side SSE Implementation\nHere’s how to implement the server-side SSE endpoint:\nfrom fasthtml.common import *\nfrom starlette.responses import StreamingResponse\nimport asyncio\n\n@app.get(\"/stream/dashboard\")\nasync def stream_dashboard():\n    \"\"\"SSE endpoint for dashboard updates.\"\"\"\n    \n    async def event_generator():\n        try:\n            while True:\n                # Generate your data\n                data = get_dashboard_data()\n                \n                # Send SSE event\n                yield f\"event: update\\n\"\n                yield f\"data: {data}\\n\\n\"\n                \n                # Wait before next update\n                await asyncio.sleep(1)\n                \n        except asyncio.CancelledError:\n            # Send close message before shutting down\n            yield f\"event: close\\n\"\n            yield f\"data: Server shutting down\\n\\n\"\n    \n    return StreamingResponse(\n        event_generator(),\n        media_type=\"text/event-stream\",\n        headers={\n            \"Cache-Control\": \"no-cache\",\n            \"Connection\": \"keep-alive\",\n        },\n    )\n\nGraceful Shutdown\nTo signal shutdown to clients, send a ‘close’ event:\n# In your shutdown handler\nasync def shutdown_sse_connections():\n    \"\"\"Send close event to all SSE clients.\"\"\"\n    for client in active_connections:\n        await client.send(\"event: close\\n\")\n        await client.send(\"data: Server shutting down\\n\\n\")\n\n\nOOB Swap for Shutdown\nAlternatively, use OOB swap to remove the SSE element:\n# Send before shutdown\nDiv(\n    id=InteractionHtmlIds.sse_element(connection_id),\n    hx_swap_oob=\"outerHTML\"\n)",
+    "crumbs": [
+      "patterns",
+      "SSE Connection Monitor"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html",
+    "href": "patterns/master_detail.html",
+    "title": "Master-Detail",
+    "section": "",
+    "text": "The DetailItem class defines a single item in the master list. Each item has: - Unique identifier - Display label for the master list - Render function that generates the detail view UI - Optional badge text and color - Optional icon - Optional data loader for fetching required data\n\nsource\n\n\n\ndef DetailItem(\n    id:str, label:str, render:Callable, badge_text:Optional=None, badge_color:Optional=None, icon:Optional=None,\n    data_loader:Optional=None, load_on_demand:bool=True\n)-&gt;None:\n\nDefinition of a single item in the master-detail pattern.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#detail-item-definition",
+    "href": "patterns/master_detail.html#detail-item-definition",
+    "title": "Master-Detail",
+    "section": "",
+    "text": "The DetailItem class defines a single item in the master list. Each item has: - Unique identifier - Display label for the master list - Render function that generates the detail view UI - Optional badge text and color - Optional icon - Optional data loader for fetching required data\n\nsource\n\n\n\ndef DetailItem(\n    id:str, label:str, render:Callable, badge_text:Optional=None, badge_color:Optional=None, icon:Optional=None,\n    data_loader:Optional=None, load_on_demand:bool=True\n)-&gt;None:\n\nDefinition of a single item in the master-detail pattern.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#detail-item-group-definition",
+    "href": "patterns/master_detail.html#detail-item-group-definition",
+    "title": "Master-Detail",
+    "section": "Detail Item Group Definition",
+    "text": "Detail Item Group Definition\nThe DetailItemGroup class groups related items in a collapsible section. Each group has: - Unique identifier - Display title - List of items in the group - Collapsible state control - Optional icon\n\nsource\n\nDetailItemGroup\n\ndef DetailItemGroup(\n    id:str, title:str, items:List, default_open:bool=True, icon:Optional=None, badge_text:Optional=None,\n    badge_color:Optional=None\n)-&gt;None:\n\nGroup of related detail items in a collapsible section.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#masterdetail-class",
+    "href": "patterns/master_detail.html#masterdetail-class",
+    "title": "Master-Detail",
+    "section": "MasterDetail Class",
+    "text": "MasterDetail Class\nThe MasterDetail class manages a responsive master-detail interface. It: - Renders master list (sidebar) with items and optional groups - Manages active item selection - Renders detail content for selected item - Supports badges and status indicators - Supports hierarchical grouping with collapsible sections - Responsive design: Drawer toggleable on mobile, always visible on desktop (lg+) - Mobile-friendly: Includes hamburger menu button for navigation - Generates routes automatically - Provides OOB updates for coordinated UI changes\n\nsource\n\nMasterDetail\n\ndef MasterDetail(\n    interface_id:str, # Unique identifier for this interface\n    items:List, # List of items/groups\n    default_item:Optional=None, # Default item ID (defaults to first item)\n    container_id:str='master-detail-container', # HTML ID for container\n    master_id:str='master-detail-master', # HTML ID for master list\n    detail_id:str='master-detail-detail', # HTML ID for detail area\n    master_width:str='w-64', # Tailwind width class for master list\n    master_title:Optional=None, # Optional title for master list\n    show_on_htmx_only:bool=False, # Whether to show full interface for non-HTMX requests\n):\n\nManage master-detail interfaces with sidebar navigation and detail content area.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#item-management-methods",
+    "href": "patterns/master_detail.html#item-management-methods",
+    "title": "Master-Detail",
+    "section": "Item Management Methods",
+    "text": "Item Management Methods\n\nsource\n\nMasterDetail.get_item\n\ndef get_item(\n    item_id:str, # Item identifier\n)-&gt;Optional: # DetailItem or None\n\nGet item by ID.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#context-and-rendering-methods",
+    "href": "patterns/master_detail.html#context-and-rendering-methods",
+    "title": "Master-Detail",
+    "section": "Context and Rendering Methods",
+    "text": "Context and Rendering Methods\n\nsource\n\nMasterDetail.create_context\n\ndef create_context(\n    request:Any, # FastHTML request object\n    sess:Any, # FastHTML session object\n    item:DetailItem, # Current item\n)-&gt;InteractionContext: # Interaction context for rendering\n\nCreate interaction context for an item.\n\nsource\n\n\nMasterDetail.render_master\n\ndef render_master(\n    active_item_id:str, # Currently active item ID\n    item_route_func:Callable, # Function to generate item route\n    include_wrapper:bool=True, # Whether to include outer wrapper div\n)-&gt;FT: # Master list element\n\nRender master list (sidebar) with items and groups.\n\nsource\n\n\nMasterDetail.render_master_oob\n\ndef render_master_oob(\n    active_item_id:str, # Currently active item ID\n    item_route_func:Callable, # Function to generate item route\n)-&gt;FT: # Master list with OOB swap attribute\n\nRender master list with OOB swap attribute for coordinated updates.\n\nsource\n\n\nMasterDetail.render_detail\n\ndef render_detail(\n    item:DetailItem, # Item to render\n    ctx:InteractionContext, # Interaction context\n)-&gt;FT: # Detail content\n\nRender detail content for an item.\n\nsource\n\n\nMasterDetail.render_full_interface\n\ndef render_full_interface(\n    active_item_id:str, # Currently active item ID\n    item_route_func:Callable, # Function to generate item route\n    request:Any, # FastHTML request object\n    sess:Any, # FastHTML session object\n)-&gt;FT: # Complete master-detail interface\n\nRender complete responsive master-detail interface with drawer for mobile.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#route-generation",
+    "href": "patterns/master_detail.html#route-generation",
+    "title": "Master-Detail",
+    "section": "Route Generation",
+    "text": "Route Generation\n\nsource\n\nMasterDetail.create_router\n\ndef create_router(\n    prefix:str='', # URL prefix for routes (e.g., \"/media\")\n)-&gt;APIRouter: # APIRouter with generated routes\n\nCreate FastHTML router with generated routes for this master-detail interface.",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/master_detail.html#usage-example",
+    "href": "patterns/master_detail.html#usage-example",
+    "title": "Master-Detail",
+    "section": "Usage Example",
+    "text": "Usage Example\nHere’s a complete example showing how to create a master-detail interface:\nNote: The interface is automatically responsive: - Mobile (&lt; lg): Master list hidden in a drawer with hamburger menu toggle - Desktop (≥ lg): Master list always visible as a sidebar\n\n# Example: Simple file browser with groups\nfrom fasthtml.common import Div, H2, P, H3, Ul, Li\n\n# Define render functions for each item\ndef render_file_overview(ctx: InteractionContext):\n    \"\"\"Render file details.\"\"\"\n    file_data = ctx.get_data(\"file\", {})\n    return Div(\n        H2(f\"File: {file_data.get('name', 'Unknown')}\"),\n        P(f\"Size: {file_data.get('size', 0)} bytes\"),\n        P(f\"Modified: {file_data.get('modified', 'N/A')}\")\n    )\n\ndef render_folder_overview(ctx: InteractionContext):\n    \"\"\"Render folder contents.\"\"\"\n    folder_data = ctx.get_data(\"folder\", {})\n    return Div(\n        H2(f\"Folder: {folder_data.get('name', 'Unknown')}\"),\n        P(f\"Items: {folder_data.get('item_count', 0)}\"),\n        H3(\"Contents:\"),\n        Ul(*[Li(item) for item in folder_data.get('items', [])])\n    )\n\n# Optional data loaders\ndef load_file_data(request):\n    \"\"\"Load file metadata.\"\"\"\n    return {\n        \"file\": {\n            \"name\": \"document.txt\",\n            \"size\": 1024,\n            \"modified\": \"2025-01-15\"\n        }\n    }\n\ndef load_folder_data(request):\n    \"\"\"Load folder contents.\"\"\"\n    return {\n        \"folder\": {\n            \"name\": \"Documents\",\n            \"item_count\": 3,\n            \"items\": [\"file1.txt\", \"file2.pdf\", \"file3.doc\"]\n        }\n    }\n\n# Create the master-detail interface with groups\nfile_browser = MasterDetail(\n    interface_id=\"file_browser\",\n    master_title=\"File Browser\",\n    items=[\n        DetailItemGroup(\n            id=\"documents\",\n            title=\"Documents\",\n            items=[\n                DetailItem(\n                    id=\"doc1\",\n                    label=\"document.txt\",\n                    render=render_file_overview,\n                    data_loader=load_file_data,\n                    badge_text=\"1KB\",\n                    badge_color=badge_colors.info\n                ),\n                DetailItem(\n                    id=\"doc2\",\n                    label=\"report.pdf\",\n                    render=render_file_overview,\n                    badge_text=\"2KB\",\n                    badge_color=badge_colors.info\n                )\n            ],\n            badge_text=\"2 files\"\n        ),\n        DetailItemGroup(\n            id=\"media\",\n            title=\"Media\",\n            items=[\n                DetailItem(\n                    id=\"img1\",\n                    label=\"photo.jpg\",\n                    render=render_file_overview,\n                    badge_text=\"512KB\",\n                    badge_color=badge_colors.warning\n                )\n            ],\n            badge_text=\"1 file\"\n        ),\n        DetailItem(\n            id=\"root_folder\",\n            label=\"All Files\",\n            render=render_folder_overview,\n            data_loader=load_folder_data,\n            badge_text=\"3 items\",\n            badge_color=badge_colors.success\n        )\n    ]\n)\n\n# Generate router\nbrowser_router = file_browser.create_router(prefix=\"/files\")\n\n# In your FastHTML app, register the router:\n# from cjm_fasthtml_app_core.core.routing import register_routes\n# register_routes(app, browser_router)\n#\n# Or directly:\n# browser_router.to_app(app)\n\n\n# Test master-detail structure\nprint(f\"Interface has {len(file_browser.item_index)} items\")\nprint(f\"Default item: {file_browser.default_item}\")\nprint(f\"Item IDs: {list(file_browser.item_index.keys())}\")\nprint(f\"Master width: {file_browser.master_width}\")\n\nInterface has 4 items\nDefault item: doc1\nItem IDs: ['doc1', 'doc2', 'img1', 'root_folder']\nMaster width: w-64",
+    "crumbs": [
+      "patterns",
+      "Master-Detail"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html",
+    "href": "patterns/pagination.html",
+    "title": "Pagination",
+    "section": "",
+    "text": "The PaginationStyle enum defines different pagination display styles.\n\nsource\n\n\n\ndef PaginationStyle(\n    args:VAR_POSITIONAL, kwds:VAR_KEYWORD\n):\n\nDisplay styles for pagination controls.",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#pagination-style-options",
+    "href": "patterns/pagination.html#pagination-style-options",
+    "title": "Pagination",
+    "section": "",
+    "text": "The PaginationStyle enum defines different pagination display styles.\n\nsource\n\n\n\ndef PaginationStyle(\n    args:VAR_POSITIONAL, kwds:VAR_KEYWORD\n):\n\nDisplay styles for pagination controls.",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#pagination-class",
+    "href": "patterns/pagination.html#pagination-class",
+    "title": "Pagination",
+    "section": "Pagination Class",
+    "text": "Pagination Class\nThe Pagination class manages paginated views with automatic route generation and state management. It follows the same pattern as StepFlow for consistent API design.\nKey features: - Automatic pagination math (total pages, page ranges) - Auto-generated routes via create_router() - Query parameter preservation (filters, sorting, etc.) - Flexible data loading and rendering - HTMX integration for SPA-like navigation\n\nsource\n\nPagination\n\ndef Pagination(\n    pagination_id:str, # Unique identifier for this pagination instance\n    data_loader:Callable, # Function that returns all items\n    render_items:Callable, # Function to render items for a page\n    items_per_page:int=20, # Number of items per page\n    container_id:str=None, # HTML ID for container (auto-generated if None)\n    content_id:str=None, # HTML ID for content area (auto-generated if None)\n    preserve_params:List=None, # Query parameters to preserve\n    style:PaginationStyle=&lt;PaginationStyle.SIMPLE: 'simple'&gt;, # Pagination display style\n    prev_text:str='« Previous', # Text for previous button\n    next_text:str='Next »', # Text for next button\n    page_info_format:str='Page {current} of {total}', # Format for page info\n    button_size:str=None, # Button size class\n    push_url:bool=True, # Whether to update URL with hx-push-url\n    show_endpoints:bool=False, # Whether to show First/Last buttons\n    first_text:str='«« First', # Text for first page button\n    last_text:str='Last »»', # Text for last page button\n    redirect_route:Optional=None, # Route to redirect non-HTMX requests\n):\n\nManage paginated views with automatic route generation and state management.",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#helper-methods",
+    "href": "patterns/pagination.html#helper-methods",
+    "title": "Pagination",
+    "section": "Helper Methods",
+    "text": "Helper Methods\n\nsource\n\nPagination.get_total_pages\n\ndef get_total_pages(\n    total_items:int, # Total number of items\n)-&gt;int: # Total number of pages\n\nCalculate total number of pages.\n\nsource\n\n\nPagination.get_page_items\n\ndef get_page_items(\n    all_items:List, # All items\n    page:int, # Current page number (1-indexed)\n)-&gt;tuple: # (page_items, start_idx, end_idx)\n\nGet items for the current page.\n\nsource\n\n\nPagination.build_route\n\ndef build_route(\n    page:int, # Page number\n    request:Any, # FastHTML request object\n    page_route_func:Callable, # Route function from create_router\n)-&gt;str: # Complete route with preserved params\n\nBuild route URL with preserved query parameters.",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#rendering-methods",
+    "href": "patterns/pagination.html#rendering-methods",
+    "title": "Pagination",
+    "section": "Rendering Methods",
+    "text": "Rendering Methods\n\nsource\n\nPagination.render_navigation_controls\n\ndef render_navigation_controls(\n    current_page:int, # Current page number\n    total_pages:int, # Total number of pages\n    route_func:Callable, # Function to generate route for page\n)-&gt;FT: # Navigation controls element\n\nRender pagination navigation controls.\n\nsource\n\n\nPagination.render_page_content\n\ndef render_page_content(\n    page_items:List, # Items for current page\n    current_page:int, # Current page number\n    total_pages:int, # Total number of pages\n    request:Any, # FastHTML request object\n    route_func:Callable, # Function to generate route for page\n)-&gt;FT: # Complete page content with items and navigation\n\nRender complete page content with items and pagination controls.",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#route-generation",
+    "href": "patterns/pagination.html#route-generation",
+    "title": "Pagination",
+    "section": "Route Generation",
+    "text": "Route Generation\n\nsource\n\nPagination.create_router\n\ndef create_router(\n    prefix:str='', # URL prefix for routes (e.g., \"/library\")\n)-&gt;APIRouter: # APIRouter with generated routes\n\nCreate FastHTML router with generated routes for pagination.",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#usage-example",
+    "href": "patterns/pagination.html#usage-example",
+    "title": "Pagination",
+    "section": "Usage Example",
+    "text": "Usage Example\nHere’s a complete example showing how to create a paginated view:\n\n# Example: Simple paginated item list\nfrom fasthtml.common import Div, H3, P, Li, Ul\n\n# Define data loader function\ndef load_items(request):\n    \"\"\"Load all items - this could query a database, file system, etc.\"\"\"\n    # For demo, generate 100 items\n    return [f\"Item {i}\" for i in range(1, 101)]\n\n# Define render function for items\ndef render_items_list(items, page, request):\n    \"\"\"Render items for current page.\"\"\"\n    return Ul(\n        *[Li(item) for item in items],\n        cls=\"list-disc ml-6\"\n    )\n\n# Create pagination instance\nitems_pagination = Pagination(\n    pagination_id=\"items\",\n    data_loader=load_items,\n    render_items=render_items_list,\n    items_per_page=10\n)\n\n# Generate router\nitems_router = items_pagination.create_router(prefix=\"/items\")\n\n# In your FastHTML app, register the router:\n# from cjm_fasthtml_app_core.core.routing import register_routes\n# register_routes(app, items_router)\n#\n# Or directly:\n# items_router.to_app(app)\n\n# Access the pagination at: /items/content?page=1\n\n# Test pagination math\nprint(f\"Items per page: {items_pagination.items_per_page}\")\nprint(f\"Total pages for 100 items: {items_pagination.get_total_pages(100)}\")\nprint(f\"Total pages for 95 items: {items_pagination.get_total_pages(95)}\")\n\n# Test page items\nall_items = load_items(None)\npage1_items, start, end = items_pagination.get_page_items(all_items, 1)\nprint(f\"\\nPage 1: items {start+1}-{end} = {page1_items[:3]}...\")\n\npage5_items, start, end = items_pagination.get_page_items(all_items, 5)\nprint(f\"Page 5: items {start+1}-{end} = {page5_items[:3]}...\")\n\nItems per page: 10\nTotal pages for 100 items: 10\nTotal pages for 95 items: 10\n\nPage 1: items 1-10 = ['Item 1', 'Item 2', 'Item 3']...\nPage 5: items 41-50 = ['Item 41', 'Item 42', 'Item 43']...\n\n\n\n# Example 2: Pagination with preserved query parameters (filters, search, etc.)\nfrom fasthtml.common import Div, H3, P\n\n# Define data loader that uses query parameters\ndef load_media_files(request):\n    \"\"\"Load media files, filtered by query parameters.\"\"\"\n    # In real app, this would filter based on request.query_params\n    media_type = request.query_params.get(\"media_type\", \"all\") if request else \"all\"\n    view = request.query_params.get(\"view\", \"grid\") if request else \"grid\"\n    \n    # Simulate filtered results\n    all_files = [f\"file{i}.mp4\" for i in range(1, 51)]\n    \n    # Return filtered files (simplified for demo)\n    return all_files\n\n# Define render function that uses query parameters\ndef render_media_grid(items, page, request):\n    \"\"\"Render media items in grid view.\"\"\"\n    media_type = request.query_params.get(\"media_type\", \"all\") if request else \"all\"\n    view = request.query_params.get(\"view\", \"grid\") if request else \"grid\"\n    \n    return Div(\n        H3(f\"Media Library ({view} view, filter: {media_type})\"),\n        P(f\"Showing {len(items)} files on page {page}\"),\n        Div(*[Div(item) for item in items])\n    )\n\n# Create pagination with preserved parameters\nmedia_pagination = Pagination(\n    pagination_id=\"media\",\n    data_loader=load_media_files,\n    render_items=render_media_grid,\n    items_per_page=20,\n    preserve_params=[\"view\", \"media_type\"],  # Automatically preserve these in URLs\n    style=PaginationStyle.SIMPLE\n)\n\n# Generate router\nmedia_router = media_pagination.create_router(prefix=\"/library\")\n\n# Now when users navigate pages, view and media_type are automatically preserved:\n# /library/content?page=1&view=grid&media_type=video\n# /library/content?page=2&view=grid&media_type=video  &lt;- view and media_type preserved!\n\nprint(\"Media pagination configured with parameter preservation:\")\nprint(f\"  Preserved params: {media_pagination.preserve_params}\")\nprint(f\"  Items per page: {media_pagination.items_per_page}\")\nprint(f\"  Style: {media_pagination.style.value}\")\n\nMedia pagination configured with parameter preservation:\n  Preserved params: ['view', 'media_type']\n  Items per page: 20\n  Style: simple",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#integration-with-fasthtml-applications",
+    "href": "patterns/pagination.html#integration-with-fasthtml-applications",
+    "title": "Pagination",
+    "section": "Integration with FastHTML Applications",
+    "text": "Integration with FastHTML Applications\nThe Pagination class integrates seamlessly with FastHTML applications using the same pattern as StepFlow.\n\n# This cell has been replaced by the new Pagination class above",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#router-registration",
+    "href": "patterns/pagination.html#router-registration",
+    "title": "Pagination",
+    "section": "Router Registration",
+    "text": "Router Registration\nAfter creating a Pagination instance and generating its router, register it with your FastHTML app:\nfrom cjm_fasthtml_app_core.core.routing import register_routes\n\n# Create pagination\nlibrary_pagination = Pagination(\n    pagination_id=\"library\",\n    data_loader=load_library_items,\n    render_items=render_library_grid,\n    items_per_page=20,\n    preserve_params=[\"view\", \"media_type\"]\n)\n\n# Generate router\nlibrary_router = library_pagination.create_router(prefix=\"/library\")\n\n# Register with app\nregister_routes(app, library_router)\n\n# Or directly:\n# library_router.to_app(app)\nThe router automatically handles: - Pagination math (total pages, item slicing) - Query parameter preservation - Route generation with preserved state - HTMX integration",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#data-loader-and-render-functions",
+    "href": "patterns/pagination.html#data-loader-and-render-functions",
+    "title": "Pagination",
+    "section": "Data Loader and Render Functions",
+    "text": "Data Loader and Render Functions\nThe Pagination class requires two key functions:\n\nData Loader Function\nLoads all items based on request (can use query parameters for filtering):\ndef load_items(request):\n    \"\"\"Load all items - can filter based on query parameters.\"\"\"\n    # Access filters from query parameters\n    media_type = request.query_params.get(\"media_type\", \"all\")\n    search = request.query_params.get(\"search\", \"\")\n    \n    # Load and filter items\n    items = get_all_items()\n    \n    if media_type != \"all\":\n        items = [item for item in items if item.type == media_type]\n    \n    if search:\n        items = [item for item in items if search.lower() in item.name.lower()]\n    \n    return items\n\n\nRender Function\nRenders the items for display (receives current page items, page number, and request):\ndef render_items(items, page, request):\n    \"\"\"Render items for current page.\"\"\"\n    # Can access query parameters if needed\n    view_mode = request.query_params.get(\"view\", \"grid\")\n    \n    if view_mode == \"grid\":\n        return render_grid(items)\n    else:\n        return render_list(items)\nThe pagination automatically: - Calls data_loader to get all items - Slices items for current page - Passes page items to render_items - Adds navigation controls - Preserves specified query parameters",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "patterns/pagination.html#htmx-integration",
+    "href": "patterns/pagination.html#htmx-integration",
+    "title": "Pagination",
+    "section": "HTMX Integration",
+    "text": "HTMX Integration\nThe Pagination class automatically configures HTMX attributes for SPA-like navigation:\n\nhx-get: Fetches the new page content from the generated route\nhx-target: Targets the content ID (auto-generated or custom)\nhx-swap: Uses outerHTML to replace the entire content container\nhx-push-url: Updates browser URL (configurable via push_url parameter)\nhref: Provides fallback for non-JavaScript navigation\n\n\nAutomatic Swap Strategy\nThe pagination uses outerHTML swap by default, which means: - The route returns a complete Div with id=content_id - HTMX replaces the entire element (including the ID) - This ensures the navigation controls are updated with each page change\n\n\nDisabled States\nNavigation buttons automatically handle boundary conditions: - Previous button disabled on page 1 (uses btn_behaviors.disabled) - Next button disabled on last page - Disabled buttons use DaisyUI styling\n\n\nURL Management\nWhen push_url=True (default): - Browser URL updates as users navigate pages - Users can bookmark specific pages - Back/forward buttons work correctly - Preserved query parameters are maintained in URLs\nExample URL progression:\n/library/content?page=1&view=grid&media_type=video\n/library/content?page=2&view=grid&media_type=video  # page changed, other params preserved\n/library/content?page=3&view=grid&media_type=video\n\n\nCustomization Options\nYou can customize the pagination behavior:\npagination = Pagination(\n    pagination_id=\"results\",\n    data_loader=load_results,\n    render_items=render_results_list,\n    items_per_page=50,\n    style=PaginationStyle.COMPACT,  # No page info display\n    prev_text=\"← Previous\",  # Custom button text\n    next_text=\"Next →\",\n    button_size=str(btn_sizes.sm),  # Smaller buttons\n    push_url=False  # Don't update URL (for modals, etc.)\n)",
+    "crumbs": [
+      "patterns",
+      "Pagination"
+    ]
+  },
+  {
+    "objectID": "core/html_ids.html",
+    "href": "core/html_ids.html",
+    "title": "HTML IDs",
+    "section": "",
+    "text": "This class provides centralized HTML ID constants for interaction pattern components. It extends AppHtmlIds from cjm-fasthtml-app-core to inherit base application IDs.\n\nsource\n\n\n\ndef InteractionHtmlIds(\n    args:VAR_POSITIONAL, kwargs:VAR_KEYWORD\n):\n\nHTML ID constants for interaction pattern components.\nInherits from AppHtmlIds: - MAIN_CONTENT = “main-content” - ALERT_CONTAINER = “alert-container” - as_selector(id_str) - static method",
+    "crumbs": [
+      "core",
+      "HTML IDs"
+    ]
+  },
+  {
+    "objectID": "core/html_ids.html#interactionhtmlids-class",
+    "href": "core/html_ids.html#interactionhtmlids-class",
+    "title": "HTML IDs",
+    "section": "",
+    "text": "This class provides centralized HTML ID constants for interaction pattern components. It extends AppHtmlIds from cjm-fasthtml-app-core to inherit base application IDs.\n\nsource\n\n\n\ndef InteractionHtmlIds(\n    args:VAR_POSITIONAL, kwargs:VAR_KEYWORD\n):\n\nHTML ID constants for interaction pattern components.\nInherits from AppHtmlIds: - MAIN_CONTENT = “main-content” - ALERT_CONTAINER = “alert-container” - as_selector(id_str) - static method",
+    "crumbs": [
+      "core",
+      "HTML IDs"
+    ]
+  },
+  {
+    "objectID": "core/html_ids.html#usage-examples",
+    "href": "core/html_ids.html#usage-examples",
+    "title": "HTML IDs",
+    "section": "Usage Examples",
+    "text": "Usage Examples\n\n# Access base IDs\ncontainer_id = InteractionHtmlIds.STEP_FLOW_CONTAINER\nprint(f\"Container ID: {container_id}\")\nprint(f\"Container selector: {InteractionHtmlIds.as_selector(container_id)}\")\n\nContainer ID: step-flow-container\nContainer selector: #step-flow-container\n\n\n\n# Generate step-specific IDs\nstep_id = \"select-plugin\"\ncontent_id = InteractionHtmlIds.step_content(step_id)\nindicator_id = InteractionHtmlIds.step_indicator(step_id)\n\nprint(f\"Step content ID: {content_id}\")\nprint(f\"Step indicator ID: {indicator_id}\")\n\n# Generate tab-specific IDs\ntab_id = \"settings\"\ntab_radio_id = InteractionHtmlIds.tab_radio(tab_id)\ntab_content_id = InteractionHtmlIds.tab_content(tab_id)\n\nprint(f\"Tab radio ID: {tab_radio_id}\")\nprint(f\"Tab content ID: {tab_content_id}\")\n\n# Generate master-detail IDs\nitem_id = \"file-123\"\ngroup_id = \"media-files\"\nmaster_item_id = InteractionHtmlIds.master_item(item_id)\nmaster_group_id = InteractionHtmlIds.master_group(group_id)\ndetail_id = InteractionHtmlIds.detail_content(item_id)\n\nprint(f\"Master item ID: {master_item_id}\")\nprint(f\"Master group ID: {master_group_id}\")\nprint(f\"Detail content ID: {detail_id}\")\n\n# Generate modal dialog IDs\nmodal_id = \"settings-modal\"\ndialog_id = InteractionHtmlIds.modal_dialog(modal_id)\ndialog_content_id = InteractionHtmlIds.modal_dialog_content(modal_id)\n\nprint(f\"Modal dialog ID: {dialog_id}\")\nprint(f\"Modal dialog content ID: {dialog_content_id}\")\nprint(f\"Modal dialog selector: {InteractionHtmlIds.as_selector(dialog_id)}\")\n\n# Generate SSE connection IDs\nconnection_id = \"resources\"\nsse_status_id = InteractionHtmlIds.sse_status(connection_id)\nsse_element_id = InteractionHtmlIds.sse_element(connection_id)\n\nprint(f\"SSE status ID: {sse_status_id}\")\nprint(f\"SSE element ID: {sse_element_id}\")\nprint(f\"SSE status selector: {InteractionHtmlIds.as_selector(sse_status_id)}\")\n\n# Generate pagination IDs\npagination_id = \"library\"\npagination_container_id = InteractionHtmlIds.pagination_container(pagination_id)\npagination_content_id = InteractionHtmlIds.pagination_content(pagination_id)\npagination_nav_id = InteractionHtmlIds.pagination_nav(pagination_id)\n\nprint(f\"Pagination container ID: {pagination_container_id}\")\nprint(f\"Pagination content ID: {pagination_content_id}\")\nprint(f\"Pagination nav ID: {pagination_nav_id}\")\nprint(f\"Pagination content selector: {InteractionHtmlIds.as_selector(pagination_content_id)}\")\n\nStep content ID: step-select-plugin-content\nStep indicator ID: step-select-plugin-indicator\nTab radio ID: tab-settings-radio\nTab content ID: tab-settings-content\nMaster item ID: master-item-file-123\nMaster group ID: master-group-media-files\nDetail content ID: detail-file-123-content\nModal dialog ID: modal-settings-modal\nModal dialog content ID: modal-settings-modal-content\nModal dialog selector: #modal-settings-modal\nSSE status ID: sse-status-resources\nSSE element ID: sse-element-resources\nSSE status selector: #sse-status-resources\nPagination container ID: pagination-library-container\nPagination content ID: pagination-library-content\nPagination nav ID: pagination-library-nav\nPagination content selector: #pagination-library-content",
+    "crumbs": [
+      "core",
+      "HTML IDs"
+    ]
+  }
+]
