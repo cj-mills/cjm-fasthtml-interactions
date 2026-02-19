@@ -35,6 +35,7 @@ class Step:
     show_back: bool = True  # Whether to show back button
     show_cancel: bool = True  # Whether to show cancel button
     next_button_text: str = "Continue"  # Text for next/submit button
+    on_leave: Optional[Callable[[Dict[str, Any], Any, Any], Any]] = None  # Called after validation, before navigation (state, request, sess) -> None or component
     
     def is_valid(self, state: Dict[str, Any]  # Current workflow state
                 ) -> bool:  # True if step is complete and valid
@@ -466,6 +467,22 @@ def create_router(self:StepFlow,
                 cancel_route=reset.to()
             )
             return Div(step_content, id=self.container_id)
+
+        # Call on_leave hook if defined (after validation, before navigation)
+        if current_step.on_leave:
+            import inspect
+            if self.debug:
+                print(f"DEBUG StepFlow: Calling on_leave for step {current_step_id}")
+            if inspect.iscoroutinefunction(current_step.on_leave):
+                result = await current_step.on_leave(state, request, sess)
+            else:
+                result = current_step.on_leave(state, request, sess)
+            
+            # If on_leave returns a component, stay on current step (e.g., show error)
+            if result is not None:
+                if self.debug:
+                    print(f"DEBUG StepFlow: on_leave returned component, staying on step")
+                return Div(result, id=self.container_id)
 
         # Check if this is the last step
         if self.is_last_step(current_step_id):
