@@ -35,6 +35,7 @@ class Step:
     show_back: bool = True  # Whether to show back button
     show_cancel: bool = True  # Whether to show cancel button
     next_button_text: str = "Continue"  # Text for next/submit button
+    on_enter: Optional[Callable[[Dict[str, Any], Any, Any], Any]] = None  # Called when entering step, before render (state, request, sess) -> None or component
     on_leave: Optional[Callable[[Dict[str, Any], Any, Any], Any]] = None  # Called after validation, before navigation (state, request, sess) -> None or component
     
     def is_valid(self, state: Dict[str, Any]  # Current workflow state
@@ -391,10 +392,24 @@ def create_router(self:StepFlow,
 
     # Store reference to flow in router for access in route handlers
     router.step_flow = self
+    
+    # Helper to call on_enter hook
+    async def _call_on_enter(step_obj, state, request, sess):
+        """Call on_enter hook if defined, return result or None."""
+        if step_obj.on_enter:
+            import inspect
+            if self.debug:
+                print(f"DEBUG StepFlow: Calling on_enter for step {step_obj.id}")
+            if inspect.iscoroutinefunction(step_obj.on_enter):
+                result = await step_obj.on_enter(state, request, sess)
+            else:
+                result = step_obj.on_enter(state, request, sess)
+            return result
+        return None
 
     # Entry point route - start or resume
     @router
-    def start(request, sess):
+    async def start(request, sess):
         """Entry point - start workflow or resume from last step."""
         current_step_id = self.get_current_step_id(sess)
         step_obj = self.get_step(current_step_id)
@@ -403,6 +418,14 @@ def create_router(self:StepFlow,
             # Invalid state, restart from beginning
             step_obj = self.steps[0]
             self.set_current_step(sess, step_obj.id)
+
+        # Call on_enter hook before rendering
+        state = self.get_workflow_state(sess)
+        enter_result = await _call_on_enter(step_obj, state, request, sess)
+        if enter_result is not None:
+            if self.debug:
+                print(f"DEBUG StepFlow: on_enter returned component in start")
+            return Div(enter_result, id=self.container_id)
 
         ctx = self.create_context(request, sess, step_obj)
 
@@ -427,7 +450,7 @@ def create_router(self:StepFlow,
             print(f"DEBUG StepFlow: current_step_id={current_step_id}, is_last={self.is_last_step(current_step_id)}")
 
         if not current_step:
-            return start(request, sess)
+            return await start(request, sess)
 
         # Get form data if any (properly handle FormData from Starlette)
         try:
@@ -514,6 +537,14 @@ def create_router(self:StepFlow,
         if next_step_id:
             self.set_current_step(sess, next_step_id)
             step_obj = self.get_step(next_step_id)
+            
+            # Call on_enter hook for the new step
+            state = self.get_workflow_state(sess)
+            enter_result = await _call_on_enter(step_obj, state, request, sess)
+            if enter_result is not None:
+                if self.debug:
+                    print(f"DEBUG StepFlow: on_enter returned component")
+                return Div(enter_result, id=self.container_id)
 
             ctx = self.create_context(request, sess, step_obj)
 
@@ -527,11 +558,11 @@ def create_router(self:StepFlow,
 
             return Div(step_content, id=self.container_id)
 
-        return start(request, sess)
+        return await start(request, sess)
 
     # Back step handler
     @router
-    def back_step(request, sess):
+    async def back_step(request, sess):
         """Go back to previous step."""
         current_step_id = self.get_current_step_id(sess)
         prev_step_id = self.get_previous_step_id(current_step_id)
@@ -539,6 +570,14 @@ def create_router(self:StepFlow,
         if prev_step_id:
             self.set_current_step(sess, prev_step_id)
             prev_step = self.get_step(prev_step_id)
+            
+            # Call on_enter hook for the previous step
+            state = self.get_workflow_state(sess)
+            enter_result = await _call_on_enter(prev_step, state, request, sess)
+            if enter_result is not None:
+                if self.debug:
+                    print(f"DEBUG StepFlow: on_enter returned component in back_step")
+                return Div(enter_result, id=self.container_id)
 
             ctx = self.create_context(request, sess, prev_step)
 
@@ -552,13 +591,13 @@ def create_router(self:StepFlow,
 
             return Div(step_content, id=self.container_id)
 
-        return start(request, sess)
+        return await start(request, sess)
 
     # Reset workflow handler
     @router
-    def reset(request, sess):
+    async def reset(request, sess):
         """Reset workflow to beginning."""
         self.clear_workflow(sess)
-        return start(request, sess)
+        return await start(request, sess)
 
     return router

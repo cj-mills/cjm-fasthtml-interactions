@@ -48,8 +48,8 @@ graph LR
     patterns_modal_dialog --> patterns_async_loading
     patterns_pagination --> core_html_ids
     patterns_sse_connection_monitor --> core_html_ids
-    patterns_step_flow --> core_html_ids
     patterns_step_flow --> core_state_store
+    patterns_step_flow --> core_html_ids
     patterns_step_flow --> core_context
     patterns_tabbed_interface --> core_html_ids
     patterns_tabbed_interface --> core_context
@@ -935,6 +935,7 @@ class Step:
     show_back: bool = True  # Whether to show back button
     show_cancel: bool = True  # Whether to show cancel button
     next_button_text: str = 'Continue'  # Text for next/submit button
+    on_enter: Optional[Callable[[Dict[str, Any], Any, Any], Any]]  # Called when entering step, before render (state, request, sess) -> None or component
     on_leave: Optional[Callable[[Dict[str, Any], Any, Any], Any]]  # Called after validation, before navigation (state, request, sess) -> None or component
     
     def is_valid(self, state: Dict[str, Any]  # Current workflow state
