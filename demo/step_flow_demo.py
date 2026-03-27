@@ -2,7 +2,7 @@
 
 from fasthtml.common import *
 from demo import *
-
+import asyncio
 
 # Create APIRouter for step flow demo
 step_flow_ar = APIRouter(prefix="/step_flow")
@@ -174,7 +174,7 @@ def render_registration_page(request, sess):
         ),
 
         # StepFlow workflow
-        registration_router.start(request, sess),
+        asyncio.run(registration_router.start(request, sess)),
 
         cls=combine_classes(
             max_w._4xl,
