@@ -42,17 +42,17 @@ graph LR
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
     patterns_tabbed_interface[patterns.tabbed_interface<br/>Tabbed Interface]
 
-    patterns_master_detail --> core_html_ids
     patterns_master_detail --> core_context
-    patterns_modal_dialog --> core_html_ids
+    patterns_master_detail --> core_html_ids
     patterns_modal_dialog --> patterns_async_loading
+    patterns_modal_dialog --> core_html_ids
     patterns_pagination --> core_html_ids
     patterns_sse_connection_monitor --> core_html_ids
     patterns_step_flow --> core_state_store
-    patterns_step_flow --> core_html_ids
     patterns_step_flow --> core_context
-    patterns_tabbed_interface --> core_html_ids
+    patterns_step_flow --> core_html_ids
     patterns_tabbed_interface --> core_context
+    patterns_tabbed_interface --> core_html_ids
 ```
 
 *11 cross-module dependencies detected*
@@ -953,6 +953,7 @@ class StepFlow:
         container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
         on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
         show_progress: bool = False,  # Whether to show progress indicator
+        progress_renderer: Optional[Callable] = None,  # Custom progress renderer: (steps, current_index) -> FT
         wrap_in_form: bool = True,  # Whether to wrap content + navigation in a form
         debug: bool = False  # Whether to print debug information
     )
@@ -966,6 +967,7 @@ class StepFlow:
             container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
             on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
             show_progress: bool = False,  # Whether to show progress indicator
+            progress_renderer: Optional[Callable] = None,  # Custom progress renderer: (steps, current_index) -> FT
             wrap_in_form: bool = True,  # Whether to wrap content + navigation in a form
             debug: bool = False  # Whether to print debug information
         )

@@ -58,6 +58,7 @@ class StepFlow:
         container_id: str = InteractionHtmlIds.STEP_FLOW_CONTAINER,  # HTML ID for content container
         on_complete: Optional[Callable[[Dict[str, Any], Any], Any]] = None,  # Completion handler
         show_progress: bool = False,  # Whether to show progress indicator
+        progress_renderer: Optional[Callable] = None,  # Custom progress renderer: (steps, current_index) -> FT
         wrap_in_form: bool = True,  # Whether to wrap content + navigation in a form
         debug: bool = False  # Whether to print debug information
     ):
@@ -68,6 +69,7 @@ class StepFlow:
         self.container_id = container_id
         self.on_complete = on_complete
         self.show_progress = show_progress
+        self.progress_renderer = progress_renderer
         self.wrap_in_form = wrap_in_form
         self.debug = debug
         
@@ -248,6 +250,11 @@ def render_progress(self:StepFlow,
     current_step_id = self.get_current_step_id(sess)
     current_idx = self.get_step_index(current_step_id)
     
+    # Delegate to custom renderer if provided
+    if self.progress_renderer is not None:
+        return self.progress_renderer(self.steps, current_idx)
+    
+    # Default: DaisyUI steps component
     step_items = []
     for idx, step_def in enumerate(self.steps):
         # Completed steps (and current step) get primary color
