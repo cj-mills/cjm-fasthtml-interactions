@@ -656,6 +656,7 @@ class SSEConnectionConfig:
 from cjm_fasthtml_interactions.core.state_store import (
     WorkflowStateStore,
     get_session_id,
+    set_session_id,
     InMemoryWorkflowStateStore
 )
 ```
@@ -668,6 +669,15 @@ def get_session_id(
     key: str = "_workflow_session_id"  # Session key for storing the ID
 ) -> str:  # Stable session identifier
     "Get or create a stable session identifier."
+```
+
+``` python
+def set_session_id(
+    sess: Any,  # FastHTML session object
+    session_id: str,  # Workflow session ID to set as active
+    key: str = "_workflow_session_id"  # Session key for storing the ID
+) -> None
+    "Set the active workflow session ID, switching all subsequent state reads/writes to that session."
 ```
 
 #### Classes
