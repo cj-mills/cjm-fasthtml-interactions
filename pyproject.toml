@@ -1,3 +1,30 @@
 [build-system]
-requires = ["setuptools>=64.0,<76.0"]
+requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "cjm-fasthtml-interactions"
+dynamic = ["version"]
+description = "Reusable user interaction patterns for FastHTML applications including multi-step wizards, master-detail views, modal workflows, and other stateful UI orchestration patterns."
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "Apache-2.0"}
+authors = [{name = "Christian J. Mills", email = "9126128+cj-mills@users.noreply.github.com"}]
+keywords = ['nbdev', 'jupyter', 'notebook', 'python']
+classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
+dependencies = ['fastcore', 'cjm_error_handling', 'cjm_fasthtml_app_core', 'cjm_fasthtml_daisyui', 'cjm_fasthtml_sse']
+
+[project.urls]
+Repository = "https://github.com/cj-mills/cjm-fasthtml-interactions"
+Documentation = "https://cj-mills.github.io/cjm-fasthtml-interactions"
+
+[project.entry-points.nbdev]
+cjm_fasthtml_interactions = "cjm_fasthtml_interactions._modidx:d"
+
+[tool.setuptools.dynamic]
+version = {attr = "cjm_fasthtml_interactions.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["cjm_fasthtml_interactions"]
+
+[tool.nbdev]
