@@ -14,7 +14,6 @@ class InteractionHtmlIds(AppHtmlIds):
     
     Inherits from AppHtmlIds:
         - MAIN_CONTENT = "main-content"
-        - ALERT_CONTAINER = "alert-container"
         - as_selector(id_str) - static method
     """
     
@@ -30,26 +29,6 @@ class InteractionHtmlIds(AppHtmlIds):
     STEP_FLOW_CANCEL_BTN = "step-flow-cancel-btn"
     STEP_FLOW_SUBMIT_BTN = "step-flow-submit-btn"
     
-    # Tabbed interface components
-    TABBED_INTERFACE_CONTAINER = "tabbed-interface-container"
-    TABBED_INTERFACE_TABS = "tabbed-interface-tabs"
-    TABBED_INTERFACE_CONTENT = "tabbed-interface-content"
-    
-    # Master-detail components
-    MASTER_DETAIL_CONTAINER = "master-detail-container"
-    MASTER_DETAIL_MASTER = "master-detail-master"
-    MASTER_DETAIL_DETAIL = "master-detail-detail"
-    
-    # Modal dialog components
-    MODAL_DIALOG = "modal-dialog"
-    MODAL_DIALOG_BOX = "modal-dialog-box"
-    MODAL_DIALOG_CONTENT = "modal-dialog-content"
-    
-    # Pagination components
-    PAGINATION_CONTAINER = "pagination-container"
-    PAGINATION_CONTENT = "pagination-content"
-    PAGINATION_NAV = "pagination-nav"
-    
     @staticmethod
     def step_content(step_id: str  # Step identifier
                     ) -> str:  # HTML ID for step content
@@ -61,75 +40,3 @@ class InteractionHtmlIds(AppHtmlIds):
                       ) -> str:  # HTML ID for step indicator
         """Generate HTML ID for a specific step's progress indicator."""
         return f"step-{step_id}-indicator"
-    
-    @staticmethod
-    def tab_radio(tab_id: str  # Tab identifier
-                 ) -> str:  # HTML ID for tab radio input
-        """Generate HTML ID for a specific tab's radio input."""
-        return f"tab-{tab_id}-radio"
-    
-    @staticmethod
-    def tab_content(tab_id: str  # Tab identifier
-                   ) -> str:  # HTML ID for tab content
-        """Generate HTML ID for a specific tab's content."""
-        return f"tab-{tab_id}-content"
-    
-    @staticmethod
-    def master_item(item_id: str  # Item identifier
-                   ) -> str:  # HTML ID for master list item
-        """Generate HTML ID for a master list item."""
-        return f"master-item-{item_id}"
-    
-    @staticmethod
-    def master_group(group_id: str  # Group identifier
-                    ) -> str:  # HTML ID for master list group
-        """Generate HTML ID for master list group."""
-        return f"master-group-{group_id}"
-    
-    @staticmethod
-    def detail_content(item_id: str  # Item identifier
-                      ) -> str:  # HTML ID for detail content
-        """Generate HTML ID for detail content area."""
-        return f"detail-{item_id}-content"
-    
-    @staticmethod
-    def modal_dialog(modal_id: str  # Modal identifier
-                    ) -> str:  # HTML ID for modal dialog
-        """Generate HTML ID for a modal dialog."""
-        return f"modal-{modal_id}"
-    
-    @staticmethod
-    def modal_dialog_content(modal_id: str  # Modal identifier
-                           ) -> str:  # HTML ID for modal content area
-        """Generate HTML ID for modal content area."""
-        return f"modal-{modal_id}-content"
-    
-    @staticmethod
-    def sse_status(connection_id: str  # SSE connection identifier
-                  ) -> str:  # HTML ID for SSE status indicator
-        """Generate HTML ID for SSE connection status indicator."""
-        return f"sse-status-{connection_id}"
-    
-    @staticmethod
-    def sse_element(connection_id: str  # SSE connection identifier
-                   ) -> str:  # HTML ID for SSE connection element
-        """Generate HTML ID for SSE connection element."""
-        return f"sse-element-{connection_id}"
-    
-    @staticmethod
-    def pagination_container(pagination_id: str  # Pagination identifier
-                           ) -> str:  # HTML ID for pagination container
-        """Generate HTML ID for pagination container (entire paginated view)."""
-        return f"pagination-{pagination_id}-container"
-    
-    @staticmethod
-    def pagination_content(pagination_id: str  # Pagination identifier
-                         ) -> str:  # HTML ID for pagination content area
-        """Generate HTML ID for pagination content area (items display)."""
-        return f"pagination-{pagination_id}-content"
-    
-    @staticmethod
-    def pagination_nav(pagination_id: str  # Pagination identifier
-                     ) -> str:  # HTML ID for pagination navigation controls
-        """Generate HTML ID for pagination navigation controls."""
-        return f"pagination-{pagination_id}-nav"

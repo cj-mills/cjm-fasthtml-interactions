@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cjm-fasthtml-interactions"
 dynamic = ["version"]
-description = "Reusable user interaction patterns for FastHTML applications including multi-step wizards, master-detail views, modal workflows, and other stateful UI orchestration patterns."
+description = "Reusable user interaction patterns for FastHTML applications, providing the StepFlow multi-step wizard and AsyncLoadingContainer for asynchronous content loading."
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "Apache-2.0"}
 authors = [{name = "Christian J. Mills", email = "9126128+cj-mills@users.noreply.github.com"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
 classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
-dependencies = ['fastcore', 'cjm_fasthtml_app_core', 'cjm_fasthtml_daisyui', 'cjm_fasthtml_sse']
+dependencies = ['fastcore', 'cjm_fasthtml_app_core', 'cjm_fasthtml_daisyui']
 
 [project.urls]
 Repository = "https://github.com/cj-mills/cjm-fasthtml-interactions"

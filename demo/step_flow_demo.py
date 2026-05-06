@@ -216,9 +216,12 @@ def start(request, sess):
     """
     from cjm_fasthtml_app_core.core.htmx import is_htmx_request
 
-    # For HTMX requests, delegate to workflow router's start function
+    # For HTMX requests, delegate to workflow router's start function.
+    # registration_router.start is async; this sync wrapper handler runs in a
+    # threadpool, so asyncio.run is the correct way to drive it (mirrors the
+    # pattern in render_registration_page above).
     if is_htmx_request(request):
-        return registration_router.start(request, sess)
+        return asyncio.run(registration_router.start(request, sess))
 
     # For full page requests, return complete page with navbar
     def content():

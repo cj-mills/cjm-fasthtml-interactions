@@ -527,12 +527,14 @@ def create_router(self:StepFlow,
                     result = await self.on_complete(state, request)
                     if self.debug:
                         print(f"DEBUG StepFlow: on_complete returned (async)")
-                    return result
                 else:
                     result = self.on_complete(state, request)
                     if self.debug:
                         print(f"DEBUG StepFlow: on_complete returned (sync)")
-                    return result
+                # Wrap in container Div so subsequent HTMX calls targeting
+                # #container_id (e.g., a "Start Over" button rendered by
+                # on_complete) still find their target after the swap.
+                return Div(result, id=self.container_id)
             else:
                 # No completion handler, just show success
                 return Div("Workflow completed!", id=self.container_id)

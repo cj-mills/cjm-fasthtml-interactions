@@ -4,6 +4,6 @@ project:
 website:
   title: "cjm-fasthtml-interactions"
   site-url: "https://cj-mills.github.io/cjm-fasthtml-interactions"
-  description: "Reusable user interaction patterns for FastHTML applications including multi-step wizards, master-detail views, modal workflows, and other stateful UI orchestration patterns."
+  description: "Reusable user interaction patterns for FastHTML applications, providing the StepFlow multi-step wizard and AsyncLoadingContainer for asynchronous content loading."
   repo-branch: main
   repo-url: "https://github.com/cj-mills/cjm-fasthtml-interactions"
