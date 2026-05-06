@@ -55,7 +55,7 @@ def index(request):
                     hx_get=step_flow_ar.index.to(),
                     hx_target=f"#{AppHtmlIds.MAIN_CONTENT}",
                     hx_push_url="true",
-                    cls=combine_classes(btn, btn_colors.primary, btn_sizes.lg, m.r(2), m.b(2))
+                    cls=combine_classes(buttons.page_primary, m.r(2), m.b(2))
                 ),
                 A(
                     "Async Loading Demo",
@@ -63,7 +63,7 @@ def index(request):
                     hx_get=async_loading_ar.index.to(),
                     hx_target=f"#{AppHtmlIds.MAIN_CONTENT}",
                     hx_push_url="true",
-                    cls=combine_classes(btn, btn_colors.info, btn_sizes.lg, m.r(2), m.b(2))
+                    cls=combine_classes(buttons.page_primary, m.r(2), m.b(2))
                 ),
             ),
 
