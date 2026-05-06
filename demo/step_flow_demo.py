@@ -100,11 +100,11 @@ def on_registration_complete(state: dict, request):
             Div(
                 A(
                     "Start Another Registration",
-                    href=step_flow_ar.start.to(),
-                    hx_get=step_flow_ar.start.to(),
+                    href=registration_router.reset.to(),
+                    hx_get=registration_router.reset.to(),
                     hx_target=f"#{InteractionHtmlIds.STEP_FLOW_CONTAINER}",
                     hx_push_url="true",
-                    cls=combine_classes(btn, btn_colors.primary)
+                    cls=buttons.page_primary
                 ),
                 cls=combine_classes(text_align.center)
             ),

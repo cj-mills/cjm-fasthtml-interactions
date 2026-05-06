@@ -14,11 +14,12 @@ from fastcore.basics import patch
 from ..core.context import InteractionContext
 from ..core.html_ids import InteractionHtmlIds
 from ..core.state_store import WorkflowStateStore, InMemoryWorkflowStateStore
-from cjm_fasthtml_daisyui.components.actions.button import btn, btn_colors, btn_styles
 from cjm_fasthtml_daisyui.components.navigation.steps import steps, step, step_colors
 from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import flex_display, gap, justify
 from cjm_fasthtml_tailwind.utilities.spacing import m, p
 from cjm_fasthtml_tailwind.core.base import combine_classes
+
+from cjm_fasthtml_design_system.buttons import buttons
 
 # %% ../../nbs/patterns/step_flow.ipynb #1bc6e294
 @dataclass
@@ -329,11 +330,11 @@ def render_navigation(self:StepFlow,
     if not step_obj:
         return Div()
     
-    buttons = []
+    nav_buttons = []
     
     # Back button
     if step_obj.show_back and back_route and not self.is_first_step(step_id):
-        buttons.append(
+        nav_buttons.append(
             Button(
                 "← Back",
                 hx_get=back_route,
@@ -341,7 +342,7 @@ def render_navigation(self:StepFlow,
                 hx_swap="outerHTML",
                 type="button",  # Important: prevent form submission
                 id=InteractionHtmlIds.STEP_FLOW_BACK_BTN,
-                cls=combine_classes(btn, btn_styles.ghost)
+                cls=buttons.step_dismissal
             )
         )
     
@@ -352,7 +353,7 @@ def render_navigation(self:StepFlow,
     
     # If wrapped in form, this will submit the form
     # If not wrapped, it will trigger HTMX POST
-    button_attrs = {"id": button_id, "cls": combine_classes(btn, btn_colors.primary)}
+    button_attrs = {"id": button_id, "cls": buttons.step_primary}
     if self.wrap_in_form:
         button_attrs["type"] = "submit"
     else:
@@ -362,11 +363,11 @@ def render_navigation(self:StepFlow,
             "hx_swap": "outerHTML"
         })
     
-    buttons.append(Button(button_text, **button_attrs))
+    nav_buttons.append(Button(button_text, **button_attrs))
     
     # Cancel button
     if step_obj.show_cancel and cancel_route:
-        buttons.append(
+        nav_buttons.append(
             Button(
                 "Cancel",
                 hx_get=cancel_route,
@@ -374,12 +375,12 @@ def render_navigation(self:StepFlow,
                 hx_swap="outerHTML",
                 type="button",  # Important: prevent form submission
                 id=InteractionHtmlIds.STEP_FLOW_CANCEL_BTN,
-                cls=combine_classes(btn, btn_styles.ghost)
+                cls=buttons.step_dismissal
             )
         )
     
     return Div(
-        *buttons,
+        *nav_buttons,
         id=InteractionHtmlIds.STEP_FLOW_NAVIGATION,
         cls=combine_classes(
             flex_display, 

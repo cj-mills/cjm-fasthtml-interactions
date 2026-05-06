@@ -32,9 +32,9 @@ graph LR
     patterns_async_loading[patterns.async_loading<br/>Async Loading Container]
     patterns_step_flow[patterns.step_flow<br/>Step Flow]
 
+    patterns_step_flow --> core_context
     patterns_step_flow --> core_state_store
     patterns_step_flow --> core_html_ids
-    patterns_step_flow --> core_context
 ```
 
 *3 cross-module dependencies detected*

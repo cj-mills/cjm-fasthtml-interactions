@@ -12,6 +12,7 @@ from cjm_fasthtml_interactions.core.html_ids import InteractionHtmlIds
 from cjm_fasthtml_app_core.core.html_ids import AppHtmlIds
 from cjm_fasthtml_app_core.core.htmx import handle_htmx_request
 from cjm_fasthtml_app_core.core.layout import wrap_with_layout
+from cjm_fasthtml_design_system.buttons import buttons
 
 # Utilities for styling
 from cjm_fasthtml_tailwind.utilities.spacing import p, m
