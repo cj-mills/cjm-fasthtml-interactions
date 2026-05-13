@@ -11,6 +11,14 @@ from dataclasses import dataclass, field
 from fasthtml.common import *
 from fastcore.basics import patch
 
+# Explicit APIRouter override — shadows the wildcard-imported
+# fasthtml.common.APIRouter with the flat-URL subclass from cjm-fasthtml-app-core.
+# Required for FastHTML 0.14 compatibility: under 0.14, routes defined inside
+# StepFlow.create_router() (e.g., `def start`, `def next_step`, etc.) would
+# otherwise be registered under nested_name-prefixed paths (e.g.,
+# `create_router_start` instead of `start`), making `router.start(...)` fail.
+from cjm_fasthtml_app_core.core.routing import APIRouter
+
 from ..core.context import InteractionContext
 from ..core.html_ids import InteractionHtmlIds
 from ..core.state_store import WorkflowStateStore, InMemoryWorkflowStateStore
