@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://cj-mills.github.io/cjm-fasthtml-interactions/index.html</loc>
+    <lastmod>2026-05-15T09:07:06.800Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cj-mills.github.io/cjm-fasthtml-interactions/core/state_store.html</loc>
+    <lastmod>2026-05-15T09:07:06.874Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cj-mills.github.io/cjm-fasthtml-interactions/patterns/async_loading.html</loc>
+    <lastmod>2026-05-15T09:07:07.072Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cj-mills.github.io/cjm-fasthtml-interactions/patterns/step_flow.html</loc>
+    <lastmod>2026-05-15T09:07:07.124Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cj-mills.github.io/cjm-fasthtml-interactions/core/html_ids.html</loc>
+    <lastmod>2026-05-15T09:07:06.802Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cj-mills.github.io/cjm-fasthtml-interactions/core/context.html</loc>
+    <lastmod>2026-05-15T09:07:06.810Z</lastmod>
+  </url>
+</urlset>
